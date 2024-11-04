@@ -6,7 +6,7 @@ import LoginPage from '../pages/LoginPage.js';
 
 
 const routes = [
-  {path : '/', component : HomePage},
+  {path : '/home', component : HomePage},
   {path : '/register', component : RegisterPage},
   {path : '/register-sponsor', component : SponsorRegisterPage},
   {path : '/register-influencer', component : InfluencerRegisterPage},

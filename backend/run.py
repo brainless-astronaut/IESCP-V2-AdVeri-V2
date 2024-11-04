@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_from_directory
 from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *
@@ -17,7 +17,7 @@ def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend', static_url_path='/static')
     app.config.from_object(Config)
 
-    CORS(app)  # add credentials
+    CORS(app, support_credentials = True)  # add credentials
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -32,13 +32,20 @@ def create_app():
         db.create_all()  # Create all database tables
         create_admin()   # Create the admin user if it doesn't exist
 
+    app.register_blueprint(auth_bp)
+
     return app
 
 app = create_app()
 
+# @app.route('/')
+# def serve_vue_app():
+#     return app.send_static_file('pages/HomePage.js')
+
 @app.route('/')
-def serve_vue_app():
-    return app.send_static_file('HomePage.js')
+def home():
+    return send_from_directory('../frontend', 'index.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)

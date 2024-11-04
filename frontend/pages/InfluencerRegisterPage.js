@@ -1,4 +1,4 @@
-// SponsorRegisterPage.js
+// InfluencerRegisterPage.js
 export default {
     data() {
         return {
@@ -10,7 +10,7 @@ export default {
                 industry: '',
                 industry_other: '',
                 budget: '',
-                role: 'sponsor' // Hardcoded role as per requirement
+                role: 'influencer' // Hardcoded role as per requirement
             },
             message: ''
         };

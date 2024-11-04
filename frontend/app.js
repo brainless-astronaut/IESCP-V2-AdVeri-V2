@@ -1,71 +1,48 @@
-// // Import Vue and your components
-// const { createApp } = Vue; // Adjust this line if you are not using Vue via CDN
+// // frontend/app.js
+// // import { createApp } from 'vue';
+// // import { createRouter, createWebHistory } from 'vue-router';
 
-// import InfluencerRegisterPage from '.pages/InfluencerRegisterPage.js'; // Adjust path as necessary
-// import SponsorRegisterPage from '.pages/SponsorRegisterPage.js'; // Adjust path as necessary
 
-// const app = createApp({
-//   data() {
-//     return {
-//       currentPage: 'InfluencerRegisterPage', // Default page to show
-//     };
-//   },
-//   components: {
-//     InfluencerRegisterPage,
-//     SponsorRegisterPage,
-//   },
-//   template: `
-//     <div>
-//       <button @click="currentPage = 'InfluencerRegisterPage'">Register Influencer</button>
-//       <button @click="currentPage = 'SponsorRegisterPage'">Register Sponsor</button>
+// const { createApp } = 'vue';
+// const { createRouter, createWebHistory } = 'vue-router';
 
-//       <component :is="currentPage"></component>
-//     </div>
-//   `
+// import HomePage from './pages/HomePage.js';
+// import LoginPage from './pages/LoginPage.js';
+// import RegisterPage from './pages/RegisterPage.js';
+// import SponsorRegisterPage from './pages/SponsorRegisterPage.js';
+// import InfluencerRegisterPage from './pages/InfluencerRegisterPage.js';
+
+// const routes = [
+//     { path: '/home', component: HomePage },
+//     { path: '/login', component: LoginPage },
+//     { path: '/register', component: RegisterPage },
+//     { path: '/register-sponsor', component: SponsorRegisterPage},
+//     { path: '/register-sponsor', component: InfluencerRegisterPage},
+// ];
+
+// const router = createRouter({
+//     history: createWebHistory(),
+//     routes,
 // });
 
-// // Mount the Vue instance to the DOM
+// const app = createApp({});
+// app.use(router);
 // app.mount('#app');
 
 
-// import Navbar from "./components/Navbar.js"
-// import router from "./utils/router.js"
-// import store from "./utils/store.js"
+import router from "./utils/router.js"
 
-// const app = new Vue({
-//     el : '#app',
-//     template : `
-//         <div> 
-//             <Navbar />
-//             <router-view> </router-view>
-//         </div>
-//     `,
-//     components : {
-//         Navbar,
-//     },
-//     router,
-//     store,
-// })
-
-// frontend/app.js
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from './pages/HomePage.js';
-import LoginPage from './pages/LoginPage.js';
-import RegisterPage from './pages/RegisterPage.js';
-
-const routes = [
-    { path: '/', component: HomePage },
-    { path: '/login', component: LoginPage },
-    { path: '/register', component: RegisterPage },
-    // Add other routes as needed
-];
-
-const router = createRouter({
-    history: createWebHistory(),
-    routes,
-});
-
-const app = createApp({});
-app.use(router);
-app.mount('#app');
+const app = new Vue({
+    el : '#app',
+    // template : `
+    //     <div> 
+    //         <router-view> </router-view>
+    //     </div>
+    // `,
+    // components : {
+    //     Navbar,
+    // },
+    router,
+    template: '<router-view></router-view>',
+    // store,
+})

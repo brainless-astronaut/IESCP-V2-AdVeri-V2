@@ -5,8 +5,8 @@ const RegisterPage = {
         <h1>Register as</h1>
         <h1>----------------------</h1>
         <div class="button-container">
-            <router-link to="/register/sponsors" class="btn">Sponsor</router-link>
-            <router-link to="/register/influencers" class="btn">Influencer</router-link>
+            <router-link to="/register-sponsor" class="btn">Sponsor</router-link>
+            <router-link to="/register-influencer" class="btn">Influencer</router-link>
         </div>
         <router-link to="/" class="back-link">Go back to welcome page</router-link>
         <br>
@@ -76,3 +76,5 @@ const RegisterPage = {
     `,
 };
 
+
+export default RegisterPage;

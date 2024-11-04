@@ -25,13 +25,15 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    const publicPages = ['/', '/register', '/register-sposnor', '/register-influencer', '/login']; // reoutes that don't require authentication
+    const publicPages = ['/home', '/register', '/register-sponsor', '/register-influencer', '/login']; // routes that don't require authentication
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = isAuthenitcated();
 
-    if (authRequired && !loggedIn) {
-        return next('/login') // redirect to login page if not logged in
-    }
+    // if (authRequired && !loggedIn) {
+    //     return next('/login') // redirect to login page if not logged in
+    // }
 
     next();  // allow navigation
 })
+
+export default router;

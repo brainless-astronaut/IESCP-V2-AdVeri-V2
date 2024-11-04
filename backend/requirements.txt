@@ -1,0 +1,11 @@
+celery
+datetime
+flask
+flask-bcrypt
+flask-caching
+flask-cors
+flask-excel
+flask-jwt-extended
+flask-restful
+flask-sqlalchemy
+redis

@@ -22,7 +22,8 @@ export default {
     methods: {
         async home() {
             try {
-                const response = await fetch(`${location.origin}/home`); // replace with actual backend endpoint
+                // const response = await fetch(`${location.origin}/home`); // replace with actual backend endpoint
+                const response = await fetch(`${location.origin}/`);
                 const data = await response.json();
                 console.log('Response from backend:', data);
             } catch (error) {

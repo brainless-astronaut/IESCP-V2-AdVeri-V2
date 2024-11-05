@@ -6,7 +6,8 @@ import LoginPage from '../pages/LoginPage.js';
 
 
 const routes = [
-  {path : '/home', component : HomePage},
+//   {path : '/home', component : HomePage},
+  {path : '/', component: HomePage},
   {path : '/register', component : RegisterPage},
   {path : '/register-sponsor', component : SponsorRegisterPage},
   {path : '/register-influencer', component : InfluencerRegisterPage},
@@ -25,7 +26,8 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    const publicPages = ['/home', '/register', '/register-sponsor', '/register-influencer', '/login']; // routes that don't require authentication
+    // const publicPages = ['/home', '/register', '/register-sponsor', '/register-influencer', '/login']; // routes that don't require authentication
+    const publicPages = ['/', '/register', '/register-sponsor', '/register-influencer', '/login']
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = isAuthenitcated();
 

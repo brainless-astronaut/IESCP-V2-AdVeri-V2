@@ -37,13 +37,17 @@ class RegisterPage(Resource):
 class SponsorRegistration(Resource):
     def post(self):
         try:
-            username = request.form['username']
-            email = request.form['email']
-            password = request.form['password']
-            entity_name = request.form['entity_name']
-            industry = request.form['industry']
-            budget = request.form['budget']
-            role = request.form['role'] ## change to hardcode role = 'sposnor''
+            data = request.get_json()  # Parse JSON data
+            if not data:
+                return jsonify({"message": "No data provided"}), 400
+            
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+            role = data.get('role') ## change to hardcode role = 'sposnor'
+            entity_name = data.get('entity_name')
+            industry = data.get('industry')
+            budget = data.get('budget')
 
             existing_user = Users.query.filter_by(username = username, password = password).first()
 
@@ -83,13 +87,17 @@ class SponsorRegistration(Resource):
 class InfluencerRegistration(Resource):
     def post(self):
         try:
-            username = request.form['username']
-            email = request.form['email']
-            password = request.form['password']
-            role = request.form['role'] ## change to hardcode role = 'sposnor''
-            name = request.form['name']
-            category = request.form['category']
-            niche = request.form['niche']
+            data = request.get_json()
+            if not data:
+                return jsonify({"message": "No data provided"}), 400
+            
+            username = data.get('username')
+            email = data.get('email')
+            password = data.get('password')
+            role = data.get('role')
+            name = data.get('name')
+            category = data.get('category')
+            niche = data.get('niche')
 
             existing_user = Users.query.filter_by(username = username, password = password).first()
 
@@ -129,9 +137,9 @@ class InfluencerRegistration(Resource):
 class UserLogin(Resource):
     def post(self):
         try:
-            data = request.json
-            username = data.username
-            password = data.password
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
 
             if not all([username, password]):
                 return {'message': 'Please provide username and password'}, 400
@@ -142,7 +150,7 @@ class UserLogin(Resource):
                 return {'message': 'Invalid credentials.'}, 401
             
             access_token = create_access_token(identity = {
-                'id': user.id,
+                'id': user.user_id,
                 'username': user.username,
                 'role': user.role
             })

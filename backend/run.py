@@ -38,10 +38,6 @@ def create_app():
 
 app = create_app()
 
-# @app.route('/')
-# def serve_vue_app():
-#     return app.send_static_file('pages/HomePage.js')
-
 @app.route('/')
 def home():
     return send_from_directory('../frontend', 'index.html')

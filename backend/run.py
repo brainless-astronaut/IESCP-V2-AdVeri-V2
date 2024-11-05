@@ -25,14 +25,20 @@ def create_app():
     cache = Cache(app)
     # mailer.init_app(app)
 
-    from app.users import auth_bp, create_admin
+    from app.users import auth_bp, create_admin, create_sponsors, create_influencers
+    from app.admin import admin_bp
+    from app.sponsor import sponsor_bp, create_campaigns
 
     # Initialize the app context before database operations
     with app.app_context():
         db.create_all()  # Create all database tables
         create_admin()   # Create the admin user if it doesn't exist
+        # create_sponsors()
+        # create_campaigns()
+        # create_influencers()
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
 
     return app
 

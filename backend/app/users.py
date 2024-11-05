@@ -2,7 +2,6 @@ from datetime import datetime
 from flask import request, jsonify, request, Blueprint
 from flask_restful import Api, Resource
 from flask_jwt_extended import create_access_token, jwt_required, unset_jwt_cookies
-from sqlalchemy import func
 from .models import db, Users, Sponsors, Influencers, bcrypt
 
 auth_bp = Blueprint('auth', __name__)
@@ -16,7 +15,7 @@ def create_admin():
             admin = Users(
                 username = 'admin',
                 email = 'admin@adveri.com',
-                password = 'root',
+                password = bcrypt.generate_password_hash('root'),
                 role = 'admin'
             )
             db.session.add(admin)
@@ -26,6 +25,76 @@ def create_admin():
         db.session.rollback()
         print(f'Error occured while creating admin: {str(e)}')
 
+def create_sponsors():
+    try:
+        uids = [2, 3, 4]
+        unames = ['s1', 's2', 's3']
+        emails = ['s1@s1.com', 's2@s2.com', 's3@s3.com']
+        pwds = ['s1', 's2', 's3']
+        en_names = ['s1', 's2', 's3']
+        industry = ['s1', 's2', 's3']
+        budget = [2, 3, 4]
+        for i in range(len(uids)):
+            new_user = Users(
+                user_id = uids[i],
+                username = unames[i],
+                email = emails[i],
+                password = pwds[i],
+                role = 'sponsor'
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            new_sponsor = Sponsors(
+                sponsor_id = (i + 1),
+                user_id = uids[i],
+                entity_name = en_names[i],
+                industry = industry[i],
+                budget = budget[i]
+            )
+            db.session.add(new_sponsor)
+            db.session.commit()
+        
+        print('sample sponsor created')
+
+    except Exception as e:
+        db.session.rollback()
+        print('create sponsor failed.')
+
+def create_influencers():
+    try:
+        uids = [2, 3, 4]
+        unames = ['i1', 'i2', 'i3']
+        emails = ['i1@i1.com', 'i2@i2.com', 'i3@i3.com']
+        pwds = ['i1', 'i2', 'i3']
+        names = ['i1', 'i2', 'i3']
+        cates = ['i1', 'i2', 'i3']
+        niches = ['i1', 'i2', 'i3']
+        for i in range(len(uids)):
+            new_user = Users(
+                user_id = uids[i],
+                username = unames[i],
+                email = emails[i],
+                password = pwds[i],
+                role = 'influencer'
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            new_influencer = Sponsors(
+                sponsor_id = (i + 1),
+                user_id = uids[i],
+                name = names[i],
+                category = cates[i],
+                niche = niches[i]
+            )
+            db.session.add(new_influencer)
+            db.session.commit()
+        
+        print('sample inf created')
+
+    except Exception as e:
+        db.session.rollback()
+        print('create inf failed.')
+        
 class HomePage(Resource):
     def get(self):
         pass
@@ -39,7 +108,7 @@ class SponsorRegistration(Resource):
         try:
             data = request.get_json()  # Parse JSON data
             if not data:
-                return jsonify({"message": "No data provided"}), 400
+                return {"message": "No data provided"}, 400
             
             username = data.get('username')
             email = data.get('email')
@@ -61,6 +130,7 @@ class SponsorRegistration(Resource):
                 username = username,
                 email = email,
                 password = bcrypt.generate_password_hash(password),
+                is_approved = False,
                 role = role
             )
 
@@ -89,7 +159,7 @@ class InfluencerRegistration(Resource):
         try:
             data = request.get_json()
             if not data:
-                return jsonify({"message": "No data provided"}), 400
+                return {"message": "No data provided"}, 400
             
             username = data.get('username')
             email = data.get('email')
@@ -158,7 +228,7 @@ class UserLogin(Resource):
             user.last_login_at = datetime.now()
             db.session.commit()
 
-            return jsonify({"message": "Login successful", "access_token": access_token}), 200
+            return {"message": "Login successful", "access_token": access_token}, 200
         
         except Exception as e:
             db.session.rollback()
@@ -167,7 +237,7 @@ class UserLogin(Resource):
 class UserLogout(Resource):
     @jwt_required()
     def post(self):
-        response = jsonify({"message": "Logout successful"})
+        response = {"message": "Logout successful"}
         unset_jwt_cookies(response)
         return response, 200
 

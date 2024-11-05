@@ -1,39 +1,5 @@
-// export default {
-//     template : `
-//     <div>
-//         <h1> Login </h1>
-//         <input placeholder="username"  v-model="username"/>  
-//         <input placeholder="password"  v-model="password"/>  
-//         <button class='btn btn-primary' @click="login"> Login </button>
-//     </div>
-//     `,
-//     data(){
-//         return {
-//             username : null,
-//             password : null,
-//         } 
-//     },
-//     methods : {
-//         async login(){
-//             const res = await axios.post(location.origin+'/login', 
-//                 {
-//                     method : 'POST', 
-//                     headers: {'Content-Type' : 'application/json'}, 
-//                     body : JSON.stringify({'username': this.username,'password': this.password})
-//                 })
-//             if (res.ok){
-//                 console.log('Login successful!')
-//                 const data = await res.json()
-              
-//                 localStorage.setItem('user', JSON.stringify(data))
-                
-//                 this.$store.commit('setUser')
-//                 this.$router.push('/feed')
-//             }
-//         }
-//     }
-// }
-
+// LoginPage.js
+// import jwt_decode from 'jwt-decode';
 
 export default {
     data() {
@@ -53,10 +19,30 @@ export default {
 
                 if (response.status === 200) {
                     this.message = 'Login successful!';
+                    // localStorage.setItem('token', response.data.access_token); 
+                    // // this.$router.push('/admin-dashboard'); 
+                    // // const userRole = response.data.access_token.identity.role;
+
+                    // // Decode the token to get user role
+                    // const decodedToken = jwt_decode(response.data.access_token);
+                    // const userRole = decodedToken.role;
+
+                    // //  redirect based on role
+                    // if (userRole === 'admin') {
+                    //     this.$router.push('/admin-dashboard');
+                    // } else if (userRole === 'sponsor') {
+                    //     this.$router.push('/sponsor-dashboard');
+                    // } else if (userRole === 'influencer') {
+                    //     this.$router.push('/influencer-dashboard');
+                    // } else {
+                    //     this.message = 'Invalid user role!';
+                    //     return; // Redirect to home page if invalid role is detected.
+                    // }
                 }
                 else {
                     this.message = 'Invalid credentials!';
                 }
+
             } catch (error) {
                 this.message = error.response?.data?.message || 'An error occurred while trying to login.' + error;
             }

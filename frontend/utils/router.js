@@ -3,7 +3,39 @@ import RegisterPage from '../pages/RegisterPage.js';
 import SponsorRegisterPage from '../pages/SponsorRegisterPage.js';
 import InfluencerRegisterPage from '../pages/InfluencerRegisterPage.js';
 import LoginPage from '../pages/LoginPage.js';
+import AdminDashboard from '../pages/AdminDashboard.js';
+import SponsorDashboard from '../pages/SponsorDashboard.js';
+// import InfluencerDashboard from '../pages/InfluencerDashboard.js';
 
+async function checkAdmin(to, from, next) {
+    const userRole = await checkUserRole();
+    if (userRole !== 'admin') {
+        alert("You don't have permission to access this page");
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+}
+  
+async function checkSponsor(to, from, next) {
+    const userRole = await checkUserRole();
+    if (userRole !== 'sponsor') {
+        alert("You don't have permission to access this page");
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+}
+
+async function checkInfluencer(to, from, next) {
+    const userRole = await checkUserRole();
+    if (userRole!== 'influencer') {
+        alert("You don't have permission to access this page");
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+}
 
 const routes = [
 //   {path : '/home', component : HomePage},
@@ -12,6 +44,9 @@ const routes = [
   {path : '/register-sponsor', component : SponsorRegisterPage},
   {path : '/register-influencer', component : InfluencerRegisterPage},
   {path : '/login', component : LoginPage},
+  {path : '/admin-dashboard', component : AdminDashboard},
+  {path : '/sponsor-dashboard', component : SponsorDashboard},
+//   {path : '/influencer-dashboard', component : InfluencerDashboard},
 ];
 
 // to check if user is authenticated 

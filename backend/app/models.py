@@ -98,6 +98,8 @@ class Users(db.Model):
     email = db.Column(db.String(50), nullable = False, unique = True)
     password = db.Column(db.String(60), nullable = False)
     role = db.Column(db.String(10), nullable = False)
+    is_approved = db.Column(db.Boolean, default = True, nullable = False)
+    is_flagged = db.Column(db.Boolean, default = False, nullable = False)
     last_login_at = db.Column(db.DateTime, default = datetime.now)
     # name = db.Column(db.String(50), default = 'No Name')
     # profile_picture = db.Column(db.String(50), default = 'user_default.svg')
@@ -109,7 +111,6 @@ class Users(db.Model):
 class Influencers(db.Model):
     __tablename__ = '__influencers__'
     influencer_id = db.Column(db.Integer, primary_key = True)
-    is_flagged = db.Column(db.String(5), default = 'False')
     name = db.Column(db.String(30), default = 'No name')
     category = db.Column(db.String(50))
     niche = db.Column(db.String(100))
@@ -136,7 +137,6 @@ class InfluencerPlatforms(db.Model):
 class Sponsors(db.Model):
     __tablename__ = '__sponsors__'
     sponsor_id = db.Column(db.Integer, primary_key = True)
-    is_flagged = db.Column(db.String(5), default = 'False')
     # website = db.Column(db.String(40))
     entity_name = db.Column(db.String(50), default = 'No Name')
     industry = db.Column(db.String(50))

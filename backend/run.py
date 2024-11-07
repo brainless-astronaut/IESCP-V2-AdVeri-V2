@@ -28,17 +28,21 @@ def create_app():
     from app.users import auth_bp, create_admin, create_sponsors, create_influencers
     from app.admin import admin_bp
     from app.sponsor import sponsor_bp, create_campaigns
+    from app.influencer import influencer_bp
 
     # Initialize the app context before database operations
     with app.app_context():
         db.create_all()  # Create all database tables
         create_admin()   # Create the admin user if it doesn't exist
         # create_sponsors()
-        # create_campaigns()
         # create_influencers()
+        # create_campaigns()
+
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(sponsor_bp)
+    app.register_blueprint(influencer_bp)
 
     return app
 
@@ -48,6 +52,11 @@ app = create_app()
 def home():
     return send_from_directory('../frontend', 'index.html')
 
+def delete_users():
+    users = Users.query.filter_by(username = 'i4').first()
+    db.session.delete(users)
+    db.session.commit()
 
 if __name__ == "__main__":
     app.run(debug=True)
+    delete_users()  # Uncomment this line to delete the user with username 'i4' before starting the server.

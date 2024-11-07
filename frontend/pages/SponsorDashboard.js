@@ -45,7 +45,12 @@ export default {
                 this.receivedRequests = data.received_requests;
 
             } catch (error) {
-                console.error("Error fetching dashboard data:", error);
+                if (error.response && error.response.status === 422) {
+                    console.error("Error fetching dashboard data (422):", error.response.data); // Examine the error details
+                    // Display a user-friendly error message to the user
+                } else {
+                    console.error("Error fetching dashboard data:", error);
+                }
             }
         }
     },

@@ -22,7 +22,8 @@ export default {
                 });
                 this.message = response.data.message;
                 if (response.status === 200) {
-                    this.resetForm();
+                    // this.resetForm();
+                    this.$router.push('/login');
                 }
             } catch (error) {
                 this.message = error.response?.data.message || 'An error occurred.' + error;

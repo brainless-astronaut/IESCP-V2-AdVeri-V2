@@ -35,24 +35,26 @@ def create_sponsors():
         industry = ['s1', 's2', 's3']
         budget = [2, 3, 4]
         for i in range(len(uids)):
-            new_user = Users(
-                user_id = uids[i],
-                username = unames[i],
-                email = emails[i],
-                password = pwds[i],
-                role = 'sponsor'
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            new_sponsor = Sponsors(
-                sponsor_id = (i + 1),
-                user_id = uids[i],
-                entity_name = en_names[i],
-                industry = industry[i],
-                budget = budget[i]
-            )
-            db.session.add(new_sponsor)
-            db.session.commit()
+            exisiting_user = Users.query.filter_by(username=unames[i], email = emails[i]).first()
+            if not exisiting_user:
+                new_user = Users(
+                    user_id = uids[i],
+                    username = unames[i],
+                    email = emails[i],
+                    password = pwds[i],
+                    role = 'sponsor'
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                new_sponsor = Sponsors(
+                    sponsor_id = (i + 1),
+                    user_id = uids[i],
+                    entity_name = en_names[i],
+                    industry = industry[i],
+                    budget = budget[i]
+                )
+                db.session.add(new_sponsor)
+                db.session.commit()
         
         print('sample sponsor created')
 
@@ -70,24 +72,26 @@ def create_influencers():
         cates = ['i1', 'i2', 'i3']
         niches = ['i1', 'i2', 'i3']
         for i in range(len(uids)):
-            new_user = Users(
-                user_id = uids[i],
-                username = unames[i],
-                email = emails[i],
-                password = pwds[i],
-                role = 'influencer'
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            new_influencer = Sponsors(
-                sponsor_id = (i + 1),
-                user_id = uids[i],
-                name = names[i],
-                category = cates[i],
-                niche = niches[i]
-            )
-            db.session.add(new_influencer)
-            db.session.commit()
+            exisiting_user = Users.query.filter_by(username=unames[i], email = emails[i]).first()
+            if not exisiting_user:
+                new_user = Users(
+                    user_id = uids[i],
+                    username = unames[i],
+                    email = emails[i],
+                    password = pwds[i],
+                    role = 'influencer'
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                new_influencer = Sponsors(
+                    sponsor_id = (i + 1),
+                    user_id = uids[i],
+                    name = names[i],
+                    category = cates[i],
+                    niche = niches[i]
+                )
+                db.session.add(new_influencer)
+                db.session.commit()
         
         print('sample inf created')
 
@@ -148,7 +152,7 @@ class SponsorRegistration(Resource):
             db.session.add(new_sponsor)
             db.session.commit()
 
-            return {'message', 'Sponsor registered successfully!'}, 200
+            return {'message': 'Sponsor registered successfully!'}, 200
         
         except Exception as e:
             db.session.rollback()
@@ -198,7 +202,7 @@ class InfluencerRegistration(Resource):
             db.session.add(new_sponsor)
             db.session.commit()
 
-            return {'message', 'Sponsor registered successfully!'}, 200
+            return {'message': 'Influencer registered successfully!'}, 200
         
         except Exception as e:
             db.session.rollback()
@@ -220,7 +224,7 @@ class UserLogin(Resource):
                 return {'message': 'Invalid credentials.'}, 401
             
             access_token = create_access_token(identity = {
-                'id': user.user_id,
+                'user_id': user.user_id,
                 'username': user.username,
                 'role': user.role
             })

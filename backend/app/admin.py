@@ -1,10 +1,9 @@
 from datetime import datetime
-from flask import request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint, make_response
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from .models import *
 from sqlalchemy import func
-# import matplotlib.pyplot as plt
 
 admin_bp = Blueprint('admin', __name__)
 admin = Api(admin_bp)
@@ -37,7 +36,7 @@ class AdminDashboard(Resource):
         sponsors_distribution = {industry: count for industry, count in sponsors_by_industry}
         campaigns_distribution = {industry: count for industry, count in campaigns_by_industry}
 
-        return jsonify({
+        return make_response(jsonify({
             'current_user': current_user,
             'sponsors_count': sponsors_count,
             'influencers_count': influencers_count,
@@ -48,7 +47,125 @@ class AdminDashboard(Resource):
             'flagged_campaigns_count': flagged_campaigns_count,
             'sponsors_distribution': sponsors_distribution,
             'campaigns_distribution': campaigns_distribution
-        }), 200
+        }), 200)
 
+class AdminManageUsers(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            current_user = get_jwt_identity()
+
+            influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == False).all()
+            sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == False).all()
+
+            flagged_influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == True).all()
+            flagged_sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == True).all()
+
+            return make_response(jsonify({
+                'current_user': current_user,
+                'influencers': influencers,
+                'sponsors': sponsors,
+                'flagged_influencers': flagged_influencers,
+                'flagged_sponsors': flagged_sponsors,
+                }), 200)
+        
+        except Exception as e:
+            return make_response(request({'message': 'Failed to retrieve users.'}, 500))
+    
+    @jwt_required
+    def post(self):
+        try:
+            data = request.get_json()
+
+            user_id = data.get('user_id')
+            action = data.get('action')
+            user = Users.query.filter_by(user_id = user_id)
+            if action == 'flag':
+                user.is_flagged = True
+            elif action == 'unflag':
+                user.is_flagged = False
+            elif action == 'delete':
+                user.delete() 
+            else:
+                return make_response(request({'message': 'Invalid action.'}, 400))
+            
+            db.session.commit()
+            return make_response(request({'message': 'Action performed successfully!'}, 200))
+        
+        except Exception as e:
+            db.session.rollback()
+            return make_response(request({'message':  'Action failed.'}, 500))
+        
+class AdminManageCamapaigns(Resource):
+    @jwt_required
+    def get(self):
+        current_user = get_jwt_identity()
+
+        campaigns = Campaigns.query.filter_by(is_flagged=False).all()
+
+        flagged_campaigns = Campaigns.query.filter_by(is_flagged=False).all()
+
+        return make_response(jsonify({
+            'current_user': current_user,
+            'campaigns': campaigns,
+            'flagged_campaigns': flagged_campaigns
+            }), 200)
+    
+    @jwt_required
+    def post(self):
+        try:
+            data = request.get_json()
+
+            campaign_id = data.get('campaign_id')
+            action = data.get('action')
+            campaign = Campaigns.query.filter_by(campaign_id = campaign_id)
+            if action == 'flag':
+                campaign.is_flagged = True
+            elif action == 'unflag':
+                campaign.is_flagged = False
+            elif action == 'delete':
+                campaign.delete() 
+            else:
+                return make_response(request({'message': 'Invalid action.'}, 400))
+            
+            db.session.commit()
+            return make_response(request({'message': 'Action performed successfully!'}, 200))
+        
+        except Exception as e:
+            db.session.rollback()
+            return make_response(request({'message':  'Action failed.'}, 500))
+
+class AdminApproveSponsor(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            current_user = get_jwt_identity()
+
+            sponsors_to_approve = Users.query.filter_by(role='sponsor', is_approved=False).all()
+
+            return make_response(jsonify({
+                'current_user': current_user,
+                'sponsors_to_approve': sponsors_to_approve
+            }), 200)
+        except Exception as e:
+            return make_response(request({'message': 'Failed to retrieve sponsors to approve.'}, 500))
+    
+    @jwt_required
+    def post(self):
+        try:
+            data = request.get_json()
+
+            user_id = data.get('user_id')
+            user = Users.query.filter_by(user_id = user_id)
+            user.is_approved = True
+            db.session.commit()
+            return make_response(request({'message': 'Sponsor approved successfully!'}, 200))
+        
+        except Exception as e:
+            db.session.rollback()
+            return make_response(request({'message':  'Failed to approve sponsor.'}, 500))
 
 admin.add_resource(AdminDashboard, '/admin-dashboard')
+admin.add_resource(AdminManageUsers, '/admin-users')
+admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')
+admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor')

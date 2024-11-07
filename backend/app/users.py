@@ -41,7 +41,7 @@ def create_sponsors():
                     user_id = uids[i],
                     username = unames[i],
                     email = emails[i],
-                    password = pwds[i],
+                    password = bcrypt.generate_password_hash(pwds[i]),
                     role = 'sponsor'
                 )
                 db.session.add(new_user)
@@ -78,7 +78,7 @@ def create_influencers():
                     user_id = uids[i],
                     username = unames[i],
                     email = emails[i],
-                    password = pwds[i],
+                    password = bcrypt.generate_password_hash(pwds[i]),
                     role = 'influencer'
                 )
                 db.session.add(new_user)

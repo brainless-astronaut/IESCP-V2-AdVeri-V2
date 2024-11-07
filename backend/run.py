@@ -34,9 +34,9 @@ def create_app():
     with app.app_context():
         db.create_all()  # Create all database tables
         create_admin()   # Create the admin user if it doesn't exist
-        # create_sponsors()
-        # create_influencers()
-        # create_campaigns()
+        create_sponsors()
+        create_influencers()
+        create_campaigns()
 
 
     app.register_blueprint(auth_bp)

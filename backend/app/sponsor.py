@@ -51,9 +51,9 @@ class SponsorDashboard(Resource):
         sent_requests = AdRequests.query.filter_by(initiator = 'sponsor').all()
         received_requests = AdRequests.query.filer_by(initiator = 'influencer').all()
 
-        past_campaigns = [campaign for campaign in campaigns if campaign.end_date <= datetime.now()]
-        present_campaigns = [campaign for campaign in campaigns if campaign.end_date >= datetime.now()]
-        future_campaigns = [campaign for campaign in campaigns if campaign.start_date >= datetime.now()]
+        past_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date <= datetime.now()]
+        present_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date >= datetime.now()]
+        future_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.start_date >= datetime.now()]
 
         campaign_reach = db.session.query(
             Campaigns.name,
@@ -82,11 +82,11 @@ class SponsorDashboard(Resource):
             
         return make_response(jsonify({
             'current_user': current_user,
-            'past_campaigns': past_campaigns,
-            'present_campaigns': present_campaigns,
-            'future_campaigns': future_campaigns,
-            'sent_requests': sent_requests,
-            'received_requests': received_requests,
+            'past_campaigns': [campaign.to_dict() for campaign in past_campaigns],
+            'present_campaigns': [campaign.to_dict() for campaign in present_campaigns],
+            'future_campaigns': [campaign.to_dict() for campaign in future_campaigns],
+            'sent_requests': [sent_request.to_dict() for sent_request in sent_requests],
+            'received_requests': [received_request.todict() for received_request in received_requests],
             'campaign_reach_dict': campaign_reach_dict,
             'campaign_influencer_counts_dict': campaign_influencer_counts_dict,
             'total_campaigns': len(campaigns),

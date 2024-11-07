@@ -12,6 +12,7 @@ class AdminDashboard(Resource):
     @jwt_required()
     def get(self):
         current_user = get_jwt_identity()
+        print('token', current_user) ## debugging point
 
         # Basic counts
         sponsors_count = Users.query.filter_by(role='sponsor', is_approved=True, is_flagged=False).count()
@@ -63,10 +64,10 @@ class AdminManageUsers(Resource):
 
             return make_response(jsonify({
                 'current_user': current_user,
-                'influencers': influencers,
-                'sponsors': sponsors,
-                'flagged_influencers': flagged_influencers,
-                'flagged_sponsors': flagged_sponsors,
+                'influencers': [influencer.to_dict() for influencer in influencers],
+                'sponsors': [sponsor.to_dict() for sposnor in sponsors],
+                'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+                'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
                 }), 200)
         
         except Exception as e:
@@ -107,8 +108,8 @@ class AdminManageCamapaigns(Resource):
 
         return make_response(jsonify({
             'current_user': current_user,
-            'campaigns': campaigns,
-            'flagged_campaigns': flagged_campaigns
+            'campaigns': [campaign.to_dict() for campaign in campaigns],
+            'flagged_campaigns': [flagged_campaign.to_dict() for flagged_campaign in flagged_campaigns]
             }), 200)
     
     @jwt_required

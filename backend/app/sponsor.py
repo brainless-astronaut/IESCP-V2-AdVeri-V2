@@ -98,13 +98,22 @@ class SponsorDashboard(Resource):
 
 class SponsorCampaigns(Resource):
     @jwt_required
-    def post(self):
+    def get(self):
         current_user = get_jwt_identity()
 
+        your_campaigns = Campaigns.query.filter(sponsor_id = current_user.user_id).all()
+
+        return make_response(jsonify({
+            'current_user': current_user,
+            'your_campaigns': [campaign.to_dict for camapign in your_campaigns]
+            }))
+
+    @jwt_required
+    def post(self, sponsor_id):
         try:
             data = request.get_json()
             new_campaign = Campaigns(
-                sponsor_id = current_user.user_id,
+                sponsor_id = sponsor_id,
                 name = data.get('name'),
                 description = data.get('description'),
                 start_date = datetime.strptime(data.get('start_date'), '%d-%m-%Y'),

@@ -33,7 +33,7 @@ class InfluencerDashboard(Resource):
             'total_campaigns': len(campaigns),
         }), 200)
 
-class InfluencerMakeRequests(Resource):
+class InfluencerRequests(Resource):
     
     @jwt_required
     def get(self):
@@ -83,6 +83,61 @@ class InfluencerMakeRequests(Resource):
         except Exception as e:
             db.session.rollback()
             return make_response(jsonify({'message': f'Error while making request. {str(e)}'}), 500)
+    
+    @jwt_required
+    def put(self, request_id):
+        try:
+            current_user = get_jwt_identity()
+
+            request = AdRequests.query.get(request_id)
+
+            if not request: 
+                return make_response(jsonify({'message': 'Request does not exists.'}))
+
+            if request.influencer_id!= current_user.user_id: 
+                return make_response(jsonify({'message': 'You are not authorized to update this request.'}))
+
+            data = request.get_json()
+            action = data.get('action')
+            if action == 'update':
+                request.requirements = data.get('requirements')
+                request.payment_amount = data.get('payment_amount')
+                request.messages = data.get('messages')
+            elif  action == 'negotiate':
+                request.negotiation_amount = data.get('negotiation_amount')
+                request.status = 'negotiation'
+            elif  action == 'accept':
+                request.status = 'accepted'
+            elif action == 'rejected': 
+                request.status = 'rejected'
+        
+
+            db.session.commit()
+            return make_response(jsonify({'message': 'Request action performed successfully'}), 200)
+
+        except Exception as e:
+            db.session.rollback()
+            return make_response(jsonify({'message': f'Error while updating request. {str(e)}'}), 500)
+
+    @jwt_required
+    def delete(self, request_id):
+        try:
+            current_user = get_jwt_identity()
+
+            request = AdRequests.query.get(request_id)
+
+            if not request: 
+                return make_response(jsonify({'message': 'Request does not exists.'}))
+
+            if request.influencer_id!= current_user.user_id: 
+                return make_response(jsonify({'message': 'You are not authorized to delete this request.'}))
+
+            db.session.delete(request)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return make_response(jsonify({'message': f'Error while deleting request. {str(e)}'}), 500)
+
 
 influencer.add_resource(InfluencerDashboard, '/influencer-dashboard')
-influencer.add_resource(InfluencerMakeRequests, '/influencer-make-requests')
+influencer.add_resource(InfluencerRequests, '/influencer-requests')

@@ -96,7 +96,7 @@ class SponsorDashboard(Resource):
             'total_present_campaigns': len(present_campaigns),
         }), 200)
 
-class SponsorCreateCampaign(Resource):
+class SponsorCampaigns(Resource):
     @jwt_required
     def post(self):
         current_user = get_jwt_identity()
@@ -119,8 +119,7 @@ class SponsorCreateCampaign(Resource):
         except Exception as e:
             db.session.rollback()
             return make_response(jsonify({'message': str(e)}), 400)
-
-class SponsorEditCampaign(Resource):
+        
     @jwt_required
     def put(self, campaign_id):
         try:
@@ -158,25 +157,88 @@ class SponsorEditCampaign(Resource):
             return make_response(jsonify({'message': 'Campaign deleted successfully'}), 200)
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': str(e)}), 400) 
-
+            return make_response(jsonify({'message': str(e)}), 400)
+     
 class SponsorSendRequest(Resource):
     @jwt_required
     def post(self, campaign_id):
         current_user = get_jwt_identity()
         try:
             data = request.get_json()
+            new_request = AdRequests(
+                camapign_id = campaign_id,
+                influencer_id = data.get('influencer_id'),
+                sponsor_id = current_user.user_id,
+                initiator ='sponsor',   
+                requirements = data.get('requirements'),
+                payment_amount = data.get('payment_amount'),
+                messages = data.get('messages')
+            )
+            db.session.add(new_request)
+            db.session.commit()
+            return make_response(jsonify({'message': 'Request sent successfully'}), 201)
 
         except Exception as e:
             db.session.rollback()
             return make_response(jsonify({'message': f'Error occured while sending request. {str(e)}'}))
 
+    @jwt_required
+    def put(self, request_id):
+        try:
+            current_user = get_jwt_identity()
+
+            request = AdRequests.query.get(request_id)
+
+            if not request: 
+                return make_response(jsonify({'message': 'Request does not exists.'}))
+
+            if request.influencer_id!= current_user.user_id: 
+                return make_response(jsonify({'message': 'You are not authorized to update this request.'}))
+
+            data = request.get_json()
+            action = data.get('action')
+            if action == 'update':
+                request.requirements = data.get('requirements')
+                request.payment_amount = data.get('payment_amount')
+                request.messages = data.get('messages')
+            elif  action == 'negotiate':
+                request.negotiation_amount = data.get('negotiation_amount')
+                request.status = 'negotiation'
+            elif  action == 'accept':
+                request.status = 'accepted'
+            elif action == 'rejected': 
+                request.status = 'rejected'
+        
+
+            db.session.commit()
+            return make_response(jsonify({'message': 'Request action performed successfully'}), 200)
+        except Exception as e:
+            db.session.rollback()
+            return make_response(jsonify({'message': f'Error while updating request. {str(e)}'}), 500)
+
+    @jwt_required
+    def delete(self, request_id):
+        try:
+            current_user = get_jwt_identity()
+
+            request = AdRequests.query.get(request_id)
+
+            if not request: 
+                return make_response(jsonify({'message': 'Request does not exists.'}))
+
+            if request.influencer_id!= current_user.user_id: 
+                return make_response(jsonify({'message': 'You are not authorized to delete this request.'}))
+
+            db.session.delete(request)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return make_response(jsonify({'message': f'Error while deleting request. {str(e)}'}), 500)
 
 
 # Registering the resource with the API
 sponsor.add_resource(SponsorDashboard, '/sponsor-dashboard')
-sponsor.add_resource(SponsorCreateCampaign, '/sponsor-create-campaign')
-sponsor.add_resource(SponsorEditCampaign, '/sponsor-edit-campaign')
+sponsor.add_resource(SponsorCampaigns, '/sponsor-campaigns')
 
 
 ## doubt - campaigns have CRUD, how to differentiate routes between campaign view, creation, edit, and delete in  rest api

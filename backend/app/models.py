@@ -93,7 +93,7 @@ bcrypt = Bcrypt()
 
 class Users(db.Model):
     __tablename__ = '__users__'
-    user_id = db.Column(db.Integer, primary_key = True)
+    user_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     username = db.Column(db.String(20), nullable = False, unique = True)
     email = db.Column(db.String(50), nullable = False, unique = True)
     password = db.Column(db.String(60), nullable = False)
@@ -110,7 +110,7 @@ class Users(db.Model):
 
 class Influencers(db.Model):
     __tablename__ = '__influencers__'
-    influencer_id = db.Column(db.Integer, primary_key = True)
+    influencer_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     name = db.Column(db.String(30), default = 'No name')
     category = db.Column(db.String(50))
     niche = db.Column(db.String(100))
@@ -125,7 +125,7 @@ class Influencers(db.Model):
 
 class InfluencerPlatforms(db.Model):
     __tablename__ = '__influencer_platforms__'
-    influence_id = db.Column(db.Integer, primary_key = True)
+    influence_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     platform = db.Column(db.String(20), nullable = False)
     reach = db.Column(db.Integer, nullable = False)
     url = db.Column(db.String(50), nullable = False)
@@ -136,7 +136,7 @@ class InfluencerPlatforms(db.Model):
 
 class Sponsors(db.Model):
     __tablename__ = '__sponsors__'
-    sponsor_id = db.Column(db.Integer, primary_key = True)
+    sponsor_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     # website = db.Column(db.String(40))
     entity_name = db.Column(db.String(50), default = 'No Name')
     industry = db.Column(db.String(50))
@@ -150,7 +150,7 @@ class Sponsors(db.Model):
 
 class Campaigns(db.Model):
     __tablename__ = '__campaigns__'
-    campaign_id = db.Column(db.Integer, primary_key = True)
+    campaign_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     sponsor_id = db.Column(db.Integer, db.ForeignKey('__sponsors__.sponsor_id'), nullable = False)
     is_flagged = db.Column(db.String(5), default = 'False')
     name = db.Column(db.String(60), nullable = False)
@@ -167,7 +167,7 @@ class Campaigns(db.Model):
 
 class AdRequests(db.Model):
     __tablename__ = '__ad_requests__'
-    request_id = db.Column(db.Integer, primary_key = True)
+    request_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     campaign_id = db.Column(db.Integer, db.ForeignKey('__campaigns__.campaign_id'), nullable = False)
     influencer_id = db.Column(db.Integer, db.ForeignKey('__influencers__.influencer_id'), nullable = False)
     sponsor_id = db.Column(db.Integer, db.ForeignKey('__sponsors__.sponsor_id'), nullable = False)
@@ -175,6 +175,7 @@ class AdRequests(db.Model):
     initiator = db.Column(db.String(10), nullable = False)
     requirements = db.Column(db.String(60), nullable = False)
     payment_amount = db.Column(db.Numeric(10,2), nullable = False)
+    negotiation_amount = db.Column(db.Numeric(10,2), default = 0.0)
     messages = db.Column(db.String(60), nullable = False)
     status = db.Column(db.String(10), nullable = False, default = 'Pending')
     
@@ -182,15 +183,3 @@ class AdRequests(db.Model):
     campaigns = db.relationship('Campaigns', back_populates = 'ad_requests')
     influencers = db.relationship('Influencers', back_populates = 'ad_requests')
     sponsors = db.relationship('Sponsors', back_populates = 'ad_requests')
-    negotiations = db.relationship('Negotiations', back_populates = 'ad_requests', uselist = False, cascade = 'all, delete-orphan')
-
-class Negotiations(db.Model):
-    __tablename__ = '__negotiations__'
-    negotiation_id = db.Column(db.Integer, primary_key = True)
-    request_id = db.Column(db.Integer, db.ForeignKey('__ad_requests__.request_id'), nullable = False)
-    initiator = db.Column(db.String(10), nullable = False)
-    message = db.Column(db.String(60), nullable = False)
-    status = db.Column(db.String(10), nullable = False)
-    
-    ## Relationships
-    ad_requests = db.relationship('AdRequests', back_populates = 'negotiations')

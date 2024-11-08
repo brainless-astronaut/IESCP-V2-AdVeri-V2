@@ -11,6 +11,12 @@ export default {
     },
     create() {
         this.fetchCampaigns();
+        const campaignId = this.$route.params.id;
+        if (campaignId) {
+            this.loadCampaignById(campaignId);  // Fetch specific campaign
+        } else {
+            this.loadAllCampaigns();  // Fetch all campaigns
+        }
     },
     methods: {
         async fetchCampaigns() {
@@ -27,6 +33,9 @@ export default {
             }
         },
 
+        // async loadCampaignById(id) {
+        //     // Logic to fetch and display a specific campaign
+        // },
         openCreatePopup() {
             this.showCreatePopup = true;
         },

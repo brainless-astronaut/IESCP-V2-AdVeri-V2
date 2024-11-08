@@ -5,7 +5,11 @@ import InfluencerRegisterPage from '../pages/InfluencerRegisterPage.js';
 import LoginPage from '../pages/LoginPage.js';
 import AdminDashboard from '../pages/AdminDashboard.js';
 import SponsorDashboard from '../pages/SponsorDashboard.js';
-// import InfluencerDashboard from '../pages/InfluencerDashboard.js';
+import SponsorCampaigns from '../pages/SponsorCampaigns.js';
+import SponsorRequests from '../pages/SponsorRequests.js';
+import InfluencerDashboard from '../pages/InfluencerDashboard.js';
+import InfluencerRequests from '../pages/InfluencerRequests.js'
+
 
 async function checkAdmin(to, from, next) {
     const userRole = await checkUserRole();
@@ -38,7 +42,6 @@ async function checkInfluencer(to, from, next) {
 }
 
 const routes = [
-//   {path : '/home', component : HomePage},
   {path : '/', component: HomePage},
   {path : '/register', component : RegisterPage},
   {path : '/register-sponsor', component : SponsorRegisterPage},
@@ -46,7 +49,13 @@ const routes = [
   {path : '/login', component : LoginPage},
   {path : '/admin-dashboard', component : AdminDashboard},
   {path : '/sponsor-dashboard', component : SponsorDashboard},
-//   {path : '/influencer-dashboard', component : InfluencerDashboard},
+  {path : '/sponsor-campaigns', component : SponsorCampaigns},
+  {path : '/sponsor-campaigns/:id', component : SponsorCampaigns},
+  {path : '/sponsor-requests', component : SponsorRequests},
+  {path : '/sponsor-requests/:id', component : SponsorRequests},
+  {path : '/influencer-dashboard', component : InfluencerDashboard},
+  {path : '/influencer-requests', component : InfluencerRequest},
+  {path : '/influencer-requests/:id', component : InfluencerRequest},
 ];
 
 // to check if user is authenticated 

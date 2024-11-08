@@ -168,7 +168,7 @@ class SponsorCampaigns(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': str(e)}), 400)
      
-class SponsorSendRequest(Resource):
+class SponsorRequests(Resource):
     @jwt_required
     def post(self, campaign_id):
         current_user = get_jwt_identity()
@@ -248,6 +248,7 @@ class SponsorSendRequest(Resource):
 # Registering the resource with the API
 sponsor.add_resource(SponsorDashboard, '/sponsor-dashboard')
 sponsor.add_resource(SponsorCampaigns, '/sponsor-campaigns')
+sponsor.add_resource(SponsorRequests, '/sponsor-requests')
 
 
 ## doubt - campaigns have CRUD, how to differentiate routes between campaign view, creation, edit, and delete in  rest api

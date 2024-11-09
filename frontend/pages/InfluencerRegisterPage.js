@@ -32,7 +32,7 @@ export default {
                 this.message = data.message;
                 
                 if (response.ok) {
-                    this.$router.push('/login');
+                    this.$router.push('/');
                 }
             } catch (error) {
                 this.message = 'An error occurred: ' + error;

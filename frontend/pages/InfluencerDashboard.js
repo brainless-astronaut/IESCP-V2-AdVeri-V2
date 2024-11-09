@@ -33,12 +33,6 @@ export default {
         async fetchDashboardData() {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
-                console.log('Token:', token);
-
                 const response = await fetch('/admin-dashboard', {
                     method: 'GET',
                     headers: {
@@ -46,6 +40,13 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+                
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
+                console.log('Token:', token);
+             
 
                 if (!response.ok) {
                     throw new Error("Failed to fetch dashboard data");

@@ -26,12 +26,17 @@ class AdminDashboard(Resource):
         flagged_campaigns_count = Campaigns.query.filter_by(is_flagged=True).count()
 
         # Industry distribution counts
-        sponsors_by_industry = Users.query.filter_by(role='sponsor', is_flagged=False) \
-            .with_entities(Sponsors.industry, func.count(Sponsors.id)).join(Sponsors, Users.id == Sponsors.user_id) \
+        sponsors_by_industry = db.session.query(Sponsors.industry, func.count(Sponsors.user_id)) \
+            .select_from(Users).join(Sponsors, Users.user_id == Sponsors.user_id) \
+            .filter(Users.role == 'sponsor', Users.is_flagged == False) \
             .group_by(Sponsors.industry).all()
 
-        campaigns_by_industry = Campaigns.query.filter_by(is_flagged=False) \
-            .with_entities(Campaigns.industry, func.count(Campaigns.id)).group_by(Campaigns.industry).all()
+        campaigns_by_industry = db.session.query(
+                Sponsors.industry, func.count(Campaigns.id).label("campaign_count")
+            ) \
+            .join(Sponsors, Campaigns.sponsor_id == Sponsors.user_id) \
+            .group_by(Sponsors.industry) \
+            .all()
 
         # Prepare data for charts
         sponsors_distribution = {industry: count for industry, count in sponsors_by_industry}

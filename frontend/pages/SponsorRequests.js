@@ -1,3 +1,5 @@
+// frontend/pages/SponsorRequests.js
+
 export default {
     data() {
         return {
@@ -5,7 +7,7 @@ export default {
             showCreatePopup: false, // Controls visibility of the Create Request popup
             showEditPopup: false, // Controls visibility of the Edit Request popup
             currentRequest: {}, // Stores request data for view/edit actions
-            token: localStorage.getItem('jwt_token'), // Assuming token is stored here
+            token: localStorage.getItem('accessToken'), // Assuming token is stored here
         };
     },
     created() {
@@ -15,13 +17,20 @@ export default {
         // Fetch requests for the current sponsor's campaigns
         async fetchRequests() {
             try {
-                const response = await axios.get('/sponsor-requests', {
+                const response = await fetch('/sponsor-requests', {
+                    method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`,
                     },
                 });
 
-                this.requests = response.data.requests;
+                if (response.ok) {
+                    const data = await response.json();
+                    this.requests = data.requests;
+                } else {
+                    console.error("Error fetching requests:", await response.text());
+                }
             } catch (error) {
                 console.error("Error fetching requests:", error);
             }
@@ -30,11 +39,12 @@ export default {
         // Open the Create Request Popup
         openCreatePopup() {
             this.showCreatePopup = true;
+            this.currentRequest = {}; // Reset the form data
         },
 
         // Open the Edit Request Popup
         openEditPopup(request) {
-            this.currentRequest = { ...request }; // clone request data
+            this.currentRequest = { ...request }; // Clone request data
             this.showEditPopup = true;
         },
 
@@ -47,15 +57,23 @@ export default {
         // Create a new request
         async createRequest(requestData) {
             try {
-                const response = await axios.post('/sponsor-requests', requestData, {
+                const response = await fetch('/sponsor-requests', {
+                    method: 'POST',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`,
                     },
+                    body: JSON.stringify(requestData)
                 });
 
-                alert(response.data.message);
-                this.fetchRequests();
-                this.closePopup();
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    this.fetchRequests();
+                    this.closePopup();
+                } else {
+                    console.error("Error creating request:", await response.text());
+                }
             } catch (error) {
                 console.error("Error creating request:", error);
             }
@@ -64,15 +82,23 @@ export default {
         // Edit the request
         async editRequest(requestData) {
             try {
-                const response = await axios.put(`/sponsor-requests/${this.currentRequest.id}`, requestData, {
+                const response = await fetch(`/sponsor-requests/${this.currentRequest.id}`, {
+                    method: 'PUT',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`,
                     },
+                    body: JSON.stringify(requestData)
                 });
 
-                alert(response.data.message);
-                this.fetchRequests();
-                this.closePopup();
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    this.fetchRequests();
+                    this.closePopup();
+                } else {
+                    console.error("Error editing request:", await response.text());
+                }
             } catch (error) {
                 console.error("Error editing request:", error);
             }
@@ -81,14 +107,20 @@ export default {
         // Delete the request
         async deleteRequest(requestId) {
             try {
-                const response = await axios.delete(`/sponsor-requests/${requestId}`, {
+                const response = await fetch(`/sponsor-requests/${requestId}`, {
+                    method: 'DELETE',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
+                        'Authorization': `Bearer ${this.token}`,
                     },
                 });
 
-                alert(response.data.message);
-                this.fetchRequests();
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    this.fetchRequests();
+                } else {
+                    console.error("Error deleting request:", await response.text());
+                }
             } catch (error) {
                 console.error("Error deleting request:", error);
             }

@@ -1,4 +1,4 @@
-import axios from 'axios';
+// frontend/pages/InfluencerRequests.js
 
 export default {
     template: `
@@ -67,7 +67,7 @@ export default {
                 payment_amount: '',
                 messages: ''
             },
-            token: 'your_jwt_token' // Replace with actual token retrieval
+            token: localStorage.getItem('accessToken')
         };
     },
     created() {
@@ -76,12 +76,18 @@ export default {
     methods: {
         async fetchCampaigns() {
             try {
-                const response = await axios.get('/influencer-requests', {
+                const response = await fetch('/influencer-requests', {
                     headers: {
-                        Authorization: `Bearer ${this.token}`
+                        'Authorization': `Bearer ${this.token}`
                     }
                 });
-                this.campaigns = response.data.public_campaigns;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.campaigns = data.public_campaigns;
+                } else {
+                    console.error("Failed to fetch campaigns:", response.statusText);
+                }
             } catch (error) {
                 console.error("Error fetching campaigns:", error);
             }
@@ -99,19 +105,29 @@ export default {
         },
         async submitRequest() {
             try {
-                const response = await axios.post(`/influencer-requests/${this.selectedCampaign.id}`, this.requestForm, {
+                const response = await fetch(`/influencer-requests/${this.selectedCampaign.id}`, {
+                    method: 'POST',
                     headers: {
-                        Authorization: `Bearer ${this.token}`
-                    }
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
+                    body: JSON.stringify(this.requestForm)
                 });
-                alert(response.data.message || 'Request submitted successfully');
-                this.closePopup();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message || 'Request submitted successfully');
+                    this.closePopup();
+                } else {
+                    console.error("Failed to submit request:", response.statusText);
+                }
             } catch (error) {
                 console.error("Error submitting request:", error);
             }
         }
     }
 };
+
 
 
 // Campaign Table:

@@ -1,4 +1,4 @@
-// import axios from 'axios';
+// frontend/pages/SponsorDashboard.js
 
 export default {
     data() {
@@ -19,15 +19,22 @@ export default {
     methods: {
         async fetchSponsorDashboardData() {
             try {
-                const token = localStorage.getItem('jwt_token'); // Assuming JWT is stored here
-                const response = await axios.get('/sponsor-dashboard', {
+                const token = localStorage.getItem('accessToken'); // Assuming JWT is stored here
+                const response = await fetch('/sponsor-dashboard', {
+                    method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
                 // Extracting data from the response
-                const data = response.data;
                 this.totalCounts = {
                     total_campaigns: data.total_campaigns,
                     total_past_campaigns: data.total_past_campaigns,
@@ -45,8 +52,8 @@ export default {
                 this.receivedRequests = data.received_requests;
 
             } catch (error) {
-                if (error.response && error.response.status === 422) {
-                    console.error("Error fetching dashboard data (422):", error.response.data); // Examine the error details
+                if (error.message.includes("422")) {
+                    console.error("Error fetching dashboard data (422):", error); // Examine the error details
                     // Display a user-friendly error message to the user
                 } else {
                     console.error("Error fetching dashboard data:", error);

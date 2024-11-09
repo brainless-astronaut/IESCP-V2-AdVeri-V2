@@ -1,4 +1,4 @@
-// RegisterPage.js
+// frontend/pages/RegisterPage.js
 const RegisterPage = {
     template: `
     <div class="login-container">

@@ -1,70 +1,29 @@
-// InfluencerDashboard.js
+// frontend/pages/InfluencerDashboard.js
 
 export default {
     template: `
-        <div>
-            <h1>Influencer Dashboard</h1>
-            <p>Total Requests: {{ totalRequests }}</p>
-
+        <div id="app">
+            <h1>Admin Dashboard</h1>
             <div>
-                <h2>Sent Requests</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Request ID</th>
-                            <th>Campaign ID</th>
-                            <th>Sponsor ID</th>
-                            <th>Requirements</th>
-                            <th>Payment Amount</th>
-                            <th>Messages</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="request in sentRequests" :key="request.id">
-                            <td>{{ request.id }}</td>
-                            <td>{{ request.campaign_id }}</td>
-                            <td>{{ request.sponsor_id }}</td>
-                            <td>{{ request.requirements }}</td>
-                            <td>{{ request.payment_amount }}</td>
-                            <td>{{ request.messages }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h2>Counts</h2>
+                <p>Sponsors: {{ counts.sponsors_count }}</p>
+                <p>Influencers: {{ counts.influencers_count }}</p>
+                <p>Campaigns: {{ counts.campaigns_count }}</p>
+                <p>Pending Sponsors: {{ counts.sponsors_to_approve_count }}</p>
+                <p>Flagged Sponsors: {{ counts.flagged_sponsors_count }}</p>
+                <p>Flagged Influencers: {{ counts.flagged_influencers_count }}</p>
+                <p>Flagged Campaigns: {{ counts.flagged_campaigns_count }}</p>
             </div>
-
-            <div>
-                <h2>Received Requests</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Request ID</th>
-                            <th>Campaign ID</th>
-                            <th>Sponsor ID</th>
-                            <th>Requirements</th>
-                            <th>Payment Amount</th>
-                            <th>Messages</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="request in receivedRequests" :key="request.id">
-                            <td>{{ request.id }}</td>
-                            <td>{{ request.campaign_id }}</td>
-                            <td>{{ request.sponsor_id }}</td>
-                            <td>{{ request.requirements }}</td>
-                            <td>{{ request.payment_amount }}</td>
-                            <td>{{ request.messages }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <canvas id="sponsorsChart">spns ind</canvas>
+            <canvas id="campaignsChart">cmpps ind</canvas>
         </div>
     `,
     data() {
         return {
-            sentRequests: [],
-            receivedRequests: [],
-            totalRequests: 0,
-            token: localStorage.getItem('accessToken'),
+            counts: {},
+            sponsorsDistribution: {},
+            campaignsDistribution: {},
+            token: localStorage.getItem('accessToken')
         };
     },
     created() {
@@ -73,21 +32,90 @@ export default {
     methods: {
         async fetchDashboardData() {
             try {
-                const response = await axios.get('/influencer-dashboard', {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
+                console.log('Token:', token);
+
+                const response = await fetch('/admin-dashboard', {
+                    method: 'GET',
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 });
-                const data = response.data;
-                this.sentRequests = data.sent_requests;
-                this.receivedRequests = data.received_requests;
-                this.totalRequests = data.Total_Requests;
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch dashboard data");
+                }
+
+                const data = await response.json();
+                this.counts = {
+                    sponsors_count: data.sponsors_count,
+                    influencers_count: data.influencers_count,
+                    campaigns_count: data.campaigns_count,
+                    sponsors_to_approve_count: data.sponsors_to_approve_count,
+                    flagged_sponsors_count: data.flagged_sponsors_count,
+                    flagged_influencers_count: data.flagged_influencers_count,
+                    flagged_campaigns_count: data.flagged_campaigns_count,
+                };
+                this.sponsorsDistribution = data.sponsors_distribution;
+                this.campaignsDistribution = data.campaigns_distribution;
+
+                this.renderCharts();
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
             }
+        },
+        renderCharts() {
+            const sponsorCtx = document.getElementById('sponsorsChart').getContext('2d');
+            new Chart(sponsorCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(this.sponsorsDistribution),
+                    datasets: [{
+                        label: 'Sponsors by Industry',
+                        data: Object.values(this.sponsorsDistribution),
+                        backgroundColor: 'rgba(225, 225, 255, 0.6)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const campaignsCtx = document.getElementById('campaignsChart').getContext('2d');
+            new Chart(campaignsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(this.campaignsDistribution),
+                    datasets: [{
+                        label: 'Campaigns by Industry',
+                        data: Object.values(this.campaignsDistribution),
+                        backgroundColor: 'rgba(0, 105, 62, 0.6)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
     }
 };
+
 
 // Tables for Data Display:
 

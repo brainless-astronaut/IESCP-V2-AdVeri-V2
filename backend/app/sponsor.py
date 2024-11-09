@@ -105,7 +105,7 @@ class SponsorCampaigns(Resource):
 
         return make_response(jsonify({
             'current_user': current_user,
-            'your_campaigns': [campaign.to_dict for camapign in your_campaigns]
+            'your_campaigns': [campaign.to_dict for campaign in your_campaigns]
             }))
 
     @jwt_required

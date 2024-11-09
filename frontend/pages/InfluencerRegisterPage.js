@@ -1,4 +1,5 @@
-// SponsorRegisterPage.js
+// frontend/pages/InfluencerRegisterPage.js
+
 export default {
     data() {
         return {
@@ -11,22 +12,31 @@ export default {
                 niche: '',
                 role: 'influencer' // Hardcoded role as per requirement
             },
-            message: ''
+            message: '',
+            token: localStorage.getItem('accessToken')
         };
     },
     methods: {
         async registerSponsor() {
             try {
-                const response = await axios.post('/register-influencer', this.form, {
-                    headers: { 'Content-Type': 'application/json' }
+                const response = await fetch('/register-influencer', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
+                    body: JSON.stringify(this.form)
                 });
-                this.message = response.data.message;
-                if (response.status === 200) {
-                    // this.resetForm();
+
+                const data = await response.json();
+                this.message = data.message;
+                
+                if (response.ok) {
                     this.$router.push('/login');
                 }
             } catch (error) {
-                this.message = error.response?.data.message || 'An error occurred.' + error;
+                this.message = 'An error occurred: ' + error;
+                console.error("Error:", error);
             }
         },
         resetForm() {
@@ -142,3 +152,4 @@ export default {
         </div>
     `
 };
+

@@ -1,5 +1,4 @@
-// LoginPage.js
-// import jwt_decode from 'jwt-decode';
+// frontend/pages/LoginPage.js
 
 export default {
     data() {

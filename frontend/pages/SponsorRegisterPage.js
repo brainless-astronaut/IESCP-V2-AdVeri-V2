@@ -1,4 +1,5 @@
-// SponsorRegisterPage.js
+// frontend/pages/SponsorRegisterPage.js
+
 export default {
     data() {
         return {
@@ -17,16 +18,26 @@ export default {
     methods: {
         async registerSponsor() {
             try {
-                const response = await axios.post('/register-sponsor', this.form, {
-                    headers: { 'Content-Type': 'application/json' }
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch('/register-sponsor', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(this.form)
                 });
-                this.message = response.data.message;
-                if (response.status === 200) {
-                    // this.resetForm();
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    this.message = data.message;
                     this.$router.push('/login');
+                } else {
+                    this.message = data.message || 'An error occurred.';
                 }
             } catch (error) {
-                this.message = error.response?.data.message || 'An error occurred.' + error;
+                this.message = 'An error occurred: ' + error;
             }
         },
         resetForm() {
@@ -142,3 +153,4 @@ export default {
         </div>
     `
 };
+

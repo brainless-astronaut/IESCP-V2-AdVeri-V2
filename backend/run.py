@@ -59,4 +59,4 @@ def delete_users():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    delete_users()  # Uncomment this line to delete the user with username 'i4' before starting the server.
+    # delete_users()  # Uncomment this line to delete the user with username 'i4' before starting the server.

@@ -65,7 +65,7 @@ class AdminManageUsers(Resource):
             return make_response(jsonify({
                 'current_user': current_user,
                 'influencers': [influencer.to_dict() for influencer in influencers],
-                'sponsors': [sponsor.to_dict() for sposnor in sponsors],
+                'sponsors': [sponsor.to_dict() for sponsor in sponsors],
                 'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
                 'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
                 }), 200)

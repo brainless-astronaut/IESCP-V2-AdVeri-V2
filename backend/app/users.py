@@ -99,14 +99,6 @@ def create_influencers():
         db.session.rollback()
         print('create inf failed.')
         
-class HomePage(Resource):
-    def get(self):
-        pass
-
-class RegisterPage(Resource):
-    def get(self):
-        pass
-
 class SponsorRegistration(Resource):
     def post(self):
         try:
@@ -245,9 +237,7 @@ class UserLogout(Resource):
         unset_jwt_cookies(response)
         return response, 200
 
-auth.add_resource(HomePage, '/home')
-auth.add_resource(RegisterPage, '/register')
 auth.add_resource(SponsorRegistration, '/register-sponsor')
 auth.add_resource(InfluencerRegistration, '/register-influencer')
-auth.add_resource(UserLogin, '/login')
+auth.add_resource(UserLogin, '/')
 auth.add_resource(UserLogout, '/logout')

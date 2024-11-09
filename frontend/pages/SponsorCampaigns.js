@@ -1,7 +1,9 @@
+// frontend/pages/SponsorCampaigns.js
+
 export default {
     data() {
         return {
-            campaign: [],
+            campaigns: [],
             showCreatePopup: false,
             showViewPopup: false,
             showEditPopup: false,
@@ -9,7 +11,7 @@ export default {
             token: localStorage.getItem('accessToken'),
         }
     },
-    create() {
+    created() {
         this.fetchCampaigns();
         const campaignId = this.$route.params.id;
         if (campaignId) {
@@ -21,32 +23,35 @@ export default {
     methods: {
         async fetchCampaigns() {
             try {
-                const response = await axios.get('/sponsor-campaigns', {
+                const response = await fetch('/sponsor-campaigns', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    }
                 });
 
-                this.campaigns = reqpose.data.your_campaigns;
+                if (response.ok) {
+                    const data = await response.json();
+                    this.campaigns = data.your_campaigns;
+                } else {
+                    console.error("Failed to fetch campaigns:", response.statusText);
+                }
             } catch (error) {
                 console.error("Error fetching campaigns:", error);
             }
         },
 
-        // async loadCampaignById(id) {
-        //     // Logic to fetch and display a specific campaign
-        // },
         openCreatePopup() {
             this.showCreatePopup = true;
         },
 
-        openViewPopup() {
-            this.currentCamapign = campaign;
+        openViewPopup(campaign) {
+            this.currentCampaign = campaign;
             this.showViewPopup = true;
         },
 
-        openEditPopup() {
-            this.currentCamapign = campaign;
+        openEditPopup(campaign) {
+            this.currentCampaign = campaign;
             this.showEditPopup = true;
         },
 
@@ -56,21 +61,25 @@ export default {
             this.showViewPopup = false;
         },
 
-        getCampaignById(id) {
-            return this.campaigns.find(c => c.id === id);
-        },
-
         async createCampaign(campaignData) {
             try {
-                const response = await axios.post('/sponsor-campaigns', campaignData, {
+                const response = await fetch('/sponsor-campaigns', {
+                    method: 'POST',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
+                    body: JSON.stringify(campaignData)
                 });
 
-                alert(response.data.message);
-                this.fetchCampaigns();
-                this.closePopup();
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    this.fetchCampaigns();
+                    this.closePopup();
+                } else {
+                    console.error("Failed to create campaign:", response.statusText);
+                }
             } catch (error) {
                 console.error("Error creating campaign:", error);
             }
@@ -78,29 +87,44 @@ export default {
 
         async editCampaign(campaignData) {
             try {
-                const response = await axios.put(`/sponsor-campaigns/${this.currentCampaign.id}`, campaignData, {
+                const response = await fetch(`/sponsor-campaigns/${this.currentCampaign.id}`, {
+                    method: 'PUT',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
                     },
+                    body: JSON.stringify(campaignData)
                 });
 
-                alert(response.data.message);
-                this.fetchCampaigns();
-                this.closePopup();
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    this.fetchCampaigns();
+                    this.closePopup();
+                } else {
+                    console.error("Failed to edit campaign:", response.statusText);
+                }
             } catch (error) {
                 console.error("Error editing campaign:", error);
             }
         },
+
         async deleteCampaign(campaignId) {
             try {
-                const response = await axios.delete(`/sponsor-campaigns/${campaignId}`, {
+                const response = await fetch(`/sponsor-campaigns/${campaignId}`, {
+                    method: 'DELETE',
                     headers: {
-                        Authorization: `Bearer ${this.token}`,
-                    },
+                        'Authorization': `Bearer ${this.token}`
+                    }
                 });
 
-                alert(response.data.message);
-                this.fetchCampaigns();
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    this.fetchCampaigns();
+                } else {
+                    console.error("Failed to delete campaign:", response.statusText);
+                }
             } catch (error) {
                 console.error("Error deleting campaign:", error);
             }
@@ -194,6 +218,7 @@ export default {
         </div>
     `
 };
+
 
 // Data Handling:
 

@@ -26,10 +26,10 @@ export default {
             token: localStorage.getItem('accessToken')
         };
     },
-
     created() {
         this.fetchDashboardData();
     },
+
     methods: {
         async fetchDashboardData() {
             try {
@@ -38,14 +38,21 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                console.log('Token:', localStorage.getItem('accessToken'));
-                const response = await axios.get('/admin-dashboard', {
+                console.log('Token:', token);
+
+                const response = await fetch('/admin-dashboard', {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                const data = response.data;
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch dashboard data");
+                }
+
+                const data = await response.json();
                 this.counts = {
                     sponsors_count: data.sponsors_count,
                     influencers_count: data.influencers_count,
@@ -61,34 +68,33 @@ export default {
                 this.renderCharts();
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
-            };
+            }
         },
         renderCharts() {
-            // SPonsor Distribution Chart
             const sponsorCtx = document.getElementById('sponsorsChart').getContext('2d');
-        new Chart(sponsorCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(this.sponsorsDistribution),
-                datasets: [{
-                    label: 'Sponsors by Industry',
-                    data: Object.values(this.sponsorsDistribution),
-                    backgroundColor: 'rgba(225, 225, 255, 0.6)',
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        beginAtZero: true
+            new Chart(sponsorCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(this.sponsorsDistribution),
+                    datasets: [{
+                        label: 'Sponsors by Industry',
+                        data: Object.values(this.sponsorsDistribution),
+                        backgroundColor: 'rgba(225, 225, 255, 0.6)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        const campaignsCtx = document.getElementById('campaignsChart').getContext('2d');
+            const campaignsCtx = document.getElementById('campaignsChart').getContext('2d');
             new Chart(campaignsCtx, {
                 type: 'bar',
                 data: {
@@ -109,7 +115,8 @@ export default {
             });
         }
     }
-}
+};
+
 
 // export default {
 //     template: `

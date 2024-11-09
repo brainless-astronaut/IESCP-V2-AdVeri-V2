@@ -1,3 +1,5 @@
+// frontend/pages/HomePage.js
+
 export default {
     template: `
     <div class="container">
@@ -8,7 +10,21 @@ export default {
         <div class="right">
             <p class="welcome-text">Welcome!</p>
             <div class="button-container">
-                <router-link to="/login" class="button">Login</router-link>
+                <h2>Login</h2>
+                <div v-if="message" class="message">
+                    <p>{{ message }}</p>
+                </div>
+                <form @submit.prevent="login">
+                    <input type="text" v-model="username" placeholder="Enter username" required>
+                    <input type="password" v-model="password" placeholder="Enter password" required>
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+                <a href="/register">Don't have an account? Register here as </a>
+                    <h1>----------------------</h1>
+                    <div class="button-container">
+                        <router-link to="/register-sponsor" class="btn-primary">Sponsor</router-link> |
+                        <router-link to="/register-influencer" class="btn-secondary">Influencer</router-link>
+                    </div>
                 <router-link to="/register" class="button">Register</router-link>
             </div>
         </div>
@@ -19,24 +35,59 @@ export default {
         </footer>
     </div>
     `,
+    data() {
+        return {
+            username: '',
+            password: '',
+            message: ''
+        };
+    },
     methods: {
-        async home() {
+        async login() {
             try {
-                // const response = await fetch(`${location.origin}/home`); // replace with actual backend endpoint
-                const response = await fetch(`${location.origin}/`);
-                const data = await response.json();
-                console.log('Response from backend:', data);
+                const response = await fetch(`${location.origin}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: this.username,
+                        password: this.password
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.message = 'Login successful!';
+                    // localStorage.setItem('token', data.access_token);
+
+                    // Optional: decode JWT and redirect based on user role
+                    // const decodedToken = jwt_decode(data.access_token);
+                    // const userRole = decodedToken.role;
+
+                    // if (userRole === 'admin') {
+                    //     this.$router.push('/admin-dashboard');
+                    // } else if (userRole === 'sponsor') {
+                    //     this.$router.push('/sponsor-dashboard');
+                    // } else if (userRole === 'influencer') {
+                    //     this.$router.push('/influencer-dashboard');
+                    // } else {
+                    //     this.message = 'Invalid user role!';
+                    // }
+                } else {
+                    this.message = 'Invalid credentials!';
+                }
             } catch (error) {
                 console.error('Error connecting to backend:', error);
+                this.message = 'An error occurred. Please try again.';
             }
-        },
+        }
     },
     mounted() {
-        // Call home method when component mounts to test backend connection
+        // Optionally, call a method to check backend connection on mount
         this.home();
-    },
+    }
 };
-
 
 
 // // HomePage.js

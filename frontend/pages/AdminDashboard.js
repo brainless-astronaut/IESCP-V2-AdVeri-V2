@@ -40,7 +40,7 @@ export default {
                 }
                 console.log('Token:', token);
 
-                const response = await fetch('/admin-dashboard', {
+                const response = await fetch(location.origin + '/admin-dashboard', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

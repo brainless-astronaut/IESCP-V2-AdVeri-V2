@@ -33,7 +33,7 @@ export default {
         async fetchDashboardData() {
             try {
                 const token = localStorage.getItem('accessToken');
-                const response = await fetch('/admin-dashboard', {
+                const response = await fetch(location.origin + '/admin-dashboard', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

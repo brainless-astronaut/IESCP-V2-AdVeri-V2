@@ -19,7 +19,7 @@ export default {
     methods: {
         async registerSponsor() {
             try {
-                const response = await fetch('/register-influencer', {
+                const response = await fetch(location.origin + '/register-influencer', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -88,67 +88,6 @@ export default {
 
                 <button type="submit">Register</button>
             </form>
-            <style>
-                :root {
-                    --rich-black: #010b13ff;
-                    --rusty-red: #da2c43ff;
-                    --antiflash-white: #f2f3f4ff;
-                    --ut-orange: #ff8200ff;
-                    --dartmouth-green: #00693eff;
-                }
-                body {
-                    font-family: 'Work Sans', sans-serif;
-                    color: var(--rich-black);
-                    background-color: var(--rusty-red);
-                    margin: 0;
-                    padding: 0;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    height: 100vh;
-                }
-                .register-container {
-                    background-color: var(--antiflash-white);
-                    color: var(--rich-black);
-                    padding: 20px;
-                    border-radius: 10px;
-                    width: 400px;
-                    height: 520px;
-                    flex-direction: column;
-                }
-                .register-container h1 {
-                    margin-bottom: 20px;
-                }
-                .register-container label {
-                    display: block;
-                    margin-top: 10px;
-                    text-align: justify;
-                }
-                .register-container input,
-                .register-container select {
-                    width: 380px;
-                    padding: 10px;
-                    margin-top: 5px;
-                    margin-bottom: 10px;
-                    border: 1px solid var(--rich-black);
-                    border-radius: 5px;
-                }
-                .register-container button {
-                    background-color: var(--dartmouth-green);
-                    color: var(--antiflash-white);
-                    font-family: 'Work Sans', sans-serif;
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 5px;
-                    align-self: center;
-                    cursor: pointer;
-                    transition: background-color 0.3s;
-                }
-                .register-container button:hover {
-                    background-color: var(--ut-orange);
-                }
-            </style>
         </div>
     `
 };

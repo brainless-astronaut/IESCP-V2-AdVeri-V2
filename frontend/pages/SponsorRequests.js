@@ -17,7 +17,7 @@ export default {
         // Fetch requests for the current sponsor's campaigns
         async fetchRequests() {
             try {
-                const response = await fetch('/sponsor-requests', {
+                const response = await fetch(location.origin + '/sponsor-requests', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export default {
         // Create a new request
         async createRequest(requestData) {
             try {
-                const response = await fetch('/sponsor-requests', {
+                const response = await fetch(location.origin + '/sponsor-requests', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export default {
         // Edit the request
         async editRequest(requestData) {
             try {
-                const response = await fetch(`/sponsor-requests/${this.currentRequest.id}`, {
+                const response = await fetch(location.origin + `/sponsor-requests/${this.currentRequest.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export default {
         // Delete the request
         async deleteRequest(requestId) {
             try {
-                const response = await fetch(`/sponsor-requests/${requestId}`, {
+                const response = await fetch(location.origin + `/sponsor-requests/${requestId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${this.token}`,

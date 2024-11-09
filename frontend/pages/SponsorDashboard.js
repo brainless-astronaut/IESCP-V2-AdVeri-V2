@@ -20,7 +20,7 @@ export default {
         async fetchSponsorDashboardData() {
             try {
                 const token = localStorage.getItem('accessToken'); // Assuming JWT is stored here
-                const response = await fetch('/sponsor-dashboard', {
+                const response = await fetch(location.origin + '/sponsor-dashboard', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

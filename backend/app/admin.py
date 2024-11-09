@@ -32,7 +32,7 @@ class AdminDashboard(Resource):
             .group_by(Sponsors.industry).all()
 
         campaigns_by_industry = db.session.query(
-                Sponsors.industry, func.count(Campaigns.id).label("campaign_count")
+                Sponsors.industry, func.count(Campaigns.campaign_id).label("campaign_count")
             ) \
             .join(Sponsors, Campaigns.sponsor_id == Sponsors.user_id) \
             .group_by(Sponsors.industry) \

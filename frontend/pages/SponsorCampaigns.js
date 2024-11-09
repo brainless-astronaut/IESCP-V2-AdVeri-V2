@@ -23,7 +23,8 @@ export default {
     methods: {
         async fetchCampaigns() {
             try {
-                const response = await fetch('/sponsor-campaigns', {
+                const response = await fetch(location.origin + '/sponsor-campaigns', {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.token}`
@@ -63,7 +64,7 @@ export default {
 
         async createCampaign(campaignData) {
             try {
-                const response = await fetch('/sponsor-campaigns', {
+                const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -87,7 +88,7 @@ export default {
 
         async editCampaign(campaignData) {
             try {
-                const response = await fetch(`/sponsor-campaigns/${this.currentCampaign.id}`, {
+                const response = await fetch(location.origin + `/sponsor-campaigns/${this.currentCampaign.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -111,7 +112,7 @@ export default {
 
         async deleteCampaign(campaignId) {
             try {
-                const response = await fetch(`/sponsor-campaigns/${campaignId}`, {
+                const response = await fetch(location.origin + `/sponsor-campaigns/${campaignId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${this.token}`

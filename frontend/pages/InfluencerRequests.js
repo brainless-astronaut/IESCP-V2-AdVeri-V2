@@ -76,7 +76,7 @@ export default {
     methods: {
         async fetchCampaigns() {
             try {
-                const response = await fetch('/influencer-requests', {
+                const response = await fetch(location.origin + '/influencer-requests', {
                     headers: {
                         'Authorization': `Bearer ${this.token}`
                     }
@@ -105,7 +105,7 @@ export default {
         },
         async submitRequest() {
             try {
-                const response = await fetch(`/influencer-requests/${this.selectedCampaign.id}`, {
+                const response = await fetch(location.origin + `/influencer-requests/${this.selectedCampaign.id}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

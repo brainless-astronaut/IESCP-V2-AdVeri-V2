@@ -8,7 +8,6 @@ export default {
             <p>Where Ads Meet Authenticity</p>
         </div>
         <div class="right">
-            <p class="welcome-text">Welcome!</p>
             <div class="button-container">
                 <h2>Login</h2>
                 <div v-if="message" class="message">
@@ -17,22 +16,16 @@ export default {
                 <form @submit.prevent="login">
                     <input type="text" v-model="username" placeholder="Enter username" required>
                     <input type="password" v-model="password" placeholder="Enter password" required>
-                    <button type="submit" class="btn-primary">Login</button>
+                    <button type="submit" class="button">Login</button>
                 </form>
-                <a href="/register">Don't have an account? Register here as </a>
-                    <h1>----------------------</h1>
-                    <div class="button-container">
-                        <router-link to="/register-sponsor" class="btn-primary">Sponsor</router-link> |
-                        <router-link to="/register-influencer" class="btn-secondary">Influencer</router-link>
-                    </div>
-                <router-link to="/register" class="button">Register</router-link>
+                <p>Don't have an account? Register here as</p>
+                <p>---------------------------------------</p>
+                <div class="button-container">
+                    <router-link to="/register-sponsor" class="button">Sponsor</router-link> |
+                    <router-link to="/register-influencer" class="button">Influencer</router-link>
+                </div>
             </div>
         </div>
-        <footer>
-            Thank you for using AdVeri! <br>
-            If you have any issues, please contact us at support@adveri.com <br>
-            &copy; 2024 AdVeri. All rights reserved.
-        </footer>
     </div>
     `,
     data() {
@@ -57,6 +50,19 @@ export default {
                 if (response.ok) {
                     this.message = 'Login successful!';
                     localStorage.setItem('accessToken', data.access_token);
+
+                    // console.log('Access Token:', data.access_token);
+
+                    const decodedToken = jwt_decode(data.access_token);
+                    const userRole = decodedToken.role;
+
+                    if (userRole === 'admin') {
+                        this.$router.push('/admin-dashboard');
+                    } else if (userRole === 'sponsor') {
+                        this.$router.push('/sponsor-dashboard');
+                    } else if (userRole === 'influencer') {
+                        this.$router.push('/influencer-dashboard');
+                    }
                 } else {
                     this.message = data.message;
                 }

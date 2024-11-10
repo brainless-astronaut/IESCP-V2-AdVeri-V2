@@ -1,9 +1,12 @@
 celery
-redis
+datetime
 flask
 flask-bcrypt
 flask-caching
 flask-cors
+flask-excel
 flask-jwt-extended
-flask-sqlalchemy
+flask-mail
 flask-restful
+flask-sqlalchemy
+redis

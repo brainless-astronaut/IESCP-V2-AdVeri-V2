@@ -1,47 +1,45 @@
 // frontend/utils/router.js
 
 import HomePage from '../pages/HomePage.js';
-// import RegisterPage from '../pages/RegisterPage.js';
 import SponsorRegisterPage from '../pages/SponsorRegisterPage.js';
 import InfluencerRegisterPage from '../pages/InfluencerRegisterPage.js';
-// import LoginPage from '../pages/LoginPage.js';
 import AdminDashboard from '../pages/AdminDashboard.js';
 import SponsorDashboard from '../pages/SponsorDashboard.js';
 import SponsorCampaigns from '../pages/SponsorCampaigns.js';
 import SponsorRequests from '../pages/SponsorRequests.js';
 import InfluencerDashboard from '../pages/InfluencerDashboard.js';
 import InfluencerRequests from '../pages/InfluencerRequests.js'
+import { checkUserRole } from '../utils/checkUserRole';
 
-
-// async function checkAdmin(to, from, next) {
-//     const userRole = await checkUserRole();
-//     if (userRole !== 'admin') {
-//         alert("You don't have permission to access this page");
-//         next({ name: 'login' });
-//     } else {
-//         next();
-//     }
-// }
+async function checkAdmin(to, from, next) {
+    const userRole = await checkUserRole();
+    if (userRole !== 'admin') {
+        alert("You don't have permission to access this page");
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+}
   
-// async function checkSponsor(to, from, next) {
-//     const userRole = await checkUserRole();
-//     if (userRole !== 'sponsor') {
-//         alert("You don't have permission to access this page");
-//         next({ name: 'login' });
-//     } else {
-//         next();
-//     }
-// }
+async function checkSponsor(to, from, next) {
+    const userRole = await checkUserRole();
+    if (userRole !== 'sponsor') {
+        alert("You don't have permission to access this page");
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+}
 
-// async function checkInfluencer(to, from, next) {
-//     const userRole = await checkUserRole();
-//     if (userRole!== 'influencer') {
-//         alert("You don't have permission to access this page");
-//         next({ name: 'login' });
-//     } else {
-//         next();
-//     }
-// }
+async function checkInfluencer(to, from, next) {
+    const userRole = await checkUserRole();
+    if (userRole!== 'influencer') {
+        alert("You don't have permission to access this page");
+        next({ name: 'login' });
+    } else {
+        next();
+    }
+}
 
 const routes = [
   {path : '/', component: HomePage},

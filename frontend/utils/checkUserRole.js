@@ -1,5 +1,5 @@
 export async function checkUserRole() {
-    const access_token = localStorage.getItem("access_token");
+    const access_token = localStorage.getItem("accessToken");
     if (!access_token) {
         return;
     }
@@ -8,7 +8,7 @@ export async function checkUserRole() {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: "Bearer " + localStorage.getItem("access_token"),
+                Authorization: "Bearer " + localStorage.getItem("accessToken"),
             },
         });
         const data = await response.json();

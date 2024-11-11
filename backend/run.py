@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *
 from flask_caching import Cache
-from app.celery.celery_factory import celery_init_app
+from app.tools.celery_factory import celery_init_app
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 

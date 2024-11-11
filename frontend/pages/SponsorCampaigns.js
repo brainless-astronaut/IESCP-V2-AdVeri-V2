@@ -35,7 +35,7 @@ export default {
                     const data = await response.json();
                     this.campaigns = data.your_campaigns;
                 } else {
-                    console.error("Failed to fetch campaigns:", response.statusText);
+                    console.error("Failed to fetch campaigns:", response.status, response.statusText);
                 }
             } catch (error) {
                 console.error("Error fetching campaigns:", error);
@@ -79,7 +79,7 @@ export default {
                     this.fetchCampaigns();
                     this.closePopup();
                 } else {
-                    console.error("Failed to create campaign:", response.statusText);
+                    console.error("Failed to create campaign:", response.status, response.statusText);
                 }
             } catch (error) {
                 console.error("Error creating campaign:", error);
@@ -103,7 +103,7 @@ export default {
                     this.fetchCampaigns();
                     this.closePopup();
                 } else {
-                    console.error("Failed to edit campaign:", response.statusText);
+                    console.error("Failed to edit campaign:", response.status, response.statusText);
                 }
             } catch (error) {
                 console.error("Error editing campaign:", error);
@@ -124,7 +124,7 @@ export default {
                     alert(data.message);
                     this.fetchCampaigns();
                 } else {
-                    console.error("Failed to delete campaign:", response.statusText);
+                    console.error("Failed to delete campaign:", response.status, response.statusText);
                 }
             } catch (error) {
                 console.error("Error deleting campaign:", error);

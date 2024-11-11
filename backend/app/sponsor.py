@@ -47,38 +47,37 @@ class SponsorDashboard(Resource):
     def get(self):
         current_user = get_jwt_identity()
 
-        campaigns = Campaigns.query.filter_by(sponsor_id = current_user.user_id).all()
+        campaigns = Campaigns.query.filter_by(sponsor_id = current_user['user_id']).all()
         sent_requests = AdRequests.query.filter_by(initiator = 'sponsor').all()
-        received_requests = AdRequests.query.filer_by(initiator = 'influencer').all()
+        received_requests = AdRequests.query.filter_by(initiator = 'influencer').all()
 
         past_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date <= datetime.now()]
         present_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date >= datetime.now()]
         future_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.start_date >= datetime.now()]
 
-        campaign_reach = db.session.query(
-            Campaigns.name,
-            func.sum(Influencers.reach)
-        ).join(AdRequests, AdRequests.campaign_id == Campaigns.id) \
-        .join(Influencers, Influencers.id == AdRequests.influencer_id) \
-        .filter(AdRequests.status == 'Accepted') \
-        .group_by(Campaigns.name).all()
+        # campaign_reach = db.session.query(
+        #     Campaigns.name,
+        #     func.sum(Influencers.reach)
+        # ).join(AdRequests, AdRequests.campaign_id == Campaigns.campaign_id) \
+        # .join(Influencers, Influencers.id == AdRequests.influencer_id) \
+        # .filter(AdRequests.status == 'Accepted') \
+        # .group_by(Campaigns.name).all()
 
         # Mapping result to a dictionary
-        campaign_reach_dict = {name: reach for name, reach in campaign_reach}
+        # campaign_reach_dict = {name: reach for name, reach in campaign_reach}
 
-        campaign_influencer_counts = [
-            db.session.query(
-                Campaigns.name, 
-                func.count(AdRequests.influencer_id).label('influencer_count')
-            )
-            .join(AdRequests, AdRequests.campaign_id == Campaigns.id)
-            .filter(AdRequests.sponsor_id == current_user.user_id, AdRequests.status == 'accepted')
-            .group_by(Campaigns.name)
-            .all()
-        ]
+        # Get campaign influencer counts without additional list brackets
+        campaign_influencer_counts = db.session.query(
+            Campaigns.name, 
+            func.count(AdRequests.influencer_id).label('influencer_count')
+        ).join(AdRequests, AdRequests.campaign_id == Campaigns.campaign_id) \
+         .filter(AdRequests.sponsor_id == current_user['user_id'], AdRequests.status == 'accepted') \
+         .group_by(Campaigns.name).all()
 
-        campaign_influencer_counts_dict = {campaign: count for campaign, count in campaign_influencer_counts}
-     
+        # Convert to dictionary safely
+        campaign_influencer_counts_dict = {
+            campaign: count for campaign, count in campaign_influencer_counts
+        } if campaign_influencer_counts else {}
             
         return make_response(jsonify({
             'current_user': current_user,
@@ -87,7 +86,7 @@ class SponsorDashboard(Resource):
             'future_campaigns': [campaign.to_dict() for campaign in future_campaigns],
             'sent_requests': [sent_request.to_dict() for sent_request in sent_requests],
             'received_requests': [received_request.todict() for received_request in received_requests],
-            'campaign_reach_dict': campaign_reach_dict,
+            # 'campaign_reach_dict': campaign_reach_dict,
             'campaign_influencer_counts_dict': campaign_influencer_counts_dict,
             'total_campaigns': len(campaigns),
             'total_sent_requests': len(sent_requests),
@@ -99,14 +98,18 @@ class SponsorDashboard(Resource):
 class SponsorCampaigns(Resource):
     @jwt_required
     def get(self):
-        current_user = get_jwt_identity()
 
-        your_campaigns = Campaigns.query.filter(sponsor_id = current_user.user_id).all()
+        try:
+            current_user = get_jwt_identity()
+            your_campaigns = Campaigns.query.filter_by(sponsor_id=current_user['user_id']).all()
 
-        return make_response(jsonify({
-            'current_user': current_user,
-            'your_campaigns': [campaign.to_dict for campaign in your_campaigns]
-            }))
+            return {
+                'current_user': current_user,
+                'your_campaigns': [campaign.to_dict() for campaign in your_campaigns]
+            }
+        except Exception as e:
+            print(f"Error: {e}")  # This will help you see what's going wrong in the backend
+            return make_response(jsonify({'message': str(e)}), 500)
 
     @jwt_required
     def post(self, sponsor_id):
@@ -134,7 +137,7 @@ class SponsorCampaigns(Resource):
         try:
             current_user = get_jwt_identity()
             data = request.get_json()
-            campaign = Campaigns.query.filter_by(id = campaign_id, sponsor_id = current_user.user_id).first()
+            campaign = Campaigns.query.filter_by(id = campaign_id, sponsor_id = current_user['user_id']).first()
 
             if not campaign:
                 return make_response(jsonify({'message': 'Campaign not found'}), 404)
@@ -156,7 +159,7 @@ class SponsorCampaigns(Resource):
     def delete(self, campaign_id):
         try:
             current_user = get_jwt_identity()
-            campaign = Campaigns.query.filter_by(id = campaign_id, sponsor_id = current_user.user_id).first()
+            campaign = Campaigns.query.filter_by(id = campaign_id, sponsor_id = current_user['user_id']).first()
 
             if not campaign:
                 return make_response(jsonify({'message': 'Campaign not found'}), 404)
@@ -169,6 +172,21 @@ class SponsorCampaigns(Resource):
             return make_response(jsonify({'message': str(e)}), 400)
      
 class SponsorRequests(Resource):
+
+    @jwt_required
+    def get(self):
+        try:
+            current_user = get_jwt_identity()
+            your_requests = AdRequests.query.filter_by(sponsor_id=current_user['user_id']).all()
+
+            return {
+                'current_user': current_user,
+                'your_campaigns': [request.to_dict() for request in your_requests]
+            }
+        except Exception as e:
+            print(f"Error: {e}")  # This will help you see what's going wrong in the backend
+            return make_response(jsonify({'message': str(e)}), 500)
+
     @jwt_required
     def post(self, campaign_id):
         current_user = get_jwt_identity()
@@ -177,7 +195,7 @@ class SponsorRequests(Resource):
             new_request = AdRequests(
                 camapign_id = campaign_id,
                 influencer_id = data.get('influencer_id'),
-                sponsor_id = current_user.user_id,
+                sponsor_id = current_user['user_id'],
                 initiator ='sponsor',   
                 requirements = data.get('requirements'),
                 payment_amount = data.get('payment_amount'),
@@ -201,7 +219,7 @@ class SponsorRequests(Resource):
             if not request: 
                 return make_response(jsonify({'message': 'Request does not exists.'}))
 
-            if request.influencer_id!= current_user.user_id: 
+            if request.influencer_id!= current_user['user_id']: 
                 return make_response(jsonify({'message': 'You are not authorized to update this request.'}))
 
             data = request.get_json()
@@ -235,7 +253,7 @@ class SponsorRequests(Resource):
             if not request: 
                 return make_response(jsonify({'message': 'Request does not exists.'}))
 
-            if request.influencer_id!= current_user.user_id: 
+            if request.influencer_id!= current_user['user_id']: 
                 return make_response(jsonify({'message': 'You are not authorized to delete this request.'}))
 
             db.session.delete(request)

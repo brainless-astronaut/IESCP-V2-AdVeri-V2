@@ -13,8 +13,8 @@ class InfluencerDashboard(Resource):
     def get(self):
         current_user = get_jwt_identity()
 
-        sent_requests = AdRequests.query.filter_by(initiator = 'influencer', influencer_id = current_user.user_id).all()
-        received_requests = AdRequests.query.filer_by(initiator = 'sponsor', influencer_id = current_user.user_id).all()
+        sent_requests = AdRequests.query.filter_by(initiator = 'influencer', influencer_id = current_user['user_id']).all()
+        received_requests = AdRequests.query.filer_by(initiator = 'sponsor', influencer_id = current_user['user_id']).all()
 
         return make_response(jsonify({
             'current_user': current_user,
@@ -47,7 +47,7 @@ class InfluencerRequests(Resource):
         try:
             current_user = get_jwt_identity()
 
-            existing_request = AdRequests.query.filter_by(campaign_id = campaign_id, influencer_id = current_user.user_id).first()
+            existing_request = AdRequests.query.filter_by(campaign_id = campaign_id, influencer_id = current_user['user_id']).first()
 
             if existing_request: 
                 return make_response(jsonify({'message': 'Request already exists! You need not make a new request for this campaign!'}), 200)
@@ -61,7 +61,7 @@ class InfluencerRequests(Resource):
 
             new_request = AdRequests(
                 camapign_id = campaign_id,
-                influencer_id = current_user.user_id,
+                influencer_id = current_user['user_id'],
                 sponsor_id = campaign.sponsor_id,
                 initiator = 'influencer',
                 requirements = data.get('requirements'),
@@ -84,7 +84,7 @@ class InfluencerRequests(Resource):
             if not request: 
                 return make_response(jsonify({'message': 'Request does not exists.'}))
 
-            if request.influencer_id!= current_user.user_id: 
+            if request.influencer_id!= current_user['user_id']: 
                 return make_response(jsonify({'message': 'You are not authorized to update this request.'}))
 
             data = request.get_json()
@@ -119,7 +119,7 @@ class InfluencerRequests(Resource):
             if not request: 
                 return make_response(jsonify({'message': 'Request does not exists.'}))
 
-            if request.influencer_id!= current_user.user_id: 
+            if request.influencer_id!= current_user['user_id']: 
                 return make_response(jsonify({'message': 'You are not authorized to delete this request.'}))
 
             db.session.delete(request)

@@ -54,7 +54,8 @@ export default {
                     // console.log('Access Token:', data.access_token);
 
                     const decodedToken = jwt_decode(data.access_token);
-                    const userRole = decodedToken.role;
+                    console.log('token: ' + decodedToken)
+                    const userRole = decodedToken.sub.role;
 
                     if (userRole === 'admin') {
                         this.$router.push('/admin-dashboard');

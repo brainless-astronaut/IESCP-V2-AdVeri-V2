@@ -6,6 +6,7 @@
     height: 100vh;
     padding: 20px;
     font-family: Operator Mono, sans-serif;
+    /* justify-content: center; */
 }
 
 .left, .right {
@@ -95,7 +96,34 @@ input[type="password"] {
 footer {
     text-align: center;
     margin-top: auto;
-    color: #aaaaaa;
+    color: #eeeeee;
     font-size: 0.9em;
     padding: 10px;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+  
+.card {
+    background-color: #00abd5;
+    padding: 16px;
+    border-radius: 8px;
+    width: 150px;
+    text-align: center;
+}
+  
+.card h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #eeeeee;
+}
+  
+.card p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #eeeeee;
+    margin: 0;
 }

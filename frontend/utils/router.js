@@ -9,54 +9,68 @@ import SponsorCampaigns from '../pages/SponsorCampaigns.js';
 import SponsorRequests from '../pages/SponsorRequests.js';
 import InfluencerDashboard from '../pages/InfluencerDashboard.js';
 import InfluencerRequests from '../pages/InfluencerRequests.js'
-import { checkUserRole } from '../utils/checkUserRole';
+// import { checkUserRole } from '../utils/checkUserRole';
 
-async function checkAdmin(to, from, next) {
-    const userRole = await checkUserRole();
-    if (userRole !== 'admin') {
-        alert("You don't have permission to access this page");
-        next({ name: 'login' });
-    } else {
-        next();
-    }
-}
+// async function checkAdmin(to, from, next) {
+//     const userRole = await checkUserRole();
+//     if (userRole !== 'admin') {
+//         alert("You don't have permission to access this page");
+//         next({ name: 'login' });
+//     } else {
+//         next();
+//     }
+// }
   
-async function checkSponsor(to, from, next) {
-    const userRole = await checkUserRole();
-    if (userRole !== 'sponsor') {
-        alert("You don't have permission to access this page");
-        next({ name: 'login' });
-    } else {
-        next();
-    }
-}
+// async function checkSponsor(to, from, next) {
+//     const userRole = await checkUserRole();
+//     if (userRole !== 'sponsor') {
+//         alert("You don't have permission to access this page");
+//         next({ name: 'login' });
+//     } else {
+//         next();
+//     }
+// }
 
-async function checkInfluencer(to, from, next) {
-    const userRole = await checkUserRole();
-    if (userRole!== 'influencer') {
-        alert("You don't have permission to access this page");
-        next({ name: 'login' });
-    } else {
-        next();
-    }
-}
+// async function checkInfluencer(to, from, next) {
+//     const userRole = await checkUserRole();
+//     if (userRole!== 'influencer') {
+//         alert("You don't have permission to access this page");
+//         next({ name: 'login' });
+//     } else {
+//         next();
+//     }
+// }
+
+// const routes = [
+//   { path: '/', component: HomePage },
+//   { path: '/register-sponsor', component: SponsorRegisterPage },
+//   { path: '/register-influencer', component: InfluencerRegisterPage },
+//   { path: '/admin-dashboard', component: AdminDashboard, beforeEnter: checkAdmin },
+//   { path: '/sponsor-dashboard', component: SponsorDashboard, beforeEnter: checkSponsor },
+//   { path: '/sponsor-campaigns', component: SponsorCampaigns, beforeEnter: checkSponsor },
+// //   {path : '/sponsor-campaigns/:id', component : SponsorCampaigns, beforeEnter: checkSponsor },
+//   {path : '/sponsor-requests', component : SponsorRequests, beforeEnter: checkSponsor },
+// //   {path : '/sponsor-requests/:id', component : SponsorRequests, beforeEnter: checkSponsor },
+//   {path : '/influencer-dashboard', component : InfluencerDashboard, beforeEnter: checkInfluencer },
+//   {path : '/influencer-requests', component : InfluencerRequests, beforeEnter: checkInfluencer },
+// //   {path : '/influencer-requests/:id', component : InfluencerRequests},
+// ];
+
 
 const routes = [
-  {path : '/', component: HomePage},
-//   {path : '/register', component : RegisterPage},
-  {path : '/register-sponsor', component : SponsorRegisterPage},
-  {path : '/register-influencer', component : InfluencerRegisterPage},
-//   {path : '/login', component : LoginPage},
-  {path : '/admin-dashboard', component : AdminDashboard},
-  {path : '/sponsor-dashboard', component : SponsorDashboard},
-  {path : '/sponsor-campaigns', component : SponsorCampaigns},
-//   {path : '/sponsor-campaigns/:id', component : SponsorCampaigns},
-  {path : '/sponsor-requests', component : SponsorRequests},
-//   {path : '/sponsor-requests/:id', component : SponsorRequests},
-  {path : '/influencer-dashboard', component : InfluencerDashboard},
-  {path : '/influencer-requests', component : InfluencerRequests},
-//   {path : '/influencer-requests/:id', component : InfluencerRequests},
-];
+    { path: '/', component: HomePage },
+    { path: '/register-sponsor', component: SponsorRegisterPage },
+    { path: '/register-influencer', component: InfluencerRegisterPage },
+    { path: '/admin-dashboard', component: AdminDashboard},
+    { path: '/sponsor-dashboard', component: SponsorDashboard},
+    { path: '/sponsor-campaigns', component: SponsorCampaigns},
+  //   {path : '/sponsor-campaigns/:id', component : SponsorCampaigns, beforeEnter: checkSponsor },
+    {path : '/sponsor-requests', component : SponsorRequests},
+  //   {path : '/sponsor-requests/:id', component : SponsorRequests, beforeEnter: checkSponsor },
+    {path : '/influencer-dashboard', component : InfluencerDashboard},
+    {path : '/influencer-requests', component : InfluencerRequests},
+  //   {path : '/influencer-requests/:id', component : InfluencerRequests},
+  ];
 
 // to check if user is authenticated 
 // () - means function

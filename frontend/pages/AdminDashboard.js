@@ -2,21 +2,45 @@
 
 export default {
     template: `
-        <div id="app">
+    <div id="app" class="container">
+        <div class="left">
             <h1>Admin Dashboard</h1>
-            <div>
-                <h2>Counts</h2>
-                <p>Sponsors: {{ counts.sponsors_count }}</p>
-                <p>Influencers: {{ counts.influencers_count }}</p>
-                <p>Campaigns: {{ counts.campaigns_count }}</p>
-                <p>Pending Sponsors: {{ counts.sponsors_to_approve_count }}</p>
-                <p>Flagged Sponsors: {{ counts.flagged_sponsors_count }}</p>
-                <p>Flagged Influencers: {{ counts.flagged_influencers_count }}</p>
-                <p>Flagged Campaigns: {{ counts.flagged_campaigns_count }}</p>
+            <div class="card-container">
+                <div class="card">
+                    <h3>Sponsors</h3>
+                    <p>{{ counts.sponsors_count }}</p>
+                </div>
+                <div class="card">
+                    <h3>Influencers</h3>
+                    <p>{{ counts.influencers_count }}</p>
+                </div>
+                <div class="card">
+                    <h3>Campaigns</h3>
+                    <p>{{ counts.campaigns_count }}</p>
+                </div>
+                <div class="card">
+                    <h3>Pending Sponsors</h3>
+                    <p>{{ counts.sponsors_to_approve_count }}</p>
+                </div>
+                <div class="card">
+                    <h3>Flagged Sponsors</h3>
+                    <p>{{ counts.flagged_sponsors_count }}</p>
+                </div>
+                <div class="card">
+                    <h3>Flagged Influencers</h3>
+                    <p>{{ counts.flagged_influencers_count }}</p>
+                </div>
+                <div class="card">
+                    <h3>Flagged Campaigns</h3>
+                    <p>{{ counts.flagged_campaigns_count }}</p>
+                </div>
             </div>
+        </div>
+        <div class="right">
             <canvas id="sponsorsChart">spns ind</canvas>
             <canvas id="campaignsChart">cmpps ind</canvas>
         </div>
+    </div>
     `,
     data() {
         return {
@@ -71,23 +95,20 @@ export default {
             }
         },
         renderCharts() {
-            const sponsorCtx = document.getElementById('sponsorsChart').getContext('2d');
-            new Chart(sponsorCtx, {
+            const sponsorsCtx = document.getElementById('sponsorsChart').getContext('2d');
+            new Chart(sponsorsCtx, {
                 type: 'bar',
                 data: {
                     labels: Object.keys(this.sponsorsDistribution),
                     datasets: [{
-                        label: 'Sponsors by Industry',
+                        label: 'sponsors by Industry',
                         data: Object.values(this.sponsorsDistribution),
-                        backgroundColor: 'rgba(225, 225, 255, 0.6)',
+                        backgroundColor: 'rgba(0, 171, 213, 1)',
                     }]
                 },
                 options: {
                     scales: {
                         y: {
-                            beginAtZero: true
-                        },
-                        x: {
                             beginAtZero: true
                         }
                     }
@@ -102,7 +123,7 @@ export default {
                     datasets: [{
                         label: 'Campaigns by Industry',
                         data: Object.values(this.campaignsDistribution),
-                        backgroundColor: 'rgba(0, 105, 62, 0.6)',
+                        backgroundColor: 'rgba(0, 171, 213, 1)',
                     }]
                 },
                 options: {

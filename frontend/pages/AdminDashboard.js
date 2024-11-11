@@ -115,6 +115,26 @@ export default {
                 }
             });
 
+            const influencersCtx = document.getElementById('influencersChart').getContext('2d');
+            new Chart(influencersCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(this.influencersDistribution),
+                    datasets: [{
+                        label: 'influencers by Industry',
+                        data: Object.values(this.influencersDistribution),
+                        backgroundColor: 'rgba(0, 171, 213, 1)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
             const campaignsCtx = document.getElementById('campaignsChart').getContext('2d');
             new Chart(campaignsCtx, {
                 type: 'bar',

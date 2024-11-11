@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *
 from flask_caching import Cache
+from app.celery.celery_factory import celery_init_app
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
@@ -23,20 +24,18 @@ def create_app():
     bcrypt.init_app(app)
     jwt = JWTManager(app)
     cache = Cache(app)
+    app.cache = cache
     # mailer.init_app(app)
 
-    from app.users import auth_bp, create_admin, create_sponsors, create_influencers
+    from app.users import auth_bp, create_admin
     from app.admin import admin_bp
-    from app.sponsor import sponsor_bp, create_campaigns
+    from app.sponsor import sponsor_bp
     from app.influencer import influencer_bp
 
     # Initialize the app context before database operations
     with app.app_context():
         db.create_all()  # Create all database tables
         create_admin()   # Create the admin user if it doesn't exist
-        # create_sponsors()
-        # create_influencers()
-        # create_campaigns()
 
 
     app.register_blueprint(auth_bp)
@@ -47,6 +46,8 @@ def create_app():
     return app
 
 app = create_app()
+
+celery_app = celery_init_app(app)
 
 @app.route('/')
 def home():

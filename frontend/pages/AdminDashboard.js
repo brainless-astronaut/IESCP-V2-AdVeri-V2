@@ -2,9 +2,17 @@
 
 export default {
     template: `
-    <div id="app" class="container">
+    <div class="container">
+        <header class="navbar">
+            <h2>Admin Dashboard</h2>
+            <router-link to="/admin-dashboard">Dashboard</router-link>
+            <router-link to="/admin-users">Users</router-link>
+            <router-link to="/admin-campaigns">Campaigns</router-link>
+            <router-link to="/admin-reports">Reports</router-link>
+            <router-link to="/logout">Logout</router-link>
+        </header>
         <div class="left">
-            <h1>Admin Dashboard</h1>
+            <h2>Counts</h2>
             <div class="card-container">
                 <div class="card">
                     <h3>Sponsors</h3>
@@ -47,7 +55,7 @@ export default {
             counts: {},
             sponsorsDistribution: {},
             campaignsDistribution: {},
-            influencersDistribution: {},
+            // influencersDistribution: {},
             token: localStorage.getItem('accessToken')
         };
     },
@@ -89,7 +97,7 @@ export default {
                 };
                 this.sponsorsDistribution = data.sponsors_distribution;
                 this.campaignsDistribution = data.campaigns_distribution;
-                this.influencersDistribution = data.influencers_distribution
+                // this.influencersDistribution = data.influencers_distribution
 
                 this.renderCharts();
             } catch (error) {
@@ -105,26 +113,6 @@ export default {
                     datasets: [{
                         label: 'sponsors by Industry',
                         data: Object.values(this.sponsorsDistribution),
-                        backgroundColor: 'rgba(0, 171, 213, 1)',
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            const influencersCtx = document.getElementById('influencersChart').getContext('2d');
-            new Chart(influencersCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(this.influencersDistribution),
-                    datasets: [{
-                        label: 'influencers by Industry',
-                        data: Object.values(this.influencersDistribution),
                         backgroundColor: 'rgba(0, 171, 213, 1)',
                     }]
                 },
@@ -156,6 +144,26 @@ export default {
                     }
                 }
             });
+
+            // const influencersCtx = document.getElementById('influencersChart').getContext('2d');
+            // new Chart(influencersCtx, {
+            //     type: 'bar',
+            //     data: {
+            //         labels: Object.keys(this.influencersDistribution),
+            //         datasets: [{
+            //             label: 'influencers by Industry',
+            //             data: Object.values(this.influencersDistribution),
+            //             backgroundColor: 'rgba(0, 171, 213, 1)',
+            //         }]
+            //     },
+            //     options: {
+            //         scales: {
+            //             y: {
+            //                 beginAtZero: true
+            //             }
+            //         }
+            //     }
+            // });
         }
     }
 };

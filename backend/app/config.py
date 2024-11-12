@@ -8,14 +8,15 @@ class Config:
 
     
     JWT_SECRET_KEY = 'sncuiodbfoa'
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes = 15)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes = 30)
 
-    CELERY_BROKER_URL = 'redis://localhost:6379/0'
-    RESULT_BACKEND = 'redis://localhost:6379/1'
+    CELERY_BROKER_URL = 'redis://localhost:6379/1'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379/2'
     timezone = 'Asia/Kolkata'
 
     CACHE_TYPE = 'RedisCache'
-    CACHE_REDIS_URL = 'redis://localhost:6379/2'
+    CACHE_REDIS_URL = 'redis://localhost:6379/0'
     CACHE_DEFAULT_TIMEOUT = 900
 
-    REDIS_URL = 'redis://localhost:6379'
+    MAIL_PORT = 1025
+    MAIL_SERVER = 'localhost'

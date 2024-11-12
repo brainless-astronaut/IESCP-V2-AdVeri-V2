@@ -50,10 +50,14 @@
 
 #     return filenames  # Return the list of filenames
 
-from tools.workers import celery
+# Tasks are methods or any jobs that are needed to run asynchronously (by celery) 
+# in the background or if we want a method to be scheduled
+
+from jobs.workers import celery
 from models import *
-from celery.schedules import datetime, timedelta
-from tools.mailer import send_email
+from celery.schedules import crontab
+from datetime import datetime, timedelta
+from jobs.mailer import send_email
 from flask import render_template
 
 
@@ -62,6 +66,24 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(20, monthly_report.s(), name = 'Monthly report (20 sec tst)')
 
 @celery.task
-def sendHi(userid):
-    user = Users.query.filter_by(id=userid).first()
+def sendHi(user_id):
+    user = Users.query.filter_by(user_id=user_id).first()
     return "Hi " + user.username
+
+@celery.task
+def add():
+    return 3 + 4
+
+@celery.task
+def send_daily_email():
+    _24_hrs_ago = datetime.now() - timedelta(hours=24)
+    inactive_users = Users.query.filter(
+        Users.last_login_at < _24_hrs_ago,
+        Users.role.in_(['sponsor', 'influencer'])
+    ).all()
+    count, message = 0, ''
+    for user in inactive_users:
+        message = f'Hey {user.username}!\nWe\'ve noticed that you account was inactive in the past 24 hours.\nLog in to AdVeri view your progress!'
+        count += 1
+        template = send_from_directory
+

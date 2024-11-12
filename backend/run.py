@@ -3,13 +3,11 @@ from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *
 from flask_caching import Cache
-from app.tools.celery_factory import celery_init_app
+# from app.jobs.celery_factory import celery_init_app
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+# from app.jobs import mailer, tasks, workers
 
-# db = SQLAlchemy()
-# cache = Cache()
-# bcrypt = Bcrypt()
 
 cache = Cache()
 bcrypt = Bcrypt()
@@ -26,6 +24,15 @@ def create_app():
     cache = Cache(app)
     app.cache = cache
     # mailer.init_app(app)
+
+    # # Configuring Celery
+    # celery = workers.celery
+    # celery.conf.update(
+    #     broker_url=app.config["CELERY_BROKER_URL"],
+    #     result_backend=app.config["CELERY_RESULT_BACKEND"],
+    # )
+
+    # celery.Task = workers.ContextTask
 
     from app.users import auth_bp, create_admin
     from app.admin import admin_bp
@@ -47,7 +54,7 @@ def create_app():
 
 app = create_app()
 
-celery_app = celery_init_app(app)
+# celery_app = celery_init_app(app)
 
 @app.route('/')
 def home():
@@ -60,4 +67,3 @@ def delete_users():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    # delete_users()  # Uncomment this line to delete the user with username 'i4' before starting the server.

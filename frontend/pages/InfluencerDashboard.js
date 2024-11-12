@@ -3,7 +3,13 @@
 export default {
     template: `
         <div id="app">
-            <h1>Admin Dashboard</h1>
+            <header class="navbar">
+                <h2>Influencer Dashboard</h2>
+                <router-link to="/influencer-dashboard">Dashboard</router-link>
+                <router-link to="/influencer-requests">Requests</router-link>
+                <router-link to="/logout">Logout</router-link>
+            </header>
+
             <div>
                 <h2>Counts</h2>
                 <p>Sponsors: {{ counts.sponsors_count }}</p>
@@ -33,7 +39,7 @@ export default {
         async fetchDashboardData() {
             try {
                 const token = localStorage.getItem('accessToken');
-                const response = await fetch(location.origin + '/admin-dashboard', {
+                const response = await fetch(location.origin + '/influencer-dashboard', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

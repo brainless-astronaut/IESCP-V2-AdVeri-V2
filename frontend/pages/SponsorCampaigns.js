@@ -132,7 +132,14 @@ export default {
         }
     },
     template: `
-        <div>
+        <div id="app" class="container">
+            <header class="navbar">
+                <h2>Sponsor Campaigns</h2>
+                <router-link to="/sponsor-dashboard">Dashboard</router-link>
+                <router-link to="/sponsor-campaigns">Campaigns</router-link>
+                <router-link to="/sponsor-requests">Requests</router-link>
+                <router-link to="/logout">Logout</router-link>
+            </header>
             <button @click="openCreatePopup" class="btn btn-primary">Create</button>
 
             <!-- Campaign Table -->

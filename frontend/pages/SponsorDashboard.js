@@ -62,8 +62,14 @@ export default {
         }
     },
     template: `
-        <div class="sponsor-dashboard">
-            <h1>Sponsor Dashboard</h1>
+        <div id="app" class="container">
+            <header class="navbar">
+                <h2>Sponsor Campaigns</h2>
+                <router-link to="/sponsor-dashboard">Dashboard</router-link>
+                <router-link to="/sponsor-campaigns">Campaigns</router-link>
+                <router-link to="/sponsor-requests">Requests</router-link>
+                <router-link to="/logout">Logout</router-link>
+            </header>
 
             <!-- Campaign Counts -->
             <section>

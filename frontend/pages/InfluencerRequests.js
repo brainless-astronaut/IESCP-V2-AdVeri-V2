@@ -2,7 +2,13 @@
 
 export default {
     template: `
-        <div>
+        <div id="app" class="container">
+            <header class="navbar">
+                <h2>Influencer Dashboard</h2>
+                <router-link to="/influencer-dashboard">Dashboard</router-link>
+                <router-link to="/influencer-requests">Requests</router-link>
+                <router-link to="/logout">Logout</router-link>
+            </header>
             <h1>Available Campaigns</h1>
             <table>
                 <thead>

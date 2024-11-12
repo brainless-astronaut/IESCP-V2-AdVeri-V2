@@ -40,15 +40,15 @@ class AdminDashboard(Resource):
             .group_by(Sponsors.industry) \
             .all()
         
-        influencers_by_industry = db.session.query(Influencers.category, func.count(Influencers.user_id)) \
-            .select_from(Users).join(Influencers, Users.user_id == Influencers.user_id) \
-            .filter(Users.role == 'influencer', Users.is_flagged == False) \
-            .group_by(Influencers.category).all()
+        # influencers_by_industry = db.session.query(Influencers.category, func.count(Influencers.user_id)) \
+        #     .select_from(Users).join(Influencers, Users.user_id == Influencers.user_id) \
+        #     .filter(Users.role == 'influencer', Users.is_flagged == False) \
+        #     .group_by(Influencers.category).all()
 
         # Prepare data for charts
         sponsors_distribution = {industry: count for industry, count in sponsors_by_industry}
         campaigns_distribution = {industry: count for industry, count in campaigns_by_industry}
-        influencers_distribution = {industry: count for industry, count in influencers_by_industry}
+        # influencers_distribution = {industry: count for industry, count in influencers_by_industry}
 
         return make_response(jsonify({
             'current_user': current_user,
@@ -60,8 +60,8 @@ class AdminDashboard(Resource):
             'flagged_influencers_count': flagged_influencers_count,
             'flagged_campaigns_count': flagged_campaigns_count,
             'sponsors_distribution': sponsors_distribution,
-            'campaigns_distribution': campaigns_distribution,
-            'influencers_distribution': influencers_distribution
+            'campaigns_distribution': campaigns_distribution
+            # 'influencers_distribution': influencers_distribution
         }), 200)
 
 class AdminManageUsers(Resource):

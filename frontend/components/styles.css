@@ -1,12 +1,12 @@
 .container {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     background-color: #222831;
     color: #eeeeee;
     height: 100vh;
     padding: 20px;
     font-family: Operator Mono, sans-serif;
-    /* justify-content: center; */
+    justify-content: center;
 }
 
 .left, .right {
@@ -126,4 +126,44 @@ footer {
     font-weight: bold;
     color: #eeeeee;
     margin: 0;
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #393e46;
+    color: #eeeeee;
+    padding: 10px 0;
+    z-index: 1000;
+    text-align: center;
+}
+
+.navbar router-link {
+    margin: 0 20px;
+    text-decoration: none;
+    color: #eeeeee;
+    font-size: 18px;
+}
+
+.navbar router-link:hover {
+    color: #FFD700; /* Gold color on hover */
+}
+
+.container {
+    padding-top: 50px; /* Adjust based on the navbar height */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .navbar {
+        text-align: left;
+        padding: 10px;
+    }
+
+    .navbar router-link {
+        display: block;
+        margin: 10px 0;
+    }
 }

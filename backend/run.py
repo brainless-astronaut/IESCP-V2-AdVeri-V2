@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, send_from_directory
 from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *

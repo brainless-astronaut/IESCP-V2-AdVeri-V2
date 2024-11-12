@@ -296,7 +296,6 @@ class AdminReport(Resource):
             }
         })
 
-
 admin.add_resource(AdminDashboard, '/admin-dashboard')
 admin.add_resource(AdminManageUsers, '/admin-users')
 admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')

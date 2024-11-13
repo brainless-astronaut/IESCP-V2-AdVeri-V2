@@ -1,6 +1,6 @@
-from collections import defaultdict, current_app as app
+from collections import defaultdict
 from datetime import datetime
-from flask import request, jsonify, Blueprint, make_response, send_file
+from flask import request, jsonify, Blueprint, make_response, send_file, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from .models import *

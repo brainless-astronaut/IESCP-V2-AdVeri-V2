@@ -1,12 +1,18 @@
-from flask import Flask, send_from_directory
+# Standard Library Imports - None as I am initializing my app here
+
+# Third-Party Imports - Libraries that have been installed to run this app.
+from flask import Flask, send_from_directory, jsonify
 from flask_jwt_extended import JWTManager
-from app.config import Config
-from app.models import *
 from flask_caching import Cache
-from app.jobs.celery_factory import celery_init_app
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-# from app.jobs import mailer, tasks, workers
+
+# Local Application Imports - These are my application modules that are modularized in the app folder.
+from app.config import Config
+from app.models import *
+from app.jobs.celery_factory import celery_init_app
+from app.jobs.tasks import add
+from celery.result import AsyncResult
 
 def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend', static_url_path='/static')
@@ -64,6 +70,19 @@ cache = app.cache
 @cache.cached(timeout = 5)
 def cache():
     return {'time' : str(datetime.now())}
+
+@app.get('/celery')
+def celery():
+    task = add.delay(10, 20)
+    return {'task_id' : task.id}
+
+@app.get('/get-celery-data/<id>')
+def get_celery(id):
+    result = AsyncResult(id)
+    if result.ready():
+        return jsonify({'result': result.result}), 200
+    else:
+        return jsonify({'message': 'task not ready'}), 405
 
 if __name__ == "__main__":
     app.run(debug=True)

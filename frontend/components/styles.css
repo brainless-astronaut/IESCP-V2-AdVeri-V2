@@ -1,8 +1,16 @@
+:root {
+    --dark-cyan: #008b8bff;
+    --white-smoke: #f5f5f5ff;
+    --robin-egg-blue: #00ccccff;
+    --oynx: #353839ff;
+    --amber: #ffbf00ff;
+}
+
 .container {
     display: flex;
     /* justify-content: space-between; */
-    background-color: #222831;
-    color: #eeeeee;
+    background-color: var(--oynx);
+    color: var(--white-smoke);
     height: 100vh;
     padding: 20px;
     font-family: Operator Mono, sans-serif;
@@ -14,6 +22,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 40px;
 }
 
 .left {
@@ -24,13 +33,13 @@
 
 .left h1 {
     font-size: 4em;
-    color: #00adb5;
+    color: var(--robin-egg-blue);
     margin: 0;
 }
 
 .left p {
     font-size: 2em;
-    color: #eeeeee;
+    color: var(--white-smoke);
 }
 
 .right {
@@ -40,23 +49,23 @@
 
 .right p {
     font-size: 1.5em;
-    color: #00abd5
+    color: var(--robin-egg-blue)
 }
 
 .button-container h4 {
-    color: #eeeeee;
+    color: var(--white-smoke);
     margin: 20px 0 10px;
 }
 
 .button-container h1 {
     font-size: 1.2em;
-    color: #00adb5;
+    color: var(--robin-egg-blue);
     margin: 0;
 }
 
 .message {
     margin: 10px 0;
-    color: #ff4d4d; /* Add a noticeable color for the message */
+    color: var(--amber); /* Add a noticeable color for the message */
 }
 
 form {

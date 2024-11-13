@@ -1,21 +1,31 @@
 # Tasks are methods or any jobs that are needed to run asynchronously (by celery) 
 # in the background or if we want a method to be scheduled
 
+# Standard library imports
+from datetime import datetime, timedelta
+import time
+
+# Third-party imports
 from celery import shared_task
 import flask_excel
-from models import *
-from mailer import send_email
-from datetime import datetime, timedelta
+
+# Flask imports
 from flask import render_template
 
-# @shared_task(ignore_result = False)
-# def sendHi(user_id):
-#     user = Users.query.filter_by(user_id=user_id).first()
-#     return "Hi " + user.username
+# Local application imports
+from app.models import *
+from .mailer import send_email
 
-# @shared_task(ignore_result = False)
-# def add():
-#     return 3 + 4
+
+@shared_task(ignore_result = False)
+def sendHi(user_id):
+    user = Users.query.filter_by(user_id=user_id).first()
+    return "Hi " + user.username
+
+@shared_task(ignore_result = False)
+def add(x,y):
+    time.sleep(10)
+    return x+y
 
 @shared_task(ignore_result = True)
 def daily_login_reminder():

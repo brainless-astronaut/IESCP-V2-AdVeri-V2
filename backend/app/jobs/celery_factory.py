@@ -2,10 +2,12 @@ from celery import Celery, Task
 from flask import Flask
 
 class CeleryConfig():
-    broker_url = 'redis://localhost:6379/0'
-    result_backend = 'redis://localhost:6379/1'
-    timezone = 'Asia/Kolkata'
+    broker_url = 'redis://localhost:6379/0' ## stores the tasks
+    result_backend = 'redis://localhost:6379/1' ## stores the results
+    timezone = 'Asia/Kolkata' ## for celery beat
 
+# from documentation
+# taking in flask application and returns celery instance
 def celery_init_app(app: Flask) -> Celery:
     class FlaskTask(Task):
         def __call__(self, *args: object, **kwargs: object) -> object:

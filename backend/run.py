@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *
 from flask_caching import Cache
-# from app.jobs.celery_factory import celery_init_app
+from backend.app.jobs.celery_factory import celery_init_app
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 # from app.jobs import mailer, tasks, workers
@@ -54,16 +54,11 @@ def create_app():
 
 app = create_app()
 
-# celery_app = celery_init_app(app)
+celery_app = celery_init_app(app)
 
 @app.route('/')
 def home():
     return send_from_directory('../frontend', 'index.html')
-
-def delete_users():
-    users = Users.query.filter_by(username = 'i4').first()
-    db.session.delete(users)
-    db.session.commit()
 
 if __name__ == "__main__":
     app.run(debug=True)

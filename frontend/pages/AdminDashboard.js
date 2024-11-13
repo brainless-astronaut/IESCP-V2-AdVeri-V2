@@ -5,10 +5,10 @@ export default {
     <div class="container">
         <header class="navbar">
             <h2>Admin Dashboard</h2>
-            <router-link to="/admin-dashboard">Dashboard</router-link>
-            <router-link to="/admin-users">Users</router-link>
-            <router-link to="/admin-campaigns">Campaigns</router-link>
-            <router-link to="/admin-reports">Reports</router-link>
+            <router-link to="/admin-dashboard">Dashboard</router-link> |
+            <router-link to="/admin-users">Users</router-link> |
+            <router-link to="/admin-campaigns">Campaigns</router-link> |
+            <router-link to="/admin-reports">Reports</router-link> |
             <router-link to="/logout">Logout</router-link>
         </header>
         <div class="left">

@@ -1,9 +1,11 @@
 from datetime import datetime
-from flask import request, jsonify, request, Blueprint, make_response
+from flask import request, jsonify, request, Blueprint, make_response, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from .models import *
 from sqlalchemy import func
+
+cache = app.cache
 
 sponsor_bp = Blueprint('sponsor', __name__)
 sponsor = Api(sponsor_bp)
@@ -44,6 +46,7 @@ def create_campaigns():
 
 class SponsorDashboard(Resource):
     @jwt_required()
+    @cache.memoize(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
 
@@ -97,6 +100,7 @@ class SponsorDashboard(Resource):
 
 class SponsorCampaigns(Resource):
     @jwt_required
+    @cache.memoize(timeout = 5)
     def get(self):
 
         try:
@@ -174,6 +178,7 @@ class SponsorCampaigns(Resource):
 class SponsorRequests(Resource):
 
     @jwt_required
+    @cache.memoize(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()

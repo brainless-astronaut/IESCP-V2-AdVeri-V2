@@ -1,15 +1,18 @@
 from datetime import datetime
-from flask import request, jsonify, request, Blueprint, make_response
+from flask import request, jsonify, request, Blueprint, make_response, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import and_
 from .models import *
+
+cache = app.cache
 
 influencer_bp = Blueprint('influencer', __name__)
 influencer = Api(influencer_bp)
 
 class InfluencerDashboard(Resource):
     @jwt_required()
+    @cache.memoize(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
 
@@ -26,6 +29,7 @@ class InfluencerDashboard(Resource):
 class InfluencerRequests(Resource):
     
     @jwt_required
+    @cache.memoize(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()

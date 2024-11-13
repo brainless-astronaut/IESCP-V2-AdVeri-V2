@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, current_app as app
 from datetime import datetime
 from flask import request, jsonify, Blueprint, make_response, send_file
 from flask_restful import Api, Resource
@@ -7,11 +7,14 @@ from .models import *
 from sqlalchemy import func
 import csv, base64, io, matplotlib.pyplot as plt
 
+cache = app.cache
+
 admin_bp = Blueprint('admin', __name__)
 admin = Api(admin_bp)
 
 class AdminDashboard(Resource):
     @jwt_required()
+    @cache.memoize(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
         print('token', current_user) ## debugging point
@@ -66,6 +69,7 @@ class AdminDashboard(Resource):
 
 class AdminManageUsers(Resource):
     @jwt_required
+    @cache.memoize(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()
@@ -113,6 +117,7 @@ class AdminManageUsers(Resource):
         
 class AdminManageCamapaigns(Resource):
     @jwt_required
+    @cache.memoize(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
 
@@ -152,6 +157,7 @@ class AdminManageCamapaigns(Resource):
 
 class AdminApproveSponsor(Resource):
     @jwt_required
+    @cache.memoize(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()

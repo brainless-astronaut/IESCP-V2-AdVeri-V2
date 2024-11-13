@@ -1,0 +1,37 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daily Reminder</title>
+    <style>
+      body {
+          background-color: #222831;
+          color: #eeeeee;
+          font-family: 'Operator Mono', sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          font-size: 20px;
+          font-style: bold;
+      }
+      h4 {
+        font-size: 28px;
+        color: #37B7C3;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+        <div>
+            <h4>Hey {{ user.username }}!</h4>
+            <p>We've noticed that your account was inactive in the past 24 hours.</p>
+            <p>Check in to see your progress in your ventures!</p>
+            <hr>
+        </div>
+  </body>
+</html>

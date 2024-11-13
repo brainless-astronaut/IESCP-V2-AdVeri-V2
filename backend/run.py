@@ -3,14 +3,10 @@ from flask_jwt_extended import JWTManager
 from app.config import Config
 from app.models import *
 from flask_caching import Cache
-from backend.app.jobs.celery_factory import celery_init_app
+from app.jobs.celery_factory import celery_init_app
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 # from app.jobs import mailer, tasks, workers
-
-
-cache = Cache()
-bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend', static_url_path='/static')
@@ -23,6 +19,8 @@ def create_app():
     jwt = JWTManager(app)
     cache = Cache(app)
     app.cache = cache
+
+    app.app_context().push()
     # mailer.init_app(app)
 
     # # Configuring Celery
@@ -59,6 +57,13 @@ celery_app = celery_init_app(app)
 @app.route('/')
 def home():
     return send_from_directory('../frontend', 'index.html')
+
+cache = app.cache
+
+@app.get('/cache')
+@cache.cached(timeout = 5)
+def cache():
+    return {'time' : str(datetime.now())}
 
 if __name__ == "__main__":
     app.run(debug=True)

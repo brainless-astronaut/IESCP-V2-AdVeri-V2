@@ -1,8 +1,10 @@
 from datetime import datetime
-from flask import request, jsonify, request, Blueprint
+from flask import request, jsonify, request, Blueprint, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import create_access_token, jwt_required, unset_jwt_cookies
 from .models import db, Users, Sponsors, Influencers, bcrypt
+
+cache = app.cache
 
 auth_bp = Blueprint('auth', __name__)
 auth = Api(auth_bp)
@@ -25,80 +27,6 @@ def create_admin():
         db.session.rollback()
         print(f'Error occured while creating admin: {str(e)}')
 
-def create_sponsors():
-    try:
-        uids = [2, 3, 4]
-        unames = ['s1', 's2', 's3']
-        emails = ['s1@s1.com', 's2@s2.com', 's3@s3.com']
-        pwds = ['s1', 's2', 's3']
-        en_names = ['s1', 's2', 's3']
-        industry = ['s1', 's2', 's3']
-        budget = [2, 3, 4]
-        for i in range(len(uids)):
-            exisiting_user = Users.query.filter_by(username=unames[i], email = emails[i]).first()
-            if not exisiting_user:
-                new_user = Users(
-                    user_id = uids[i],
-                    username = unames[i],
-                    email = emails[i],
-                    password = bcrypt.generate_password_hash(pwds[i]),
-                    role = 'sponsor'
-                )
-                db.session.add(new_user)
-                db.session.commit()
-                new_sponsor = Sponsors(
-                    sponsor_id = (i + 1),
-                    user_id = uids[i],
-                    entity_name = en_names[i],
-                    industry = industry[i],
-                    budget = budget[i]
-                )
-                db.session.add(new_sponsor)
-                db.session.commit()
-        
-        print('sample sponsor created')
-
-    except Exception as e:
-        db.session.rollback()
-        print('create sponsor failed.')
-
-def create_influencers():
-    try:
-        uids = [2, 3, 4]
-        unames = ['i1', 'i2', 'i3']
-        emails = ['i1@i1.com', 'i2@i2.com', 'i3@i3.com']
-        pwds = ['i1', 'i2', 'i3']
-        names = ['i1', 'i2', 'i3']
-        cates = ['i1', 'i2', 'i3']
-        niches = ['i1', 'i2', 'i3']
-        for i in range(len(uids)):
-            exisiting_user = Users.query.filter_by(username=unames[i], email = emails[i]).first()
-            if not exisiting_user:
-                new_user = Users(
-                    user_id = uids[i],
-                    username = unames[i],
-                    email = emails[i],
-                    password = bcrypt.generate_password_hash(pwds[i]),
-                    role = 'influencer'
-                )
-                db.session.add(new_user)
-                db.session.commit()
-                new_influencer = Sponsors(
-                    sponsor_id = (i + 1),
-                    user_id = uids[i],
-                    name = names[i],
-                    category = cates[i],
-                    niche = niches[i]
-                )
-                db.session.add(new_influencer)
-                db.session.commit()
-        
-        print('sample inf created')
-
-    except Exception as e:
-        db.session.rollback()
-        print('create inf failed.')
-        
 class SponsorRegistration(Resource):
     def post(self):
         try:

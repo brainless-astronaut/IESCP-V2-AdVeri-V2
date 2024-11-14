@@ -1,28 +1,29 @@
-# Standard Library Imports
+# Standard library imports
 from collections import defaultdict
 from datetime import datetime
 import os
 
-# Flask Imports
+# Flask imports
 from flask import (
-    request, jsonify, Blueprint, make_response, send_file, current_app as app, send_from_directory
+    jsonify, Blueprint, make_response, send_file, 
+    current_app as app, send_from_directory
 )
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-# SQLAlchemy and Database Imports
+# SQLAlchemy and database imports
 from sqlalchemy import func
 from .models import *
 
-# Celery Imports
+# Celery imports
 from celery.result import AsyncResult
 from .jobs.tasks import trigger_reports
 
-
+# Initialize cache and blueprint
 cache = app.cache
-
 admin_bp = Blueprint('admin', __name__)
 admin = Api(admin_bp)
+
 
 class AdminDashboard(Resource):
     @jwt_required()
@@ -101,7 +102,7 @@ class AdminManageUsers(Resource):
                 }), 200)
         
         except Exception as e:
-            return make_response(request({'message': 'Failed to retrieve users.'}, 500))
+            return make_response(jsonify({'message': 'Failed to retrieve users.'}, 500))
     
     @jwt_required
     def post(self):
@@ -118,14 +119,14 @@ class AdminManageUsers(Resource):
             elif action == 'delete':
                 user.delete() 
             else:
-                return make_response(request({'message': 'Invalid action.'}, 400))
+                return make_response(jsonify({'message': 'Invalid action.'}, 400))
             
             db.session.commit()
-            return make_response(request({'message': 'Action performed successfully!'}, 200))
+            return make_response(jsonify({'message': 'Action performed successfully!'}, 200))
         
         except Exception as e:
             db.session.rollback()
-            return make_response(request({'message':  'Action failed.'}, 500))
+            return make_response(jsonify({'message': 'Action failed.'}, 500))
         
 class AdminManageCamapaigns(Resource):
     @jwt_required
@@ -158,14 +159,14 @@ class AdminManageCamapaigns(Resource):
             elif action == 'delete':
                 campaign.delete() 
             else:
-                return make_response(request({'message': 'Invalid action.'}, 400))
+                return make_response(jsonify({'message': 'Invalid action.'}, 400))
             
             db.session.commit()
-            return make_response(request({'message': 'Action performed successfully!'}, 200))
+            return make_response(jsonify({'message': 'Action performed successfully!'}, 200))
         
         except Exception as e:
             db.session.rollback()
-            return make_response(request({'message':  'Action failed.'}, 500))
+            return make_response(jsonify({'message': 'Action failed.'}, 500))
 
 class AdminApproveSponsor(Resource):
     @jwt_required
@@ -181,7 +182,7 @@ class AdminApproveSponsor(Resource):
                 'sponsors_to_approve': sponsors_to_approve
             }), 200)
         except Exception as e:
-            return make_response(request({'message': 'Failed to retrieve sponsors to approve.'}, 500))
+            return make_response(jsonify({'message': 'Failed to retrieve sponsors to approve.'}, 500))
     
     @jwt_required
     def post(self):
@@ -192,11 +193,11 @@ class AdminApproveSponsor(Resource):
             user = Users.query.filter_by(user_id = user_id)
             user.is_approved = True
             db.session.commit()
-            return make_response(request({'message': 'Sponsor approved successfully!'}, 200))
+            return make_response(jsonify({'message': 'Sponsor approved successfully!'}, 200))
         
         except Exception as e:
             db.session.rollback()
-            return make_response(request({'message':  'Failed to approve sponsor.'}, 500))
+            return make_response(jsonify({'message': 'Failed to approve sponsor.'}, 500))
 
 # class AdminReports(Resource):
 #     @jwt_required()
@@ -237,8 +238,14 @@ class AdminReports(Resource):
             return {'message': 'Task not ready.'}, 202
 
 admin.add_resource(AdminDashboard, '/admin-dashboard')
-admin.add_resource(AdminManageUsers, '/admin-users')
-admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')
-admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor')
+admin.add_resource(AdminManageUsers, 
+                    '/admin-users', 
+                    '/admin-users/<int:user_id>'
+                  )
+admin.add_resource(AdminManageCamapaigns, 
+                    '/admin-campaigns'
+                    '/admin-campaigns/<int:user_id>'
+                    )
+admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor/<int:sponsor_id>')
 admin.add_resource(AdminReports, '/admin-reports', '/admin-reports/<string:task_id>')
 

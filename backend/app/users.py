@@ -1,8 +1,14 @@
+# Standard library imports
 from datetime import datetime
-from flask import request, jsonify, request, Blueprint, current_app as app
+
+# Third-party imports
+from flask import request, jsonify, Blueprint, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import create_access_token, jwt_required, unset_jwt_cookies
+
+# Local application imports
 from .models import db, Users, Sponsors, Influencers, bcrypt
+
 
 cache = app.cache
 
@@ -92,6 +98,8 @@ class InfluencerRegistration(Resource):
             name = data.get('name')
             category = data.get('category')
             niche = data.get('niche')
+            platform = data.get('platform')
+            reach = data.get('reach')
 
             existing_user = Users.query.filter_by(username = username, password = password).first()
 
@@ -116,7 +124,9 @@ class InfluencerRegistration(Resource):
                 user_id = infleuncer_id,
                 name = name,
                 category = category,
-                niche = niche
+                niche = niche,
+                platform = platform,
+                reach = reach
             )
 
             db.session.add(new_sponsor)

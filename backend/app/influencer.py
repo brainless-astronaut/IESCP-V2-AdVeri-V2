@@ -1,14 +1,20 @@
+# Standard library imports
 from datetime import datetime
-from flask import request, jsonify, request, Blueprint, make_response, current_app as app
+
+# Third-party imports
+from flask import request, jsonify, Blueprint, make_response, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import and_
+
+# Local application imports
 from .models import *
 
+# Initialize cache and blueprint
 cache = app.cache
-
 influencer_bp = Blueprint('influencer', __name__)
 influencer = Api(influencer_bp)
+
 
 class InfluencerDashboard(Resource):
     @jwt_required()

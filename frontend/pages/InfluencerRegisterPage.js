@@ -10,6 +10,8 @@ export default {
                 name: '',
                 category: '',
                 niche: '',
+                platform: '',
+                reach: '',
                 role: 'influencer' // Hardcoded role as per requirement
             },
             message: '',
@@ -47,6 +49,8 @@ export default {
                 name: '',
                 category: '',
                 niche: '',
+                platform: '',
+                reach: '',
                 role: 'influencer'
             };
         }
@@ -67,8 +71,8 @@ export default {
                 <label for="password">Password:</label>
                 <input type="password" v-model="form.password" placeholder="Enter your password" required>
 
-                <label for="name">Company/Individual Name:</label>
-                <input type="text" v-model="form.name" placeholder="Enter the company or individual name" required>
+                <label for="name">Name:</label>
+                <input type="text" v-model="form.name" placeholder="Enter your name" required>
 
                 <label for="category">Category:</label>
                 <select v-model="form.category" required>
@@ -85,6 +89,12 @@ export default {
 
                 <label for="niche">Niche:</label>
                 <input type="text" v-model="form.niche" placeholder="Enter your niche" required>
+
+                <label for="platform">Platform:</label>
+                <input type="text" v-model="form.platform" placeholder="Enter your platform" required>
+
+                <label for="reach">Reach:</label>
+                <input type="number" v-model="form.reach" placeholder="Enter your reach" required>
 
                 <button type="submit">Register</button>
             </form>

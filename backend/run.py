@@ -19,7 +19,7 @@ def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend', static_url_path='/static')
     app.config.from_object(Config)
 
-    CORS(app, support_credentials = True)  # add credentials
+    CORS(app, support_credentials = True)  
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -29,15 +29,6 @@ def create_app():
 
     app.app_context().push()
     # mailer.init_app(app)
-
-    # # Configuring Celery
-    # celery = workers.celery
-    # celery.conf.update(
-    #     broker_url=app.config["CELERY_BROKER_URL"],
-    #     result_backend=app.config["CELERY_RESULT_BACKEND"],
-    # )
-
-    # celery.Task = workers.ContextTask
 
     from app.users import auth_bp, create_admin
     from app.admin import admin_bp
@@ -66,26 +57,6 @@ celery_app = celery_init_app(app)
 @app.route('/')
 def home():
     return send_from_directory('../frontend', 'index.html')
-
-cache = app.cache
-
-@app.get('/cache')
-@cache.cached(timeout = 5)
-def cache():
-    return {'time' : str(datetime.now())}
-
-@app.get('/celery')
-def celery():
-    task = add.delay(10, 20)
-    return {'task_id' : task.id}
-
-@app.get('/get-celery-data/<id>')
-def get_celery(id):
-    result = AsyncResult(id)
-    if result.ready():
-        return jsonify({'result': result.result}), 200
-    else:
-        return jsonify({'message': 'task not ready'}), 405
 
 if __name__ == "__main__":
     app.run(debug=True)

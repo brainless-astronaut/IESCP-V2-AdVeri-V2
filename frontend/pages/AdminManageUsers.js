@@ -140,7 +140,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                await fetch('/admin-users', {
+                await fetch(`/admin-users/${userID}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

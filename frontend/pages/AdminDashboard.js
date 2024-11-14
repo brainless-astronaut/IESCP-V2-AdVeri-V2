@@ -71,7 +71,6 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                console.log('Token:', token);
 
                 const response = await fetch(location.origin + '/admin-dashboard', {
                     method: 'GET',

@@ -92,54 +92,65 @@ export default {
     `,
     data() {
         return {
-        influencers: [],
-        sponsors: [],
-        flaggedUsers: [],
-        selectedUser: null
+            influencers: [],
+            sponsors: [],
+            flaggedUsers: [],
+            selectedUser: null
         };
     },
     methods: {
         async fetchUsers() {
-                try {
-                const response = await fetch('/admin-manage-users', { 
-                        headers: { 
-                                Authorization: `Bearer ${localStorage.getItem('accessToken')}` 
-                        } 
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
+                const response = await fetch('/admin-manage-users', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                 });
                 const data = await response.json();
                 this.influencers = data.influencers;
                 this.sponsors = data.sponsors;
                 this.flaggedUsers = [...data.flagged_influencers, ...data.flagged_sponsors];
-                } catch (error) {
+            } catch (error) {
                 console.error("Error fetching users:", error);
-                }
+            }
         },
         viewUser(user) {
-        this.selectedUser = user;
+            this.selectedUser = user;
         },
         closeModal() {
-        this.selectedUser = null;
+            this.selectedUser = null;
         },
         async flagUser(user) {
-        await this.performAction(user.id, 'flag');
+            await this.performAction(user.id, 'flag');
         },
         async unflagUser(user) {
-        await this.performAction(user.id, 'unflag');
+            await this.performAction(user.id, 'unflag');
         },
         async performAction(userId, action) {
-        try {
-            await fetch('/admin-manage-users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-            },
-            body: JSON.stringify({ user_id: userId, action })
-            });
-            this.fetchUsers();
-        } catch (error) {
-            console.error(`Error performing action (${action}):`, error);
-        }
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
+                await fetch('/admin-manage-users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ user_id: userId, action })
+                });
+                this.fetchUsers();
+            } catch (error) {
+                console.error(`Error performing action (${action}):`, error);
+            }
         }
     },
     mounted() {

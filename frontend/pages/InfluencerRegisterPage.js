@@ -13,7 +13,7 @@ export default {
                 role: 'influencer' // Hardcoded role as per requirement
             },
             message: '',
-            token: localStorage.getItem('accessToken')
+            // token: localStorage.getItem('accessToken')
         };
     },
     methods: {
@@ -22,8 +22,8 @@ export default {
                 const response = await fetch(location.origin + '/register-influencer', {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        'Content-Type': 'application/json'
+                        // 'Authorization': `Bearer ${this.token}`
                     },
                     body: JSON.stringify(this.form)
                 });

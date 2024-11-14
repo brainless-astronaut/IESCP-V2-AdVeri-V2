@@ -39,6 +39,10 @@ export default {
         async fetchDashboardData() {
             try {
                 const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/influencer-dashboard', {
                     method: 'GET',
                     headers: {

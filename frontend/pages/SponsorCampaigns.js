@@ -23,11 +23,16 @@ export default {
     methods: {
         async fetchCampaigns() {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -64,11 +69,16 @@ export default {
 
         async createCampaign(campaignData) {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(campaignData)
                 });
@@ -88,11 +98,16 @@ export default {
 
         async editCampaign(campaignData) {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + `/sponsor-campaigns/${this.currentCampaign.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(campaignData)
                 });
@@ -112,10 +127,16 @@ export default {
 
         async deleteCampaign(campaignId) {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + `/sponsor-campaigns/${campaignId}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${this.token}`
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
@@ -132,7 +153,7 @@ export default {
         }
     },
     template: `
-        <div id="app" class="container">
+        <div>
             <header class="navbar">
                 <h2>Sponsor Campaigns</h2>
                 <router-link to="/sponsor-dashboard">Dashboard</router-link>

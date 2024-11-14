@@ -17,11 +17,16 @@ export default {
         // Fetch requests for the current sponsor's campaigns
         async fetchRequests() {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-requests', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`,
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 
@@ -57,11 +62,16 @@ export default {
         // Create a new request
         async createRequest(requestData) {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-requests', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`,
+                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify(requestData)
                 });
@@ -82,11 +92,16 @@ export default {
         // Edit the request
         async editRequest(requestData) {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + `/sponsor-requests/${this.currentRequest.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`,
+                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify(requestData)
                 });
@@ -107,10 +122,16 @@ export default {
         // Delete the request
         async deleteRequest(requestId) {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + `/sponsor-requests/${requestId}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                 });
 

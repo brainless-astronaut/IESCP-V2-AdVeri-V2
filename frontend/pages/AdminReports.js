@@ -7,7 +7,11 @@ export default {
     `,
     methods: {
         async trigger_report() {
-            const token = localStorage.getItem('accessToken')
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                console.error("Token is missing in localStorage.");
+                return;
+            }
             const res = await fetch(location.origin + '/admin-reports', {
                 method: 'GET',
                 headers: {

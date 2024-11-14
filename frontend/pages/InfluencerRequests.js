@@ -82,8 +82,14 @@ export default {
     methods: {
         async fetchCampaigns() {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/influencer-requests', {
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.token}`
                     }
                 });
@@ -111,11 +117,16 @@ export default {
         },
         async submitRequest() {
             try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + `/influencer-requests/${this.selectedCampaign.id}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(this.requestForm)
                 });

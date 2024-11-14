@@ -67,54 +67,69 @@ export default {
         </div>
     </div>
     `,
-  data() {
-    return {
-      campaigns: [],
-      flaggedCampaigns: [],
-      selectedCampaign: null
-    };
-  },
-  methods: {
-    async fetchCampaigns() {
-      try {
-        const response = await fetch('/admin-manage-campaigns', { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } });
-        const data = await response.json();
-        this.campaigns = data.campaigns;
-        this.flaggedCampaigns = data.flagged_campaigns;
-      } catch (error) {
-        console.error("Error fetching campaigns:", error);
-      }
+    data() {
+        return {
+            campaigns: [],
+            flaggedCampaigns: [],
+            selectedCampaign: null
+        };
     },
-    viewCampaign(campaign) {
-      this.selectedCampaign = campaign;
+    methods: {
+        async fetchCampaigns() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
+                const response = await fetch('/admin-manage-campaigns', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${this.token}`
+                    },
+                });
+                const data = await response.json();
+                this.campaigns = data.campaigns;
+                this.flaggedCampaigns = data.flagged_campaigns;
+            } catch (error) {
+                console.error("Error fetching campaigns:", error);
+            }
+        },
+        viewCampaign(campaign) {
+            this.selectedCampaign = campaign;
+        },
+        closeModal() {
+            this.selectedCampaign = null;
+        },
+        async flagCampaign(campaign) {
+            await this.performAction(campaign.id, 'flag');
+        },
+        async unflagCampaign(campaign) {
+            await this.performAction(campaign.id, 'unflag');
+        },
+        async performAction(campaignId, action) {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
+                await fetch('/admin-manage-campaigns', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ campaign_id: campaignId, action })
+                });
+                this.fetchCampaigns();
+            } catch (error) {
+                console.error(`Error performing action (${action}):`, error);
+            }
+        }
     },
-    closeModal() {
-      this.selectedCampaign = null;
-    },
-    async flagCampaign(campaign) {
-      await this.performAction(campaign.id, 'flag');
-    },
-    async unflagCampaign(campaign) {
-      await this.performAction(campaign.id, 'unflag');
-    },
-    async performAction(campaignId, action) {
-      try {
-        await fetch('/admin-manage-campaigns', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          },
-          body: JSON.stringify({ campaign_id: campaignId, action })
-        });
+    mounted() {
         this.fetchCampaigns();
-      } catch (error) {
-        console.error(`Error performing action (${action}):`, error);
-      }
     }
-  },
-  mounted() {
-    this.fetchCampaigns();
-  }
 };
 

@@ -19,7 +19,11 @@ export default {
     methods: {
         async fetchSponsorDashboardData() {
             try {
-                const token = localStorage.getItem('accessToken'); // Assuming JWT is stored here
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    console.error("Token is missing in localStorage.");
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-dashboard', {
                     method: 'GET',
                     headers: {

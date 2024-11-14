@@ -93,16 +93,47 @@ class AdminManageUsers(Resource):
             flagged_influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == True).all()
             flagged_sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == True).all()
 
-            return make_response(jsonify({
+            # response = make_response(jsonify({
+            #     'current_user': current_user,
+            #     'influencers': [influencer.to_dict() for influencer in influencers],
+            #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+            #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+            #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
+            #     }), 200)
+
+            # json = jsonify({
+            #     'current_user': current_user,
+            #     'influencers': [influencer.to_dict() for influencer in influencers],
+            #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+            #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+            #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
+            #     })
+
+            # print('response type:', type(response))
+            # print('jsin type:', type(json))
+
+            # return make_response(jsonify({
+            #     'current_user': current_user,
+            #     'influencers': [influencer.to_dict() for influencer in influencers],
+            #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+            #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+            #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
+            #     }), 200)
+
+
+            response_data = {
                 'current_user': current_user,
                 'influencers': [influencer.to_dict() for influencer in influencers],
                 'sponsors': [sponsor.to_dict() for sponsor in sponsors],
                 'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-                'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-                }), 200)
+                'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors]
+            }
+            response_data['Content-Type'] = 'application/json'
+
+            return jsonify(response_data), 200
         
         except Exception as e:
-            return make_response(jsonify({'message': 'Failed to retrieve users.'}, 500))
+            return {'message': 'Failed to retrieve users.'}, 500
     
     @jwt_required
     def post(self):
@@ -119,14 +150,14 @@ class AdminManageUsers(Resource):
             elif action == 'delete':
                 user.delete() 
             else:
-                return make_response(jsonify({'message': 'Invalid action.'}, 400))
+                return {'message': 'Invalid action.'}, 400
             
             db.session.commit()
-            return make_response(jsonify({'message': 'Action performed successfully!'}, 200))
+            return {'message': 'Action performed successfully!'}, 200
         
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': 'Action failed.'}, 500))
+            return {'message': 'Action failed.'}, 500
         
 class AdminManageCamapaigns(Resource):
     @jwt_required

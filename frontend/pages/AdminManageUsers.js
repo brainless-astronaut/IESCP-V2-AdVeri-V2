@@ -113,7 +113,9 @@ export default {
                         'Authorization': `Bearer ${token}`
                     },
                 });
+                console.log('response' + response)
                 const data = await response.json();
+                alert('data' + data)                         // ----> not able to reach here error in const data line - 117
                 this.influencers = data.influencers;
                 this.sponsors = data.sponsors;
                 this.flaggedUsers = [...data.flagged_influencers, ...data.flagged_sponsors];

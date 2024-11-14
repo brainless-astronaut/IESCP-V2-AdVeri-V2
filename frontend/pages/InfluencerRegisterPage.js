@@ -56,7 +56,7 @@ export default {
         }
     },
     template: `
-        <div>
+        <div class="register-container">
             <h1>Influencers Registration</h1>
             <div v-if="message">
                 <p>{{ message }}</p>
@@ -91,12 +91,17 @@ export default {
                 <input type="text" v-model="form.niche" placeholder="Enter your niche" required>
 
                 <label for="platform">Platform:</label>
-                <input type="text" v-model="form.platform" placeholder="Enter your platform" required>
+                <select v-model="form.platform" required>
+                    <option value="">Select Platform</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="youtube">YouTube</option>
+                </select>
 
                 <label for="reach">Reach:</label>
                 <input type="number" v-model="form.reach" placeholder="Enter your reach" required>
 
-                <button type="submit">Register</button>
+                <button type="submit" class="button">Register</button>
             </form>
         </div>
     `

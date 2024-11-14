@@ -57,7 +57,7 @@ export default {
         }
     },
     template: `
-        <div>
+        <div class="register-container">
             <h1>Sponsors Registration</h1>
             <div v-if="message">
                 <p>{{ message }}</p>
@@ -91,7 +91,7 @@ export default {
                 <label for="budget">Budget:</label>
                 <input type="number" v-model="form.budget" placeholder="Enter your budget" required>
 
-                <button type="submit">Register</button>
+                <button type="submit" class="button">Register</button>
             </form>
         </div>
     `

@@ -6,9 +6,12 @@
     --amber: #ffbf00ff;
 }
 
-.container {
+body {
+    font-family: Operator Mono, sans-serif;
+}
+
+.login-container {
     display: flex;
-    /* justify-content: space-between; */
     background-color: var(--oynx);
     color: var(--white-smoke);
     height: 100vh;
@@ -16,6 +19,7 @@
     font-family: Operator Mono, sans-serif;
     justify-content: center;
 }
+
 
 .left, .right {
     width: 50%;
@@ -44,6 +48,7 @@
 
 .right {
     align-items: center;
+    justify-content: center;
     padding-right: 40px;
 }
 
@@ -55,6 +60,8 @@
 .button-container h4 {
     color: var(--white-smoke);
     margin: 20px 0 10px;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .button-container h1 {
@@ -74,19 +81,22 @@ form {
     gap: 10px;
 }
 
+select,
 input[type="text"],
+input[type="number"],
 input[type="password"] {
     padding: 10px;
+    align-items: center;
     font-size: 1em;
-    color: #222831;
-    background-color: #eeeeee;
-    border: 1px solid #00adb5;
+    color: var(--oynx);
+    background-color: var(--white-smoke);
+    border: 1px solid var(--robin-egg-blue);
     border-radius: 5px;
     outline: none;
 }
 
 .button {
-    background-color: #00adb5;
+    background-color: var(--robin-egg-blue);
     color: #eeeeee;
     padding: 10px 20px;
     font-size: 1em;
@@ -109,6 +119,69 @@ footer {
     font-size: 0.9em;
     padding: 10px;
 }
+
+/* Register Styles */
+.register-container {
+    max-width: 600px; /* Limit the container width */
+    margin: 0 auto; /* Center the container */
+    padding: 20px;
+    background-color: var(--dark-cyan); /* Light background for contrast */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.register-container h1 {
+    text-align: center;
+    color: var(--white-smoke);
+    font-size: 24px;
+    /* margin-bottom: 20px; */
+}
+
+.register-container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.register-container label {
+    font-weight: bold;
+    margin: 10px 0 5px;
+    color: var(--white-smoke);
+}
+
+.register-container input,
+.register-container select {
+    padding: 10px;
+    font-size: 16px;
+    font-family: Operator Mono, sans-serif;
+    border: 1px solid var(--white-smoke);
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.register-container button {
+    background-color: var(--robin-egg-blue);
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.register-container button:hover {
+    background-color: var(--amber);
+}
+
+.register-container div[v-if="message"] p {
+    color: #ff5c5c;
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+
+
 
 .card-container {
     display: flex;

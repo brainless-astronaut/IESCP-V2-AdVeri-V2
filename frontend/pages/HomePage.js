@@ -2,7 +2,7 @@
 
 export default {
     template: `
-    <div class="container">
+    <div class="login-container">
         <div class="left">
             <h1>AdVeri</h1>
             <p>Where Ads Meet Authenticity</p>

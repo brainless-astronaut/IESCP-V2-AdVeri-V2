@@ -75,6 +75,7 @@ def trigger_reports(self):
     task_id = self.request.id
     
     # Dictionary of datasets and corresponding column names
+    # Each of the models have properties (__table__ is one such) 
     datasets = {
         'campaigns': (campaigns, [column.name for column in Campaigns.__table__.columns]),
         'approved_sponsors': (approved_sponsors, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns]),
@@ -88,7 +89,8 @@ def trigger_reports(self):
         filename = f'{task_id}_{name}_data.csv'
         csv_out = flask_excel.make_response_from_query_sets(data, column_names=columns, file_type='csv')
         
-        # Save CSV to file
+        # Save CSV to file 
+        # wb - write binary
         with open(f'./frontend/downloads/{filename}', 'wb') as file:
             file.write(csv_out.data)
         

@@ -77,7 +77,7 @@ export default {
   methods: {
     async fetchCampaigns() {
       try {
-        const response = await fetch('/admin-manage-campaigns', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+        const response = await fetch('/admin-manage-campaigns', { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } });
         const data = await response.json();
         this.campaigns = data.campaigns;
         this.flaggedCampaigns = data.flagged_campaigns;
@@ -103,7 +103,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
           },
           body: JSON.stringify({ campaign_id: campaignId, action })
         });

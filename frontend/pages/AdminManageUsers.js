@@ -103,7 +103,7 @@ export default {
                 try {
                 const response = await fetch('/admin-manage-users', { 
                         headers: { 
-                                Authorization: `Bearer ${localStorage.getItem('token')}` 
+                                Authorization: `Bearer ${localStorage.getItem('accessToken')}` 
                         } 
                 });
                 const data = await response.json();
@@ -132,7 +132,7 @@ export default {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+                Authorization: `Bearer ${localStorage.getItem('accessToken')}`
             },
             body: JSON.stringify({ user_id: userId, action })
             });

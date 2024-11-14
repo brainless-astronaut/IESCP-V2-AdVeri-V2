@@ -1,11 +1,22 @@
+# Standard Library Imports
 from collections import defaultdict
 from datetime import datetime
-from flask import request, jsonify, Blueprint, make_response, send_file, current_app as app
+
+# Flask Imports
+from flask import (
+    request, jsonify, Blueprint, make_response, send_file, current_app as app
+)
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from .models import *
+
+# SQLAlchemy and Database Imports
 from sqlalchemy import func
-import csv, base64, io, matplotlib.pyplot as plt
+from .models import *
+
+# Celery Imports
+from celery.result import AsyncResult
+from .jobs.tasks import trigger_reports
+
 
 cache = app.cache
 
@@ -186,124 +197,47 @@ class AdminApproveSponsor(Resource):
             db.session.rollback()
             return make_response(request({'message':  'Failed to approve sponsor.'}, 500))
 
-class AdminReport(Resource):
+# class AdminReports(Resource):
+#     @jwt_required()
+#     def get(self):
+#         # delay is given to indicate that it is a celery task.
+#         task = trigger_reports.delay()
+#         result = AsyncResult(task.id)
+
+#         if result.ready():
+#             return send_file(f'/frontend/downloads/{result.result}'), 200
+#         else:
+#             return {'message' : 'Task not ready.'}, 405
+
+class AdminReports(Resource):
     @jwt_required()
-    def get(self):
-        current_user = get_jwt_identity()
+    def post(self):
+        """Initiate the CSV generation task and return the task ID."""
+        task = trigger_reports.delay()
+        return {'task_id': task.id}, 202  # Return task_id for client to poll
 
-        # Fetch data from the database
-        campaigns = Campaigns.query.all()
-        approved_sponsors = (
-            db.session.query(Users, Sponsors)
-            .join(Sponsors, Users.user_id == Sponsors.user_id)
-            .filter(Users.is_approved == True)
-            .all()
-        )
-        all_influencers = (
-            db.session.query(Users, Influencers)
-            .join(Influencers, Users.user_id == Influencers.user_id)
-            .all()
-        )
-        sponsors_to_approve = (
-            db.session.query(Users, Sponsors)
-            .join(Sponsors, Users.user_id == Sponsors.user_id)
-            .filter(Users.is_approved == False)
-            .all()
-        )
+    @jwt_required()
+    def get(self, task_id):
+        """Check the status of a report and send the file if ready."""
+        download_dir = './frontend/downloads/'
 
-        # Aggregate totals
-        total_campaigns = len(campaigns)
-        total_approved_sponsors = len(approved_sponsors)
-        total_influencers = len(all_influencers)
-        total_sponsors_to_approve = len(sponsors_to_approve)
-        total_reach = sum(campaign.reach for campaign in campaigns)
-
-        # Campaigns grouped by industry
-        campaign_industry = (
-            db.session.query(Sponsors.industry)
-            .join(Campaigns, Campaigns.sponsor_id == Sponsors.user_id)
-            .all()
-        )
-        
-        campaign_industry_counts = defaultdict(int)
-        for industry in campaign_industry:
-            campaign_industry_counts[industry] += 1
-
-        # Approved sponsors grouped by industry
-        sponsor_industry = (
-            db.session.query(Sponsors.industry)
-            .join(Users, Users.user_id == Sponsors.user_id)
-            .filter(Users.is_approved == True)
-            .group_by(Sponsors.industry)
-            .all()
-        )
-        
-        sponsor_industry_counts = defaultdict(int)
-        for sponsor in sponsor_industry:
-            sponsor_industry_counts[sponsor.industry] += 1
-
-        # Influencers grouped by category
-        influencer_industry = (
-            db.session.query(Influencers.category)
-            .join(Users, Users.user_id == Influencers.user_id)
-            .group_by(Influencers.category)
-            .all()
-        )
-        
-        influencer_industry_counts = defaultdict(int)
-        for influencer in influencer_industry:
-            influencer_industry_counts[influencer.category] += 1
-
-        # Function to create a chart and return it as a file
-        def create_chart(data, title, xlabel):
-            plt.figure(figsize=(8, 4))
-            plt.bar(data.keys(), data.values(), color='#00adb5')
-            plt.title(title, color='#eeeeee')
-            plt.xlabel(xlabel, color='#eeeeee')
-            plt.ylabel('Counts', color='#eeeeee')
-            plt.xticks(rotation=45, ha='right', color='#eeeeee')
-            plt.yticks(color='#eeeeee')
-            plt.gca().set_facecolor('#222831')
-            plt.tight_layout()
-
-            # Save the plot to a bytes buffer
-            img = io.BytesIO()
-            plt.savefig(img, format='png')
-            plt.close()
-            img.seek(0)
-            return img
-
-        # Generate the charts and get in-memory buffers
-        campaign_chart_img = create_chart(campaign_industry_counts, "Campaigns by Industry", "Industry")
-        sponsor_chart_img = create_chart(sponsor_industry_counts, "Approved Sponsors by Industry", "Industry")
-        influencer_chart_img = create_chart(influencer_industry_counts, "Influencers by Category", "Category")
-
-        self.chart_images = {
-            'campaign_chart': campaign_chart_img,
-            'sponsor_chart': sponsor_chart_img,
-            'influencer_chart': influencer_chart_img
-        }
-
-        # Return the summarized data along with chart file links
-        return jsonify({
-            'current_user': current_user,
-            'total_campaigns': total_campaigns,
-            'total_approved_sponsors': total_approved_sponsors,
-            'total_influencers': total_influencers,
-            'total_sponsors_to_approve': total_sponsors_to_approve,
-            'total_reach': total_reach,
-            'campaign_industry_counts': dict(campaign_industry_counts),
-            'sponsor_industry_counts': dict(sponsor_industry_counts),
-            'influencer_industry_counts': dict(influencer_industry_counts),
-            'charts': {
-                'campaign_chart': '/download/campaign_chart',
-                'sponsor_chart': '/download/sponsor_chart',
-                'influencer_chart': '/download/influencer_chart',
-            }
-        })
+        # Check the task status using Celery
+        result = AsyncResult(task_id)
+        if result.ready():
+            # Check for files that start with the task_id
+            files = [f for f in os.listdir(download_dir) if f.startswith(task_id)]
+            
+            if files:
+                # Send the first matching file for download
+                return send_from_directory(download_dir, files[0], as_attachment=True)
+            else:
+                return {'message': 'File not found, but task is complete.'}, 404
+        else:
+            return {'message': 'Task not ready.'}, 202
 
 admin.add_resource(AdminDashboard, '/admin-dashboard')
 admin.add_resource(AdminManageUsers, '/admin-users')
 admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')
 admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor')
-admin.add_resource(AdminReport, '/admin-report')
+admin.add_resource(AdminReports, '/admin-reports', '/admin-reports/<string:task_id>')
+

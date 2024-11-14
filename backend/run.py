@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_caching import Cache
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+import flask_excel as excel
 
 # Local Application Imports - These are my application modules that are modularized in the app folder.
 from app.config import Config
@@ -53,6 +54,8 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(sponsor_bp)
     app.register_blueprint(influencer_bp)
+
+    excel.init_excel(app)
 
     return app
 

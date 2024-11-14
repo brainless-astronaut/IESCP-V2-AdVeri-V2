@@ -10,40 +10,6 @@ cache = app.cache
 sponsor_bp = Blueprint('sponsor', __name__)
 sponsor = Api(sponsor_bp)
 
-def create_campaigns():
-    try: 
-        cids = [1,2,3]
-        sids = [1,2,3]
-        names = ['a', 'b', 'c']
-        descs = ['a', 'b', 'c']
-        starts = ['11-10-2024', '01-10-2024', '03-12-2024']
-        ends = ['11-11-2024', '01-11-2024', '03-1-2025']
-        budget = [1, 2, 3]
-        visi = ['public', 'private', 'public']
-        goals = [1, 2, 3]
-
-        for i in range(len(cids)):
-            exisiting_campaign = Campaigns.query.filter_by(name=names[i]).first()
-            if not exisiting_campaign:
-                new_campaign = Campaigns(
-                    campaign_id =  cids[i],
-                    sponsor_id = sids[i],
-                    name = names[i],
-                    description = descs[i],
-                    start_date = datetime.strptime(starts[i], '%d-%m-%Y'),
-                    end_date = datetime.strptime(ends[i], '%d-%m-%Y'),
-                    budget = budget[i],
-                    visibility = visi[i],
-                    goals = goals[i]
-                )
-                db.session.add(new_campaign)
-                db.session.commit()
-        
-        print('campaigns created')
-    except Exception as e:
-        db.session.rollback()
-        print('create campaigns failed.')
-
 class SponsorDashboard(Resource):
     @jwt_required()
     @cache.memoize(timeout = 5)
@@ -54,9 +20,9 @@ class SponsorDashboard(Resource):
         sent_requests = AdRequests.query.filter_by(initiator = 'sponsor').all()
         received_requests = AdRequests.query.filter_by(initiator = 'influencer').all()
 
-        past_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date <= datetime.now()]
-        present_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date >= datetime.now()]
-        future_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.start_date >= datetime.now()]
+        past_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date <= datetime.now().date()]
+        present_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.end_date >= datetime.now().date()]
+        future_campaigns = [campaign.to_dict() for campaign in campaigns if campaign.start_date >= datetime.now().date()]
 
         # campaign_reach = db.session.query(
         #     Campaigns.name,
@@ -84,9 +50,9 @@ class SponsorDashboard(Resource):
             
         return make_response(jsonify({
             'current_user': current_user,
-            'past_campaigns': [campaign.to_dict() for campaign in past_campaigns],
-            'present_campaigns': [campaign.to_dict() for campaign in present_campaigns],
-            'future_campaigns': [campaign.to_dict() for campaign in future_campaigns],
+            'past_campaigns': past_campaigns,
+            'present_campaigns': present_campaigns,
+            'future_campaigns': future_campaigns,
             'sent_requests': [sent_request.to_dict() for sent_request in sent_requests],
             'received_requests': [received_request.todict() for received_request in received_requests],
             # 'campaign_reach_dict': campaign_reach_dict,

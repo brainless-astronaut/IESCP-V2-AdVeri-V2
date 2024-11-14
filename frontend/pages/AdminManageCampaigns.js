@@ -1,7 +1,7 @@
 export default {
     template: `
-    <div class="container">
-        <header class="navbar">
+    <div>
+        <header>
             <h2>Manage Campaigns</h2>
             <router-link to="/admin-dashboard">Dashboard</router-link>
             <router-link to="/admin-users">Users</router-link>
@@ -58,7 +58,7 @@ export default {
         </table>
 
         <!-- Modal Popup for Viewing Campaign Details -->
-        <div v-if="selectedCampaign" class="modal">
+        <div v-if="selectedCampaign">
         <h3>Campaign Details</h3>
         <p><strong>ID:</strong> {{ selectedCampaign.id }}</p>
         <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>

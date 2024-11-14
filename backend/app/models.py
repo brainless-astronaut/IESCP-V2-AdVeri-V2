@@ -167,7 +167,8 @@ class Campaigns(db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
+            'campaign_id': self.campaign_id,
+            'sponsor_id': self.sponsor_id,
             'name': self.name,
             'description': self.description,
             'start_date': self.start_date.isoformat(),  # date format conversion

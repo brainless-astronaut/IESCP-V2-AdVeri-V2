@@ -52,9 +52,9 @@ export default {
         }
     },
     template: `
-        <div class="register-container">
+        <div>
             <h1>Influencers Registration</h1>
-            <div v-if="message" class="message">
+            <div v-if="message">
                 <p>{{ message }}</p>
             </div>
             <form @submit.prevent="registerSponsor">

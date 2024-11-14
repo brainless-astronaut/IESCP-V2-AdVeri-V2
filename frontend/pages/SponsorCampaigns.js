@@ -154,14 +154,14 @@ export default {
     },
     template: `
         <div>
-            <header class="navbar">
+            <header>
                 <h2>Sponsor Campaigns</h2>
                 <router-link to="/sponsor-dashboard">Dashboard</router-link>
                 <router-link to="/sponsor-campaigns">Campaigns</router-link>
                 <router-link to="/sponsor-requests">Requests</router-link>
                 <router-link to="/logout">Logout</router-link>
             </header>
-            <button @click="openCreatePopup" class="btn btn-primary">Create</button>
+            <button @click="openCreatePopup">Create</button>
 
             <!-- Campaign Table -->
             <table>
@@ -188,8 +188,8 @@ export default {
             </table>
 
             <!-- Create Campaign Popup -->
-            <div v-if="showCreatePopup" class="popup">
-                <div class="popup-content">
+            <div v-if="showCreatePopup">
+                <div>
                     <h2>Create Campaign</h2>
                     <form @submit.prevent="createCampaign(currentCampaign)">
                         <input v-model="currentCampaign.name" placeholder="Campaign Name" required>
@@ -209,8 +209,8 @@ export default {
             </div>
 
             <!-- View Campaign Popup -->
-            <div v-if="showViewPopup" class="popup">
-                <div class="popup-content">
+            <div v-if="showViewPopup">
+                <div>
                     <h2>View Campaign</h2>
                     <p><strong>ID:</strong> {{ currentCampaign.id }}</p>
                     <p><strong>Name:</strong> {{ currentCampaign.name }}</p>
@@ -225,8 +225,8 @@ export default {
             </div>
 
             <!-- Edit Campaign Popup -->
-            <div v-if="showEditPopup" class="popup">
-                <div class="popup-content">
+            <div v-if="showEditPopup">
+                <div>
                     <h2>Edit Campaign</h2>
                     <form @submit.prevent="editCampaign(currentCampaign)">
                         <input v-model="currentCampaign.name" placeholder="Campaign Name" required>

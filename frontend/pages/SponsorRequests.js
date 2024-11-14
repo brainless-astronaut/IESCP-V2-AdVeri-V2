@@ -148,15 +148,15 @@ export default {
         }
     },
     template: `
-        <div id="app" class="container">
-            <header class="navbar">
+        <div id="app">
+            <header>
                 <h2>Sponsor Campaigns</h2>
                 <router-link to="/sponsor-dashboard">Dashboard</router-link>
                 <router-link to="/sponsor-campaigns">Campaigns</router-link>
                 <router-link to="/sponsor-requests">Requests</router-link>
                 <router-link to="/logout">Logout</router-link>
             </header>
-            <button @click="openCreatePopup" class="btn btn-primary">Create Request</button>
+            <button @click="openCreatePopup">Create Request</button>
 
             <!-- Requests Table -->
             <table>
@@ -188,8 +188,8 @@ export default {
             </table>
 
             <!-- Create Request Popup -->
-            <div v-if="showCreatePopup" class="popup">
-                <div class="popup-content">
+            <div v-if="showCreatePopup">
+                <div>
                     <h2>Create Request</h2>
                     <form @submit.prevent="createRequest(currentRequest)">
                         <input v-model="currentRequest.campaign_id" placeholder="Campaign ID" required>
@@ -204,8 +204,8 @@ export default {
             </div>
 
             <!-- Edit Request Popup -->
-            <div v-if="showEditPopup" class="popup">
-                <div class="popup-content">
+            <div v-if="showEditPopup">
+                <div>
                     <h2>Edit Request</h2>
                     <form @submit.prevent="editRequest(currentRequest)">
                         <input v-model="currentRequest.campaign_id" placeholder="Campaign ID" required>

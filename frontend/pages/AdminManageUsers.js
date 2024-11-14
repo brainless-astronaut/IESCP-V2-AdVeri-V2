@@ -1,7 +1,7 @@
 export default {
     template: `
     <div id="app">
-        <header class="navbar">
+        <header>
             <h2>Admin Dashboard</h2>
             <router-link to="/admin-dashboard">Dashboard</router-link>
             <router-link to="/admin-users">Users</router-link>
@@ -80,7 +80,7 @@ export default {
         </table>
 
         <!-- Modal Popup for Viewing User Details -->
-        <div v-if="selectedUser" class="modal">
+        <div v-if="selectedUser">
             <h3>User Details</h3>
             <p><strong>Username:</strong> {{ selectedUser.username }}</p>
             <p><strong>Email:</strong> {{ selectedUser.email }}</p>

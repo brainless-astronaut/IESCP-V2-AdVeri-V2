@@ -2,8 +2,8 @@
 
 export default {
     template: `
-        <div id="app" class="container">
-            <header class="navbar">
+        <div id="app">
+            <header>
                 <h2>Influencer Dashboard</h2>
                 <router-link to="/influencer-dashboard">Dashboard</router-link>
                 <router-link to="/influencer-requests">Requests</router-link>
@@ -33,7 +33,7 @@ export default {
             </table>
 
             <!-- View Campaign Popup -->
-            <div v-if="selectedCampaign" class="popup">
+            <div v-if="selectedCampaign">
                 <h2>Campaign Details</h2>
                 <p><strong>ID:</strong> {{ selectedCampaign.id }}</p>
                 <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
@@ -42,7 +42,7 @@ export default {
             </div>
 
             <!-- Make Request Popup -->
-            <div v-if="showRequestForm" class="popup">
+            <div v-if="showRequestForm">
                 <h2>Make Request for {{ selectedCampaign.name }}</h2>
                 <form @submit.prevent="submitRequest">
                     <label>

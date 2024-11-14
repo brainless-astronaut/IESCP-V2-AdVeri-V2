@@ -66,8 +66,8 @@ export default {
         }
     },
     template: `
-        <div id="app" class="container">
-            <header class="navbar">
+        <div id="app">
+            <header>
                 <h2>Sponsor Campaigns</h2>
                 <router-link to="/sponsor-dashboard">Dashboard</router-link>
                 <router-link to="/sponsor-campaigns">Campaigns</router-link>

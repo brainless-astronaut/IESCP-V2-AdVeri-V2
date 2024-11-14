@@ -106,7 +106,8 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                const response = await fetch('/admin-manage-users', {
+                const response = await fetch('/admin-users', {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -139,7 +140,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                await fetch('/admin-manage-users', {
+                await fetch('/admin-users', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

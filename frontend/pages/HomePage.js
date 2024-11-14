@@ -40,8 +40,8 @@ export default {
             try {
                 const response = await fetch(location.origin, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json' 
+                    headers: {
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         username: this.username,

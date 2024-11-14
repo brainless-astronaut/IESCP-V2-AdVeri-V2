@@ -1,9 +1,14 @@
+# Standard library imports
 from datetime import datetime
-from flask import request, jsonify, request, Blueprint, make_response, current_app as app
+
+# Third-party imports
+from flask import request, jsonify, Blueprint, make_response, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from .models import *
 from sqlalchemy import func
+
+# Local application imports
+from .models import *
 
 cache = app.cache
 
@@ -71,12 +76,14 @@ class SponsorCampaigns(Resource):
 
         try:
             current_user = get_jwt_identity()
-            your_campaigns = Campaigns.query.filter_by(sponsor_id=current_user['user_id']).all()
+            campaigns = Campaigns.query.filter_by(sponsor_id=current_user['user_id']).all()
 
-            return {
+            your_campaigns = [campaign.to_dict() for campaign in campaigns]
+
+            return make_response(jsonify({
                 'current_user': current_user,
-                'your_campaigns': [campaign.to_dict() for campaign in your_campaigns]
-            }
+                'your_campaigns': your_campaigns
+            }), 200)
         except Exception as e:
             print(f"Error: {e}")  # This will help you see what's going wrong in the backend
             return make_response(jsonify({'message': str(e)}), 500)
@@ -236,8 +243,19 @@ class SponsorRequests(Resource):
 
 # Registering the resource with the API
 sponsor.add_resource(SponsorDashboard, '/sponsor-dashboard')
-sponsor.add_resource(SponsorCampaigns, '/sponsor-campaigns')
-sponsor.add_resource(SponsorRequests, '/sponsor-requests')
+sponsor.add_resource(SponsorCampaigns, 
+                     '/sponsor-campaigns/', ## for get - getting campaigns data
+                     '/sponsor-campaigns-post/<int:sponsor_id>', ## for post - creating campaigns
+                     '/sponsor-campaigns-edit/<int:campaign_id>', ## for put - edit campaigns
+                     '/sponsor-campaigns-delete/<int:campaign_id>' ## for delete - deleting the campaign
+                    )
+sponsor.add_resource(SponsorRequests, 
+                     '/sponsor-requests',  # GET: for getting requests data
+                     '/sponsor-requests-post/<int:campaign_id>',  # POST: to send a request
+                     '/sponsor-requests-edit/<int:request_id>',  # PUT: to edit a request
+                     '/sponsor-requests-delete/<int:request_id>'  # DELETE: to delete a request
+                    )
+
 
 
 ## doubt - campaigns have CRUD, how to differentiate routes between campaign view, creation, edit, and delete in  rest api

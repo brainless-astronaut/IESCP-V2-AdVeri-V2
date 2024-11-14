@@ -82,7 +82,8 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                const response = await fetch('/admin-manage-campaigns', {
+                const response = await fetch('/admin-campaigns', {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${this.token}`
@@ -114,7 +115,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                await fetch('/admin-manage-campaigns', {
+                await fetch('/admin-campaigns', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

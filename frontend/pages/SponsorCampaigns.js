@@ -74,7 +74,8 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                const response = await fetch(location.origin + '/sponsor-campaigns', {
+                userId = jwt_decode('accessToken').sub.id
+                const response = await fetch(location.origin + '/sponsor-campaigns-post/${userID}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -132,7 +133,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                const response = await fetch(location.origin + `/sponsor-campaigns/${campaignId}`, {
+                const response = await fetch(location.origin + `/sponsor-campaigns-delete/${campaignId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

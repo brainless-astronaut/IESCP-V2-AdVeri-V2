@@ -15,6 +15,8 @@ from app.jobs.celery_factory import celery_init_app
 from app.jobs.tasks import add
 from celery.result import AsyncResult
 
+cache = Cache(config={'CACHE_TYPE': 'RedisCache'})
+
 def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend', static_url_path='/static')
     app.config.from_object(Config)

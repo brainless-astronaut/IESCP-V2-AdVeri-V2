@@ -113,7 +113,8 @@ export default {
                         'Authorization': `Bearer ${token}`
                     },
                 });
-                console.log('response' + response)
+                alert('reponse text: ' + await response.text())
+                // alert('response' + response) //resposnce comes as object
                 const data = await response.json();
                 alert('data' + data)                         // ----> not able to reach here error in const data line - 117
                 this.influencers = data.influencers;

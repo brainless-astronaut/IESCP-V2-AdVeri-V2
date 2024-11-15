@@ -81,10 +81,82 @@ class AdminDashboard(Resource):
         }), 200)
 
 class AdminManageUsers(Resource):
-    @jwt_required
+    # @cache.memoize(timeout=5, make_cache_key=lambda: f"user_cache_{get_jwt_identity()}")
+    # print('admin - users resource')
+    # @cache.memoize()
+    # print('a -- memoize')
+    # @jwt_required()
+    # print('a -- jwt-required')
+    # @jwt_required()
+    # # @cache.memoize(timeout = 5)
+    # def get(self):
+    #     # print('admin users resource get')
+    #     try:
+    #         return jsonify({'name': 'acb'})
+
+
+    #         # current_user = get_jwt_identity()
+
+    #         # influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == False).all()
+    #         # sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == False).all()
+
+    #         # flagged_influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == True).all()
+    #         # flagged_sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == True).all()
+
+    #         # # response = make_response(jsonify({
+    #         # #     'current_user': current_user,
+    #         # #     'influencers': [influencer.to_dict() for influencer in influencers],
+    #         # #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+    #         # #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+    #         # #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
+    #         # #     }), 200)
+
+    #         # # json = jsonify({
+    #         # #     'current_user': current_user,
+    #         # #     'influencers': [influencer.to_dict() for influencer in influencers],
+    #         # #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+    #         # #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+    #         # #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
+    #         # #     })
+
+    #         # # print('response type:', type(response))
+    #         # # print('jsin type:', type(json))
+
+    #         # # return make_response(jsonify({
+    #         # #     'current_user': current_user,
+    #         # #     'influencers': [influencer.to_dict() for influencer in influencers],
+    #         # #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+    #         # #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+    #         # #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
+    #         # #     }), 200)
+
+
+    #         # response_data = {
+    #         #     'current_user': current_user,
+    #         #     'influencers': [influencer.to_dict() for influencer in influencers],
+    #         #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
+    #         #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
+    #         #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors]
+    #         # }
+    #         # response_data['Content-Type'] = 'application/json'
+
+    #         # # return jsonify(response_data), 200
+
+    #         # # return jsonify({'name': 'acb'})
+
+    #         # # return '1'
+        
+    #     except Exception as e:
+    #         return {'message': 'Failed to retrieve users.'}, 500
+    
+    @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
+        # return {"State": "Succes"}
+
+        print('admin users resource get')
         try:
+            # return jsonify({'name': 'acb'})
             current_user = get_jwt_identity()
 
             influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == False).all()
@@ -131,11 +203,19 @@ class AdminManageUsers(Resource):
             response_data['Content-Type'] = 'application/json'
 
             return jsonify(response_data), 200
+
+            # return jsonify({'name': 'acb'})
+
+            # return '1'
         
         except Exception as e:
             return {'message': 'Failed to retrieve users.'}, 500
-    
-    @jwt_required
+
+
+
+
+
+    @jwt_required()
     def post(self):
         try:
             data = request.get_json()
@@ -160,7 +240,7 @@ class AdminManageUsers(Resource):
             return {'message': 'Action failed.'}, 500
         
 class AdminManageCamapaigns(Resource):
-    @jwt_required
+    @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
@@ -175,7 +255,7 @@ class AdminManageCamapaigns(Resource):
             'flagged_campaigns': [flagged_campaign.to_dict() for flagged_campaign in flagged_campaigns]
             }), 200)
     
-    @jwt_required
+    @jwt_required()
     def post(self):
         try:
             data = request.get_json()
@@ -200,7 +280,7 @@ class AdminManageCamapaigns(Resource):
             return make_response(jsonify({'message': 'Action failed.'}, 500))
 
 class AdminApproveSponsor(Resource):
-    @jwt_required
+    @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
         try:
@@ -215,7 +295,7 @@ class AdminApproveSponsor(Resource):
         except Exception as e:
             return make_response(jsonify({'message': 'Failed to retrieve sponsors to approve.'}, 500))
     
-    @jwt_required
+    @jwt_required()
     def post(self):
         try:
             data = request.get_json()

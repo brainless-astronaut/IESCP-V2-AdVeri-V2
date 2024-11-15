@@ -18,16 +18,10 @@ export default {
     methods: {
         async registerSponsor() {
             try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
                 const response = await fetch(location.origin + '/register-sponsor', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(this.form)
                 });

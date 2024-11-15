@@ -23,7 +23,7 @@ class Config:
     CACHE_TYPE = 'RedisCache'
     CACHE_REDIS_PORT = 6379
     CACHE_REDIS_URL = 'redis://localhost:6379/0'
-    CACHE_DEFAULT_TIMEOUT = 30
+    CACHE_DEFAULT_TIMEOUT = 5
 
     # Mail settings
     MAIL_SERVER = 'localhost'

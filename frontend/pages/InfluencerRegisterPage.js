@@ -15,7 +15,6 @@ export default {
                 role: 'influencer' // Hardcoded role as per requirement
             },
             message: '',
-            // token: localStorage.getItem('accessToken')
         };
     },
     methods: {

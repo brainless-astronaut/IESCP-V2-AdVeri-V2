@@ -34,7 +34,7 @@ class InfluencerDashboard(Resource):
 
 class InfluencerRequests(Resource):
     
-    @jwt_required
+    @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
         try:
@@ -52,7 +52,7 @@ class InfluencerRequests(Resource):
         except Exception as e:
             return make_response(jsonify({'message': f'Error while fetching campaign data. {str(e)}'}), 500)
     
-    @jwt_required
+    @jwt_required()
     def post(self, campaign_id):
         try:
             current_user = get_jwt_identity()
@@ -84,7 +84,7 @@ class InfluencerRequests(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': f'Error while making request. {str(e)}'}), 500)
     
-    @jwt_required
+    @jwt_required()
     def put(self, request_id):
         try:
             current_user = get_jwt_identity()
@@ -119,7 +119,7 @@ class InfluencerRequests(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': f'Error while updating request. {str(e)}'}), 500)
 
-    @jwt_required
+    @jwt_required()
     def delete(self, request_id):
         try:
             current_user = get_jwt_identity()

@@ -70,7 +70,7 @@ class SponsorDashboard(Resource):
         }), 200)
 
 class SponsorCampaigns(Resource):
-    @jwt_required
+    @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
 
@@ -88,7 +88,7 @@ class SponsorCampaigns(Resource):
             print(f"Error: {e}")  # This will help you see what's going wrong in the backend
             return make_response(jsonify({'message': str(e)}), 500)
 
-    @jwt_required
+    @jwt_required()
     def post(self, sponsor_id):
         try:
             data = request.get_json()
@@ -109,7 +109,7 @@ class SponsorCampaigns(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': str(e)}), 400)
         
-    @jwt_required
+    @jwt_required()
     def put(self, campaign_id):
         try:
             current_user = get_jwt_identity()
@@ -132,7 +132,7 @@ class SponsorCampaigns(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': str(e)}), 400)
     
-    @jwt_required
+    @jwt_required()
     def delete(self, campaign_id):
         try:
             current_user = get_jwt_identity()
@@ -150,7 +150,7 @@ class SponsorCampaigns(Resource):
      
 class SponsorRequests(Resource):
 
-    @jwt_required
+    @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
         try:
@@ -165,7 +165,7 @@ class SponsorRequests(Resource):
             print(f"Error: {e}")  # This will help you see what's going wrong in the backend
             return make_response(jsonify({'message': str(e)}), 500)
 
-    @jwt_required
+    @jwt_required()
     def post(self, campaign_id):
         current_user = get_jwt_identity()
         try:
@@ -187,7 +187,7 @@ class SponsorRequests(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': f'Error occured while sending request. {str(e)}'}))
 
-    @jwt_required
+    @jwt_required()
     def put(self, request_id):
         try:
             current_user = get_jwt_identity()
@@ -221,7 +221,7 @@ class SponsorRequests(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': f'Error while updating request. {str(e)}'}), 500)
 
-    @jwt_required
+    @jwt_required()
     def delete(self, request_id):
         try:
             current_user = get_jwt_identity()

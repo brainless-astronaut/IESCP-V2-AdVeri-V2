@@ -89,6 +89,7 @@ export default {
                         'Authorization': `Bearer ${this.token}`
                     },
                 });
+                alert('response text: ' + await response.text())
                 const data = await response.json();
                 this.campaigns = data.campaigns;
                 this.flaggedCampaigns = data.flagged_campaigns;

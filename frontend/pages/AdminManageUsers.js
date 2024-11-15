@@ -2,7 +2,7 @@ export default {
     template: `
     <div id="app">
         <header>
-            <h2>Admin Dashboard</h2>
+            <h2>Manage Users</h2>
             <router-link to="/admin-dashboard">Dashboard</router-link>
             <router-link to="/admin-users">Users</router-link>
             <router-link to="/admin-campaigns">Campaigns</router-link>
@@ -10,84 +10,109 @@ export default {
             <router-link to="/logout">Logout</router-link>
         </header>
 
+        <!-- Search Bar -->
+        <section>
+            <input 
+                type="text" 
+                v-model="searchTerm" 
+                placeholder="Search by username, email, or name" 
+                class="search-bar"
+            />
+        </section>
+
         <!-- Table for Influencers -->
-        <h2>Influencers</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="influencer in influencers" :key="influencer.id">
-                    <td>{{ influencer.username }}</td>
-                    <td>{{ influencer.email }}</td>
-                    <td>{{ influencer.name }}</td>
-                    <td>
-                        <button @click="viewUser(influencer)">View</button>
-                        <button @click="flagUser(influencer)">Flag</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <section>
+            <h2>Influencers</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="influencer in influencers" :key="influencer.id">
+                            <td>{{ influencer.username }}</td>
+                            <td>{{ influencer.email }}</td>
+                            <td>{{ influencer.name }}</td>
+                            <td>{{ influencer.category }}</td>
+                            <td>
+                                <button type="submit" @click="flagUser(influencer)">Flag</button>
+                                <details>
+                                    <summary class="btn btn-view">View</summary>
+                                    <p><strong>Username:</strong> {{ influencer.username }}</p>
+                                    <p><strong>Name:</strong> {{ influencer.name }}</p>
+                                    <p><strong>Category:</strong> {{ influencer.category }}</p>
+                                    <p><strong>Niche:</strong> {{ influencer.niche }}</p>
+                                    <p><strong>Reach:</strong> {{ influencer.reach }}</p>
+                                    <p><strong>Platform:</strong> {{ influencer.platform }}</p>
+                                    <p><strong>Earnings:</strong> {{ influencer.earnings }}</p>
+                                </details>                        
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+        </section>
 
         <!-- Table for Sponsors -->
-        <h2>Sponsors</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="sponsor in sponsors" :key="sponsor.id">
-                    <td>{{ sponsor.username }}</td>
-                    <td>{{ sponsor.email }}</td>
-                    <td>{{ sponsor.name }}</td>
-                    <td>
-                        <button @click="viewUser(sponsor)">View</button>
-                        <button @click="flagUser(sponsor)">Flag</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <section>
+            <h2>Sponsors</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Entity Name</th>
+                            <th>Industry</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="sponsor in sponsors" :key="sponsor.id">
+                            <td>{{ sponsor.username }}</td>
+                            <td>{{ sponsor.email }}</td>
+                            <td>{{ sponsor.entity_name}}</td>
+                            <td>{{ sponsor.name }}</td>
+                            <td>
+                                <button type="submit" @click="flagUser(sponsor)">Flag</button>
+                                <details>
+                                    <summary class="btn btn-view">View</summary>
+                                    <p><strong>Username:</strong> {{ sponsor.username }}</p>
+                                    <p><strong>Company Name:</strong> {{ sponsor.entity_name}}</p>
+                                    <p><strong>Industry:</strong> {{ sponsor.industry }}</p>
+                                    <p><strong>Budget:</strong> {{ sponsor.budget }}</p>
+                                </details>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+        </section>
 
         <!-- Table for Flagged Users -->
         <h2>Flagged Users</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="user in flaggedUsers" :key="user.id">
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        <button @click="unflagUser(user)">Unflag</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- Modal Popup for Viewing User Details -->
-        <div v-if="selectedUser">
-            <h3>User Details</h3>
-            <p><strong>Username:</strong> {{ selectedUser.username }}</p>
-            <p><strong>Email:</strong> {{ selectedUser.email }}</p>
-            <p><strong>Name:</strong> {{ selectedUser.name }}</p>
-            <p><strong>Role:</strong> {{ selectedUser.role }}</p>
-            <button @click="closeModal">Close</button>
-        </div>
+        <section>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="user in flaggedUsers" :key="user.id">
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <button @click="unflagUser(user)">Unflag</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+        </section>
     </div>
     `,
     data() {
@@ -106,17 +131,15 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                const response = await fetch('/admin-users', {
+                const response = await fetch('/admin-users?search_query=${this.searchTerm}', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                 });
-                alert('reponse text: ' + await response.text())
-                // alert('response' + response) //resposnce comes as object
+                // alert('reponse text: ' + await response.text())
                 const data = await response.json();
-                alert('data' + data)                         // ----> not able to reach here error in const data line - 117
                 this.influencers = data.influencers;
                 this.sponsors = data.sponsors;
                 this.flaggedUsers = [...data.flagged_influencers, ...data.flagged_sponsors];
@@ -143,7 +166,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                await fetch(`/admin-users/${userID}`, {
+                await fetch(`/admin-users/${userId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

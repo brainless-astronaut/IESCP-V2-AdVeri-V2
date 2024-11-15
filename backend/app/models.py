@@ -16,9 +16,9 @@ class Users(db.Model):
     username = db.Column(db.String(20), nullable = False, unique = True)
     email = db.Column(db.String(50), nullable = False, unique = True)
     password = db.Column(db.String(60), nullable = False)
-    role = db.Column(db.String(10), nullable = False)
+    is_flagged = db.Column(db.Boolean, default = False, nullable = False)  
     is_approved = db.Column(db.Boolean, default = True, nullable = False)
-    is_flagged = db.Column(db.Boolean, default = False, nullable = False)
+    role = db.Column(db.String(10), nullable = False)
     last_login_at = db.Column(db.DateTime, default = datetime.now)
 
     ## Relationships

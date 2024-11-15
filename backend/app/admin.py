@@ -50,7 +50,7 @@ class AdminDashboard(Resource):
             .group_by(Sponsors.industry).all()
 
         campaigns_by_industry = db.session.query(
-                Sponsors.industry, func.count(Campaigns.campaign_id).label("campaign_count")
+                Sponsors.industry, func.count(Campaigns.campaign_id).label('campaign_count')
             ) \
             .join(Sponsors, Campaigns.sponsor_id == Sponsors.user_id) \
             .group_by(Sponsors.industry) \
@@ -81,139 +81,116 @@ class AdminDashboard(Resource):
         }), 200)
 
 class AdminManageUsers(Resource):
-    # @cache.memoize(timeout=5, make_cache_key=lambda: f"user_cache_{get_jwt_identity()}")
-    # print('admin - users resource')
-    # @cache.memoize()
-    # print('a -- memoize')
-    # @jwt_required()
-    # print('a -- jwt-required')
-    # @jwt_required()
-    # # @cache.memoize(timeout = 5)
-    # def get(self):
-    #     # print('admin users resource get')
-    #     try:
-    #         return jsonify({'name': 'acb'})
-
-
-    #         # current_user = get_jwt_identity()
-
-    #         # influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == False).all()
-    #         # sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == False).all()
-
-    #         # flagged_influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == True).all()
-    #         # flagged_sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == True).all()
-
-    #         # # response = make_response(jsonify({
-    #         # #     'current_user': current_user,
-    #         # #     'influencers': [influencer.to_dict() for influencer in influencers],
-    #         # #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-    #         # #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-    #         # #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-    #         # #     }), 200)
-
-    #         # # json = jsonify({
-    #         # #     'current_user': current_user,
-    #         # #     'influencers': [influencer.to_dict() for influencer in influencers],
-    #         # #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-    #         # #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-    #         # #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-    #         # #     })
-
-    #         # # print('response type:', type(response))
-    #         # # print('jsin type:', type(json))
-
-    #         # # return make_response(jsonify({
-    #         # #     'current_user': current_user,
-    #         # #     'influencers': [influencer.to_dict() for influencer in influencers],
-    #         # #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-    #         # #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-    #         # #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-    #         # #     }), 200)
-
-
-    #         # response_data = {
-    #         #     'current_user': current_user,
-    #         #     'influencers': [influencer.to_dict() for influencer in influencers],
-    #         #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-    #         #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-    #         #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors]
-    #         # }
-    #         # response_data['Content-Type'] = 'application/json'
-
-    #         # # return jsonify(response_data), 200
-
-    #         # # return jsonify({'name': 'acb'})
-
-    #         # # return '1'
-        
-    #     except Exception as e:
-    #         return {'message': 'Failed to retrieve users.'}, 500
-    
     @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
-        # return {"State": "Succes"}
-
-        print('admin users resource get')
         try:
-            # return jsonify({'name': 'acb'})
+            #Getting jwt_identity
             current_user = get_jwt_identity()
 
-            influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == False).all()
-            sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == False).all()
+            ## serach functionality
+            search_query = request.args.get('search_query', '')
+            users = Users.query.filter(Users.username.ilike(f'%{search_query}%')).all()
+            user_ids = [user.id for user in users]
 
-            flagged_influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.flagged == True).all()
-            flagged_sponsors = Users.query.join(Sponsors).filter(Users.sponsors != None, Users.flagged == True).all()
-
-            # response = make_response(jsonify({
-            #     'current_user': current_user,
-            #     'influencers': [influencer.to_dict() for influencer in influencers],
-            #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-            #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-            #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-            #     }), 200)
-
-            # json = jsonify({
-            #     'current_user': current_user,
-            #     'influencers': [influencer.to_dict() for influencer in influencers],
-            #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-            #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-            #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-            #     })
-
-            # print('response type:', type(response))
-            # print('jsin type:', type(json))
-
-            # return make_response(jsonify({
-            #     'current_user': current_user,
-            #     'influencers': [influencer.to_dict() for influencer in influencers],
-            #     'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-            #     'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-            #     'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors],
-            #     }), 200)
+            ## Getting data
+            influencers = Influencers.query.join(Users).filter(
+                Users.id.in_(user_ids),
+                Users.role == 'influencer',
+                Users.is_flagged == False
+            ).all()
+            # influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.is_flagged == False).all()
+            sponsors = Sponsor.query.join(Users).filter(
+                Users.id.in_(user_ids),
+                Users.role == 'sponsor',
+                Users.is_flagged == False,
+                Users.is_approved == True
+            ).all()
+            
+            flagged_influencers = Influencers.query.join(Users).filter(
+                Users.id.in_(user_ids),
+                Users.role == 'influencer',
+                Users.is_flagged == True
+            ).all()
+            
+            flagged_sponsors = Sponsor.query.join(Users).filter(
+                Users.id.in_(user_ids),
+                Users.role == 'ssponsor',
+                Users.is_flagged == True,
+                Users.is_approved == True
+            ).all()
+            
+            ## dict conversions
+            influencers_list = []
+            for influencer in influencers:
+                user = next((u for u in users if u.user_id == influencer.user_id), None)
+                if user:
+                    influencers_list.append({
+                        'user_id': user.user_id,
+                        'username': user.username,
+                        'email': user.email,
+                        'name': influencer.name,
+                        'category': influencer.category,
+                        'niche': influencer.niche,
+                        'reach': influencer.reach,
+                        'platform': influencer.platform,
+                        'earnings': influencer.earnings
+                    })
+            
+            sponsors_list = []
+            for sponsor in sponsors:
+                user = next((u for u in users if u.user_id == sponsor.user_id), None)
+                if user:
+                    sponsors_list.append({
+                        'user_id': user.user_id,
+                        'username': user.username,
+                        'email': user.email,
+                        'entity_name': sponsor.entity_name,
+                        'industry': sponsor.industry,
+                        'budget': sponsor.budget
+                    })
+            
+            flagged_influencers_list = []
+            for influencer in flagged_influencers:
+                user = next((u for u in users if u.user_id == influencer.user_id), None)
+                if user:
+                    flagged_influencers_list.append({
+                        'user_id': user.user_id,
+                        'username': user.username,
+                        'email': user.email,
+                        'name': influencer.name,
+                        'category': influencer.category,
+                        'niche': influencer.niche,
+                        'reach': influencer.reach,
+                        'platform': influencer.platform,
+                        'earnings': influencer.earnings
+                    })
+            
+            flagged_sponsors_list = []
+            for sponsor in flagged_sponsors:
+                user = next((u for u in users if u.user_id == sponsor.user_id), None)
+                if user:
+                    sponsors_list.append({
+                        'user_id': user.user_id,
+                        'username': user.username,
+                        'email': user.email,
+                        'entity_name': sponsor.entity_name,
+                        'industry': sponsor.industry,
+                        'budget': sponsor.budget
+                    })
 
 
             response_data = {
                 'current_user': current_user,
-                'influencers': [influencer.to_dict() for influencer in influencers],
-                'sponsors': [sponsor.to_dict() for sponsor in sponsors],
-                'flagged_influencers': [flagged_influencer.to_dict() for flagged_influencer in flagged_influencers],
-                'flagged_sponsors': [flagged_sponsor.to_dict() for flagged_sponsor in flagged_sponsors]
+                'influencers': influencers_list,
+                'sponsors': sponsors_list,
+                'flagged_influencers': flagged_influencers_list,
+                'flagged_sponsors': flagged_sponsors_list
             }
-            response_data['Content-Type'] = 'application/json'
+            return make_response(jsonify(response_data), 200)
 
-            return jsonify(response_data), 200
-
-            # return jsonify({'name': 'acb'})
-
-            # return '1'
-        
         except Exception as e:
-            return {'message': 'Failed to retrieve users.'}, 500
-
-
-
-
+            return {'message': f'Failed to retrieve users. {str(e)}'}, 500
 
     @jwt_required()
     def post(self):
@@ -227,8 +204,8 @@ class AdminManageUsers(Resource):
                 user.is_flagged = True
             elif action == 'unflag':
                 user.is_flagged = False
-            elif action == 'delete':
-                user.delete() 
+            # elif action == 'delete':
+            #     user.delete() 
             else:
                 return {'message': 'Invalid action.'}, 400
             
@@ -245,9 +222,18 @@ class AdminManageCamapaigns(Resource):
     def get(self):
         current_user = get_jwt_identity()
 
-        campaigns = Campaigns.query.filter_by(is_flagged=False).all()
+        search_query = request.args.get('search', '')
 
-        flagged_campaigns = Campaigns.query.filter_by(is_flagged=False).all()
+        ## Filter unflagged campaigns
+        campaigns = Campaigns.query.filter(
+            Campaigns.is_flagged == False,
+            Campaign.name.ilike(f'%{search_query}%') | Campaign.description.ilike(f'%{search_query}%')
+        ).all()
+
+        flagged_campaigns = Campaigns.query.filter(
+            Campaigns.is_flagged == True,
+            Campaign.name.ilike(f'%{search_query}%') | Campaign.description.ilike(f'%{search_query}%')
+        ).all()
 
         return make_response(jsonify({
             'current_user': current_user,
@@ -325,13 +311,13 @@ class AdminApproveSponsor(Resource):
 class AdminReports(Resource):
     @jwt_required()
     def post(self):
-        """Initiate the CSV generation task and return the task ID."""
+        '''Initiate the CSV generation task and return the task ID.'''
         task = trigger_reports.delay()
         return {'task_id': task.id}, 202  # Return task_id for client to poll
 
     @jwt_required()
     def get(self, task_id):
-        """Check the status of a report and send the file if ready."""
+        '''Check the status of a report and send the file if ready.'''
         download_dir = './frontend/downloads/'
 
         # Check the task status using Celery

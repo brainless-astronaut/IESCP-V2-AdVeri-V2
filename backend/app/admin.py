@@ -179,6 +179,19 @@ class AdminManageUsers(Resource):
                         'budget': sponsor.budget
                     })
 
+            flagged_users = Users.query.filter(
+                Users.is_flagged == True,
+                Users.is_approved == True
+            ).all()
+
+            flagged_users_list = []
+            for user in flagged_users:
+                flagged_users_list.apppend({
+                    'user_id': user.user_id,
+                    'username':user.username
+                    'email': user.email,
+                    'role': user.role
+                })
 
             response_data = {
                 'current_user': current_user,

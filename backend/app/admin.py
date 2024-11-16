@@ -5,7 +5,7 @@ import os
 
 # Flask imports
 from flask import (
-    jsonify, Blueprint, make_response, send_file, 
+    jsonify, Blueprint, make_response, send_file, request,
     current_app as app, send_from_directory
 )
 from flask_restful import Api, Resource
@@ -89,116 +89,74 @@ class AdminManageUsers(Resource):
             current_user = get_jwt_identity()
 
             ## serach functionality
-            search_query = request.args.get('search_query', '')
-            users = Users.query.filter(Users.username.ilike(f'%{search_query}%')).all()
-            user_ids = [user.id for user in users]
+            # search_query = request.args.get('search_query', '')
+            # users = Users.query.filter(Users.username.ilike(f'%{search_query}%')).all()
+            # user_ids = [user.id for user in users]
 
             ## Getting data
             influencers = Influencers.query.join(Users).filter(
-                Users.id.in_(user_ids),
+                Users.user_id == Influencers.user_id,
                 Users.role == 'influencer',
                 Users.is_flagged == False
             ).all()
-            # influencers = Users.query.join(Influencers).filter(Users.influencers != None, Users.is_flagged == False).all()
-            sponsors = Sponsor.query.join(Users).filter(
-                Users.id.in_(user_ids),
+
+            sponsors = Sponsors.query.join(Users).filter(
+                Users.user_id == Sponsors.user_id,
                 Users.role == 'sponsor',
                 Users.is_flagged == False,
                 Users.is_approved == True
             ).all()
-            
-            flagged_influencers = Influencers.query.join(Users).filter(
-                Users.id.in_(user_ids),
-                Users.role == 'influencer',
-                Users.is_flagged == True
-            ).all()
-            
-            flagged_sponsors = Sponsor.query.join(Users).filter(
-                Users.id.in_(user_ids),
-                Users.role == 'ssponsor',
-                Users.is_flagged == True,
-                Users.is_approved == True
-            ).all()
-            
-            ## dict conversions
-            influencers_list = []
-            for influencer in influencers:
-                user = next((u for u in users if u.user_id == influencer.user_id), None)
-                if user:
-                    influencers_list.append({
-                        'user_id': user.user_id,
-                        'username': user.username,
-                        'email': user.email,
-                        'name': influencer.name,
-                        'category': influencer.category,
-                        'niche': influencer.niche,
-                        'reach': influencer.reach,
-                        'platform': influencer.platform,
-                        'earnings': influencer.earnings
-                    })
-            
-            sponsors_list = []
-            for sponsor in sponsors:
-                user = next((u for u in users if u.user_id == sponsor.user_id), None)
-                if user:
-                    sponsors_list.append({
-                        'user_id': user.user_id,
-                        'username': user.username,
-                        'email': user.email,
-                        'entity_name': sponsor.entity_name,
-                        'industry': sponsor.industry,
-                        'budget': sponsor.budget
-                    })
-            
-            flagged_influencers_list = []
-            for influencer in flagged_influencers:
-                user = next((u for u in users if u.user_id == influencer.user_id), None)
-                if user:
-                    flagged_influencers_list.append({
-                        'user_id': user.user_id,
-                        'username': user.username,
-                        'email': user.email,
-                        'name': influencer.name,
-                        'category': influencer.category,
-                        'niche': influencer.niche,
-                        'reach': influencer.reach,
-                        'platform': influencer.platform,
-                        'earnings': influencer.earnings
-                    })
-            
-            flagged_sponsors_list = []
-            for sponsor in flagged_sponsors:
-                user = next((u for u in users if u.user_id == sponsor.user_id), None)
-                if user:
-                    sponsors_list.append({
-                        'user_id': user.user_id,
-                        'username': user.username,
-                        'email': user.email,
-                        'entity_name': sponsor.entity_name,
-                        'industry': sponsor.industry,
-                        'budget': sponsor.budget
-                    })
 
             flagged_users = Users.query.filter(
                 Users.is_flagged == True,
                 Users.is_approved == True
             ).all()
-
-            flagged_users_list = []
-            for user in flagged_users:
-                flagged_users_list.apppend({
+            
+            ## dict conversions
+            influencers_list = [
+                {
                     'user_id': user.user_id,
-                    'username':user.username,
+                    'username': user.username,
+                    'email': user.email,
+                    'name': influencer.name,
+                    'category': influencer.category,
+                    'niche': influencer.niche,
+                    'reach': influencer.reach,
+                    'platform': influencer.platform,
+                    'earnings': influencer.earnings
+                }
+                for influencer in influencers
+                if (user := Users.query.get(influencer.user_id))
+            ]
+            
+            sponsors_list = [
+                {
+                    'user_id': user.user_id,
+                    'username': user.username,
+                    'email': user.email,
+                    'entity_name': sponsor.entity_name,
+                    'industry': sponsor.industry,
+                    'budget': sponsor.budget
+                }
+                for sponsor in sponsors
+                if (user := Users.query.get(sponsor.user_id))
+            ]
+            
+            flagged_users_list = [
+                {
+                    'user_id': user.user_id,
+                    'username': user.username,
                     'email': user.email,
                     'role': user.role
-                })
+                }
+                for user in flagged_users
+            ]
 
             response_data = {
                 'current_user': current_user,
                 'influencers': influencers_list,
                 'sponsors': sponsors_list,
-                'flagged_influencers': flagged_influencers_list,
-                'flagged_sponsors': flagged_sponsors_list
+                'flagged_users': flagged_users_list
             }
             return make_response(jsonify(response_data), 200)
 
@@ -206,19 +164,28 @@ class AdminManageUsers(Resource):
             return {'message': f'Failed to retrieve users. {str(e)}'}, 500
 
     @jwt_required()
-    def post(self):
+    def post(self):        
         try:
+            print("Headers:", request.headers)
+            
+            # Debugging: Log the JWT identity
+            current_user = get_jwt_identity()
+            print("JWT Identity:", current_user)            
+
             data = request.get_json()
 
             user_id = data.get('user_id')
+            # user_id = user_id
             action = data.get('action')
-            user = Users.query.filter_by(user_id = user_id)
+            user = Users.query.filter_by(user_id = user_id).first()
+            
+            if not user:
+                return {'message', 'User not found.'}, 404
+
             if action == 'flag':
                 user.is_flagged = True
             elif action == 'unflag':
                 user.is_flagged = False
-            # elif action == 'delete':
-            #     user.delete() 
             else:
                 return {'message': 'Invalid action.'}, 400
             
@@ -227,7 +194,7 @@ class AdminManageUsers(Resource):
         
         except Exception as e:
             db.session.rollback()
-            return {'message': 'Action failed.'}, 500
+            return {'message': f'Action failed. Error {str(e)}'}, 500
         
 class AdminManageCamapaigns(Resource):
     @jwt_required()
@@ -348,10 +315,11 @@ class AdminReports(Resource):
             return {'message': 'Task not ready.'}, 202
 
 admin.add_resource(AdminDashboard, '/admin-dashboard')
-admin.add_resource(AdminManageUsers, 
-                    '/admin-users', 
-                    '/admin-users/<int:user_id>'
-                  )
+# admin.add_resource(AdminManageUsers, 
+#                     '/admin-users', 
+#                     '/admin-users/<int:user_id>'
+#                   )
+admin.add_resource(AdminManageUsers, '/admin-users')
 admin.add_resource(AdminManageCamapaigns, 
                     '/admin-campaigns'
                     '/admin-campaigns/<int:user_id>'

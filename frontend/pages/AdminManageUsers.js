@@ -10,16 +10,6 @@ export default {
             <router-link to="/logout">Logout</router-link>
         </header>
 
-        <!-- Search Bar -->
-        <section>
-            <input 
-                type="text" 
-                v-model="searchTerm" 
-                placeholder="Search by username, email, or name" 
-                class="search-bar"
-            />
-        </section>
-
         <!-- Table for Influencers -->
         <section>
             <h2>Influencers</h2>
@@ -120,7 +110,6 @@ export default {
             influencers: [],
             sponsors: [],
             flaggedUsers: [],
-            selectedUser: null
         };
     },
     methods: {
@@ -131,7 +120,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                const response = await fetch('/admin-users?search_query=${this.searchTerm}', {
+                const response = await fetch('/admin-users', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -142,23 +131,39 @@ export default {
                 const data = await response.json();
                 this.influencers = data.influencers;
                 this.sponsors = data.sponsors;
-                this.flaggedUsers = [...data.flagged_influencers, ...data.flagged_sponsors];
+                this.flaggedUsers = data.flagged_users
             } catch (error) {
                 console.error("Error fetching users:", error);
             }
         },
-        viewUser(user) {
-            this.selectedUser = user;
-        },
-        closeModal() {
-            this.selectedUser = null;
-        },
         async flagUser(user) {
-            await this.performAction(user.id, 'flag');
+            try {
+                // alert("Flagging user:", user.user_id); // Debugging: Log the user object
+                const userId = user.user_id;
+                if (!userId) {
+                    console.error("User ID is missing:", user);
+                    return;
+                }
+                await this.performAction(userId, 'flag');
+            } catch (error) {
+                console.error("Error flagging user:", error);
+            }
         },
+        
         async unflagUser(user) {
-            await this.performAction(user.id, 'unflag');
+            try {
+                // alert("Unflagging user:", user); // Debugging: Log the user object
+                const userId = user.user_id;
+                if (!userId) {
+                    console.error("User ID is missing:", user);
+                    return;
+                }
+                await this.performAction(userId, 'unflag');
+            } catch (error) {
+                console.error("Error unflagging user:", error);
+            }
         },
+        
         async performAction(userId, action) {
             try {
                 const token = localStorage.getItem('accessToken');
@@ -166,7 +171,12 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                await fetch(`/admin-users/${userId}`, {
+                // alert("Performing action:", action, "for user ID:", userId);
+                // alert("Token:", token);
+                
+                // const response = await fetch(`/admin-users/${userId}`, {
+
+                const response = await fetch(`/admin-users`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -174,8 +184,17 @@ export default {
                     },
                     body: JSON.stringify({ user_id: userId, action })
                 });
+                
+                const responseText = await response.text();
+                // alert("Response text:", responseText);
+                
+                if (!response.ok) {
+                    throw new Error(`Error (${response.status}): ${responseText}`);
+                }
+                
                 this.fetchUsers();
             } catch (error) {
+                // alert(`Error (${action})`, error)
                 console.error(`Error performing action (${action}):`, error);
             }
         }

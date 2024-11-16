@@ -21,7 +21,7 @@ def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend', static_url_path='/static')
     app.config.from_object(Config)
 
-    CORS(app, support_credentials = True)  
+    CORS(app, resources={r"/*": {"origins": "*"}}, support_credentials = True)  
 
     db.init_app(app)
     bcrypt.init_app(app)

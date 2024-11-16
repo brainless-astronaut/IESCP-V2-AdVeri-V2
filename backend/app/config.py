@@ -12,7 +12,7 @@ class Config:
 
     # JWT settings
     JWT_SECRET_KEY = 'sncuiodbfoa'
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=30)
 
     # Celery settings
     CELERY_BROKER_URL = 'redis://localhost:6379/1'

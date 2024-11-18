@@ -1,33 +1,144 @@
-// frontend/pages/SponsorCampaigns.js
-
 export default {
+    template: `
+    <div class="sponsor-container">
+        <header class="navbar">
+            <div class="navbar-left">
+                <h1>Sponsor | Manage Campaigns</h1>
+            </div>
+            <nav class="navbar-links">
+                <router-link to="/sponsor-dashboard">Dashboard</router-link>
+                <router-link to="/sponsor-campaigns">Campaigns</router-link>
+                <router-link to="/sponsor-requests">Requests</router-link>
+                <router-link to="/logout">Logout</router-link>
+            </nav>
+            <div class="navbar-right">
+                <div class="search-bar-container">
+                    <input 
+                        type="text" 
+                        v-model="searchQuery" 
+                        placeholder="Search by name or description" 
+                        class="search-bar" 
+                    />
+                    <button @click="fetchCampaigns" class="search-button" :disabled="loading">Search</button>
+                </div>
+                <button @click="showCreateCampaignModal" class="create-campaign-button">Create Campaign</button>
+            </div>
+        </header>
+
+
+        <table class="campaigns-tables">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Progress</th>
+                    <th>Joined Influencers</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="campaign in campaigns" :key="campaign.campaign.id">
+                    <td>{{ campaign.campaign.id }}</td>
+                    <td>{{ campaign.campaign.name }}</td>
+                    <td>{{ campaign.campaign.description }}</td>
+                    <td>{{ campaign.progress }}</td>
+                    <td> 
+                        <div v-for="influencer in campaign.joined_influencers" :key="influencer">
+                            {{ influencer}}
+                        </div>
+                    </td>
+                    <td>
+                        <button @click="openViewModal(campaign)">View</button>
+                        <button @click="openEditModal(campaign)">Edit</button>
+                        <button @click="openSendRequestModal(campaign)">Send Request</button>
+                        <button @click="deleteCampaign(campaign.campaign.id)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- View Modal -->
+        <div v-if="showViewModal" class="modal">
+            <div class="modal-content">
+                <h2>Details</h2>
+                <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
+                <p><strong>Description:</strong> {{ selectedCampaign.description }}</p>
+                <p><strong>Start Date:</strong> {{ selectedCampaign.start_date }}</p>
+                <p><strong>End Date:</strong> {{ selectedCampaign.end_date }}</p>
+                <p><strong>Budget:</strong> {{ selectedCampaign.budget }}</p>
+                <button @click="closeModals">Close</button>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div v-if="showEditModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Campaign</h2>
+            <form @submit.prevent="editCampaign">
+            <input type="text" v-model="selectedCampaign.name" readonly />
+            <textarea v-model="selectedCampaign.description"></textarea>
+            <input type="date" v-model="selectedCampaign.start_date" />
+            <input type="date" v-model="selectedCampaign.end_date" />
+            <input type="number" v-model="selectedCampaign.budget" />
+            <button type="submit">Save Changes</button>
+            </form>
+            <button @click="closeModals">Close</button>
+        </div>
+        </div>
+
+        <!-- Send Request Modal -->
+        <div v-if="showSendRequestModal" class="modal">
+            <div class="modal-content">
+                <h2>Send Request to Influencers</h2>
+                <from @submit.prevent="sendRequest">
+                    <textareav-model="requestForms.requirements" placeholder="Requirements"></textarea>
+                    <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount"/>
+                    <div>
+                        <h3>Influencers</h3>
+                        <div v-for="influencer in influencers" :key="influencer.id">
+                            <input
+                                type="checkbox"
+                                :value="influencer.id"
+                                v-model="requestForm.selectedInfluencers"
+                            />
+                            {{ influencer.name }}
+                        </div>
+                    </div>
+                    <button type="submit">Send</button>
+                </form>
+                <button @click="closeModals">Close</button>
+            </div>
+        </div>
+    </div>                
+    `,
     data() {
         return {
+            searchQuery: "",
             campaigns: [],
-            showCreatePopup: false,
-            showViewPopup: false,
-            showEditPopup: false,
-            currentCampaign: {},
-            token: localStorage.getItem('accessToken'),
-        }
-    },
-    created() {
-        this.fetchCampaigns();
-        const campaignId = this.$route.params.id;
-        if (campaignId) {
-            this.loadCampaignById(campaignId);  // Fetch specific campaign
-        } else {
-            this.loadAllCampaigns();  // Fetch all campaigns
-        }
+            influencers: [],
+            showViewModal: false,
+            showEditModal: false,
+            showSendRequestModal: false,
+            showCreateCampaignModal: false,
+            selectedCampaign: {},
+            requestForm: {
+                requirements: "",
+                paymentAmount: 0,
+                selectedInfluencers: [],
+            },
+        };
     },
     methods: {
+        getToken() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) alert("Token is missing in localStorage.");
+            return token;
+        },
         async fetchCampaigns() {
+            this.loading = true;
             try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
+                this.getToken();
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'GET',
                     headers: {
@@ -36,237 +147,218 @@ export default {
                     }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    this.campaigns = data.your_campaigns;
-                } else {
-                    console.error("Failed to fetch campaigns:", response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
+                const data = await response.json();
+                this.campaigns = data.campaigns;
             } catch (error) {
-                console.error("Error fetching campaigns:", error);
+                    alert("Error fetching campaigns:", error);
+            } finally {
+                this.loading = false;
             }
         },
 
-        openCreatePopup() {
-            this.showCreatePopup = true;
-        },
-
-        openViewPopup(campaign) {
-            this.currentCampaign = campaign;
-            this.showViewPopup = true;
-        },
-
-        openEditPopup(campaign) {
-            this.currentCampaign = campaign;
-            this.showEditPopup = true;
-        },
-
-        closePopup() {
-            this.showCreatePopup = false;
-            this.showEditPopup = false;
-            this.showViewPopup = false;
-        },
-
-        async createCampaign(campaignData) {
+        async fetchFlaggedCampaigns() {
             try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
-                userId = jwt_decode('accessToken').sub.id
-                const response = await fetch(location.origin + '/sponsor-campaigns-post/${userID}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(campaignData)
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
-                    this.fetchCampaigns();
-                    this.closePopup();
-                } else {
-                    console.error("Failed to create campaign:", response.status, response.statusText);
-                }
-            } catch (error) {
-                console.error("Error creating campaign:", error);
-            }
-        },
-
-        async editCampaign(campaignData) {
-            try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
-                const response = await fetch(location.origin + `/sponsor-campaigns/${this.currentCampaign.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(campaignData)
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
-                    this.fetchCampaigns();
-                    this.closePopup();
-                } else {
-                    console.error("Failed to edit campaign:", response.status, response.statusText);
-                }
-            } catch (error) {
-                console.error("Error editing campaign:", error);
-            }
-        },
-
-        async deleteCampaign(campaignId) {
-            try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
-                const response = await fetch(location.origin + `/sponsor-campaigns-delete/${campaignId}`, {
-                    method: 'DELETE',
+                this.getToken();
+        
+                const response = await fetch(`${location.origin}/sponsor-campaigns?flagged=true`, {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
-                    this.fetchCampaigns();
-                } else {
-                    console.error("Failed to delete campaign:", response.status, response.statusText);
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+        
+                const data = await response.json();
+                this.flaggedCampaigns = data.flagged_campaigns;
             } catch (error) {
-                console.error("Error deleting campaign:", error);
+                alert("Error fetching flagged campaigns: " + error.message);
             }
+        },
+        
+        async createCampaign(campaignDetails) {
+            try {
+                this.getToken();
+        
+                const response = await fetch(`${location.origin}/sponsor-campaigns`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ action: 'create', ...campaignDetails })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                alert("Campaign created successfully!");
+                await this.fetchCampaigns(); // Refresh campaigns after creation
+            } catch (error) {
+                alert("Error creating campaign: " + error.message);
+            }
+        },
+        
+
+       
+        async editCampaign() {
+            try {
+                this.getToken();
+                const response = await fetch(location.origin + '/sponsor-campaigns', {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(this.sleectedCampaign),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                alert("Campaign updated successfully!");
+                this.closeModals();
+                this.fetchCampaigns(); // Refresh after edit
+                
+            } catch (error) {
+                alert("Error while editing campaign:", error);
+            }
+        },
+        
+        async fetchInfluencers() {
+            try {
+                this.getToken();
+                const response = await fetch(location.origin + '/sponsor-campaigns', {
+                    method: 'GET',
+                    headers: {
+                        "Content-Type": 'application/json',
+                        "Authorization": `Bearer ${token}`,
+                    },
+                })
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                this.influencers = data.influencers;
+            } catch (error) {
+                alert("Error while fetching influencers:", error);
+            }
+        },
+        async sendRequest(campaignId, influencerIds, requirements, messages) {
+            try {
+                this.getToken();
+        
+                const response = await fetch(`${location.origin}/sponsor-campaigns`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action: 'send',
+                        campaign_id: campaignId,
+                        influencer_ids: influencerIds,
+                        requirements,
+                        messages
+                    })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                alert("Requests sent successfully!");
+                await this.fetchCampaigns(); // Refresh campaigns after sending requests
+            } catch (error) {
+                alert("Error sending request: " + error.message);
+            }
+        },
+
+        async deleteCampaign(campaignId) {
+            try {
+                this.getToken();
+        
+                const response = await fetch(`${location.origin}/sponsor-campaigns`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ campaign_id: campaignId })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                alert("Campaign deleted successfully!");
+                await this.fetchCampaigns(); // Refresh campaigns after deletion
+            } catch (error) {
+                alert("Error deleting campaign: " + error.message);
+            }
+        },
+
+        async openSendRequestModal(campaign) {
+            this.selectedCampaign = campaign.campaign;
+            this.fetchInfluencers();
+            this.showSendRequestModal = true;
+        },
+        async showCreateCampaignModal() {
+            this.isCreateCampaignModalOpen = true; // Set this variable to control the modal visibility
+        },
+        async openViewModal(campaign) {
+            this.selectedCampaign = campaign.campaign;
+            this.showViewModal = true;
+        },
+        async openEditModal(campaign) {
+            this.selectedCampaign = { ...campaign.campaign };
+            this.showEditModal = true;
+        },
+        
+        async closeModals() {
+            this.showEditModal = false;
+            this.showViewModal = false;
+            this.showSendRequestModal = false;
+            this.showCreateCampaignModal = false;
+            this.selectedCampaign = {};
         }
     },
-    template: `
-        <div>
-            <header>
-                <h2>Sponsor Campaigns</h2>
-                <router-link to="/sponsor-dashboard">Dashboard</router-link>
-                <router-link to="/sponsor-campaigns">Campaigns</router-link>
-                <router-link to="/sponsor-requests">Requests</router-link>
-                <router-link to="/logout">Logout</router-link>
-            </header>
-            <button @click="openCreatePopup">Create</button>
-
-            <!-- Campaign Table -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>Campaign ID</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="campaign in campaigns" :key="campaign.id">
-                        <td>{{ campaign.id }}</td>
-                        <td>{{ campaign.name }}</td>
-                        <td>{{ campaign.description }}</td>
-                        <td>
-                            <button @click="openViewPopup(campaign)">View</button>
-                            <button @click="openEditPopup(campaign)">Edit</button>
-                            <button @click="deleteCampaign(campaign.id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Create Campaign Popup -->
-            <div v-if="showCreatePopup">
-                <div>
-                    <h2>Create Campaign</h2>
-                    <form @submit.prevent="createCampaign(currentCampaign)">
-                        <input v-model="currentCampaign.name" placeholder="Campaign Name" required>
-                        <textarea v-model="currentCampaign.description" placeholder="Campaign Description" required></textarea>
-                        <input v-model="currentCampaign.start_date" type="date" required>
-                        <input v-model="currentCampaign.end_date" type="date" required>
-                        <input v-model="currentCampaign.budget" type="number" placeholder="Budget" required>
-                        <select v-model="currentCampaign.visibility">
-                            <option value="public">Public</option>
-                            <option value="private">Private</option>
-                        </select>
-                        <textarea v-model="currentCampaign.goals" placeholder="Campaign Goals"></textarea>
-                        <button type="submit">Create</button>
-                        <button @click="closePopup">Cancel</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- View Campaign Popup -->
-            <div v-if="showViewPopup">
-                <div>
-                    <h2>View Campaign</h2>
-                    <p><strong>ID:</strong> {{ currentCampaign.id }}</p>
-                    <p><strong>Name:</strong> {{ currentCampaign.name }}</p>
-                    <p><strong>Description:</strong> {{ currentCampaign.description }}</p>
-                    <p><strong>Start Date:</strong> {{ currentCampaign.start_date }}</p>
-                    <p><strong>End Date:</strong> {{ currentCampaign.end_date }}</p>
-                    <p><strong>Budget:</strong> {{ currentCampaign.budget }}</p>
-                    <p><strong>Visibility:</strong> {{ currentCampaign.visibility }}</p>
-                    <p><strong>Goals:</strong> {{ currentCampaign.goals }}</p>
-                    <button @click="closePopup">Close</button>
-                </div>
-            </div>
-
-            <!-- Edit Campaign Popup -->
-            <div v-if="showEditPopup">
-                <div>
-                    <h2>Edit Campaign</h2>
-                    <form @submit.prevent="editCampaign(currentCampaign)">
-                        <input v-model="currentCampaign.name" placeholder="Campaign Name" required>
-                        <textarea v-model="currentCampaign.description" placeholder="Campaign Description" required></textarea>
-                        <input v-model="currentCampaign.start_date" type="date" required>
-                        <input v-model="currentCampaign.end_date" type="date" required>
-                        <input v-model="currentCampaign.budget" type="number" placeholder="Budget" required>
-                        <select v-model="currentCampaign.visibility">
-                            <option value="public">Public</option>
-                            <option value="private">Private</option>
-                        </select>
-                        <textarea v-model="currentCampaign.goals" placeholder="Campaign Goals"></textarea>
-                        <button type="submit">Save Changes</button>
-                        <button @click="closePopup">Cancel</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    `
+    mounted() {
+        this.fetchCampaigns();
+    },
 };
 
+// Purpose:
 
-// Data Handling:
+// A sponsor's interface for managing campaigns, providing functionality to create, view, edit, delete, and send requests to influencers.
+// Features:
 
-// campaigns: Stores all the campaigns fetched from the backend.
-// showCreatePopup, showViewPopup, showEditPopup: Booleans that control whether the respective popups are visible or not.
-// currentCampaign: Stores the currently selected campaign’s data, used for viewing/editing.
-// Methods:
+// Navbar: Navigation between sponsor-specific pages with logout functionality.
+// Search Bar: Filter campaigns by name or description.
+// Campaign Management Table: Display of campaign details with associated actions.
+// Modals:
+// View Campaign: Displays detailed information.
+// Edit Campaign: Allows editing selected campaign details.
+// Send Request: Allows the sponsor to send requests to influencers.
+// Create Campaign (placeholder): Opens a modal for creating new campaigns.
+// Key Data Structures:
 
-// fetchCampaigns(): Fetches the campaign data from the backend.
-// openCreatePopup(), openViewPopup(), openEditPopup(): Open the respective popups.
-// closePopup(): Closes any open popups.
-// createCampaign(), editCampaign(), deleteCampaign(): Handle the respective CRUD operations with the backend.
-// Popups:
+// campaigns: Array holding campaign details fetched from the backend.
+// influencers: List of influencers for request actions.
+// selectedCampaign: Object representing the campaign currently being acted upon.
+// requestForm: Data structure for sending requests to influencers.
+// Backend Communication:
 
-// The Create, View, and Edit Campaign popups are shown when the user clicks the respective buttons. Each popup contains a form to submit the campaign data.
-// Button Actions:
+// Uses fetch for REST API calls to endpoints for CRUD operations.
+// Requires an access token from localStorage for authenticated requests.
+// Lifecycle:
 
-// Create: Opens the "Create Campaign" popup.
-// View: Opens the "View Campaign" popup, displaying the selected campaign's details.
-// Edit: Opens the "Edit Campaign" popup, allowing modifications to the selected campaign.
-// Delete: Deletes the campaign after a confirmation.
+// Fetches campaigns upon component mount to initialize the view.

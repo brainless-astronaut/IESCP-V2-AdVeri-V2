@@ -13,38 +13,37 @@ export default {
         <!-- Table for Influencers -->
         <section>
             <h2>Influencers</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="influencer in influencers" :key="influencer.id">
-                            <td>{{ influencer.username }}</td>
-                            <td>{{ influencer.email }}</td>
-                            <td>{{ influencer.name }}</td>
-                            <td>{{ influencer.category }}</td>
-                            <td>
-                                <button type="submit" @click="flagUser(influencer)">Flag</button>
-                                <details>
-                                    <summary class="btn btn-view">View</summary>
-                                    <p><strong>Username:</strong> {{ influencer.username }}</p>
-                                    <p><strong>Name:</strong> {{ influencer.name }}</p>
-                                    <p><strong>Category:</strong> {{ influencer.category }}</p>
-                                    <p><strong>Niche:</strong> {{ influencer.niche }}</p>
-                                    <p><strong>Reach:</strong> {{ influencer.reach }}</p>
-                                    <p><strong>Platform:</strong> {{ influencer.platform }}</p>
-                                    <p><strong>Earnings:</strong> {{ influencer.earnings }}</p>
-                                </details>                        
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="influencer in influencers" :key="influencer.id">
+                        <td>{{ influencer.username }}</td>
+                        <td>{{ influencer.email }}</td>
+                        <td>{{ influencer.name }}</td>
+                        <td>{{ influencer.category }}</td>
+                        <td>
+                            <button type="submit" @click="flagUser(influencer)">Flag</button>
+                            <details>
+                                <summary class="btn btn-view">View</summary>
+                                <p><strong>Name:</strong> {{ influencer.name }}</p>
+                                <p><strong>Category:</strong> {{ influencer.category }}</p>
+                                <p><strong>Niche:</strong> {{ influencer.niche }}</p>
+                                <p><strong>Reach:</strong> {{ influencer.reach }}</p>
+                                <p><strong>Platform:</strong> {{ influencer.platform }}</p>
+                                <p><strong>Earnings:</strong> {{ influencer.earnings }}</p>
+                            </details>                        
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
 
         <!-- Table for Sponsors -->

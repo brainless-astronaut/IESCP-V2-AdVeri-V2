@@ -110,7 +110,7 @@ export default {
                 data: {
                     labels: Object.keys(this.sponsorsDistribution),
                     datasets: [{
-                        label: 'sponsors by Industry',
+                        label: 'Sponsors by Industry',
                         data: Object.values(this.sponsorsDistribution),
                         backgroundColor: 'rgba(0, 171, 213, 1)',
                     }]

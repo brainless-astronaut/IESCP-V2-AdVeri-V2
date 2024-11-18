@@ -152,13 +152,12 @@ class AdminManageUsers(Resource):
                 for user in flagged_users
             ]
 
-            response_data = {
+            return make_response(jsonify({
                 'current_user': current_user,
                 'influencers': influencers_list,
                 'sponsors': sponsors_list,
                 'flagged_users': flagged_users_list
-            }
-            return make_response(jsonify(response_data), 200)
+            }), 200)
 
         except Exception as e:
             return {'message': f'Failed to retrieve users. {str(e)}'}, 500
@@ -166,11 +165,11 @@ class AdminManageUsers(Resource):
     @jwt_required()
     def post(self):        
         try:
-            print("Headers:", request.headers)
+            # print("Headers:", request.headers)
             
             # Debugging: Log the JWT identity
             current_user = get_jwt_identity()
-            print("JWT Identity:", current_user)            
+            # print("JWT Identity:", current_user)            
 
             data = request.get_json()
 
@@ -202,23 +201,69 @@ class AdminManageCamapaigns(Resource):
     def get(self):
         current_user = get_jwt_identity()
 
-        search_query = request.args.get('search', '')
+        # campaigns = Campaigns.query.join(
+        #     Sponsors, Campaigns.sponsor_id == Sponsors.user_id
+        # ).filter(
+        #     Campaigns.is_flagged == False
+        # ).all()
 
-        ## Filter unflagged campaigns
-        campaigns = Campaigns.query.filter(
-            Campaigns.is_flagged == False,
-            Campaign.name.ilike(f'%{search_query}%') | Campaign.description.ilike(f'%{search_query}%')
+        campaigns = Campaigns.query.filter(Campaigns.is_flagged == False)
+
+        print('Campaign - query: \n', campaigns)
+
+
+        flagged_campaigns = Campaigns.query.join(
+            Sponsors, Campaigns.sponsor_id == Sponsors.user_id
+        ).filter(
+            Campaigns.is_flagged == True
         ).all()
 
-        flagged_campaigns = Campaigns.query.filter(
-            Campaigns.is_flagged == True,
-            Campaign.name.ilike(f'%{search_query}%') | Campaign.description.ilike(f'%{search_query}%')
-        ).all()
+        print('Flagged Campaign - query: \n', flagged_campaigns)
+
+
+        ## dict conversions
+        campaigns_list = [
+            {
+                'campaign_id': campaign.campaign_id,
+                'sponsor_name': sponsor.entity_name,
+                'industry': sponsor.industry,
+                'name': campaign.name,
+                'description': campaign.description,
+                'start_date': campaign.start_date.isoformat(),
+                'end_date': campaign.end_date.isoformat(),
+                'budget': campaign.budget,
+                'visibility': campaign.visibility,
+                'goals': campaign.goals
+            } 
+            for campaign in flagged_campaigns
+            if (sponsor := Sponsors.query.get(campaign.sponsor_id))
+        ]
+
+        print('Campaigns_list: \n', campaigns_list)
+
+        flagged_campaigns_list = [
+            {
+                'campaign_id': campaign.campaign_id,
+                'sponsor_name': sponsor.entity_name,
+                'industry': sponsor.industry,
+                'name': campaign.name,
+                'description': campaign.description,
+                'start_date': campaign.start_date.isoformat(),
+                'end_date': campaign.end_date.isoformat(),
+                'budget': campaign.budget,
+                'visibility': campaign.visibility,
+                'goals': campaign.goals
+            }
+            for campaign in flagged_campaigns
+            if (sponsor := Sponsors.query.get(campaign.sponsor_id))
+        ]
+
+        print('Flagged_campaigns list:\n', flagged_campaigns_list)
 
         return make_response(jsonify({
             'current_user': current_user,
-            'campaigns': [campaign.to_dict() for campaign in campaigns],
-            'flagged_campaigns': [flagged_campaign.to_dict() for flagged_campaign in flagged_campaigns]
+            'campaigns': campaigns_list,
+            'flagged_campaigns': flagged_campaigns_list
             }), 200)
     
     @jwt_required()
@@ -243,7 +288,7 @@ class AdminManageCamapaigns(Resource):
         
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': 'Action failed.'}, 500))
+            return {'message': f'Action failed. Error {str(e)}'}, 500
 
 class AdminApproveSponsor(Resource):
     @jwt_required()
@@ -315,15 +360,8 @@ class AdminReports(Resource):
             return {'message': 'Task not ready.'}, 202
 
 admin.add_resource(AdminDashboard, '/admin-dashboard')
-# admin.add_resource(AdminManageUsers, 
-#                     '/admin-users', 
-#                     '/admin-users/<int:user_id>'
-#                   )
 admin.add_resource(AdminManageUsers, '/admin-users')
-admin.add_resource(AdminManageCamapaigns, 
-                    '/admin-campaigns'
-                    '/admin-campaigns/<int:user_id>'
-                    )
+admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')
 admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor/<int:sponsor_id>')
 admin.add_resource(AdminReports, '/admin-reports', '/admin-reports/<string:task_id>')
 

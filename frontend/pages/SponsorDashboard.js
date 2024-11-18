@@ -4,13 +4,8 @@ export default {
     data() {
         return {
             totalCounts: {},
-            campaignReach: {},
+            // campaignReach: {},
             campaignInfluencerCounts: {},
-            pastCampaigns: [],
-            presentCampaigns: [],
-            futureCampaigns: [],
-            sentRequests: [],
-            receivedRequests: []
         };
     },
     created() {
@@ -21,7 +16,7 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    alert("Token is missing in localStorage.");
                     return;
                 }
                 const response = await fetch(location.origin + '/sponsor-dashboard', {
@@ -41,28 +36,63 @@ export default {
                 // Extracting data from the response
                 this.totalCounts = {
                     total_campaigns: data.total_campaigns,
-                    total_past_campaigns: data.total_past_campaigns,
-                    total_present_campaigns: data.total_present_campaigns,
-                    total_future_campaigns: data.future_campaigns.length,
-                    total_sent_requests: data.total_sent_requests,
-                    total_received_requests: data.total_received_requests
+                    past_campaigns_count: data.past_campaigns_count,
+                    present_campaigns_count: data.present_campaigns_count,
+                    future_campaigns_count: data.future_campaigns,
+                    sent_requests_count: data.sent_requests_count,
+                    received_requests_count: data.received_requests_count
                 };
-                this.campaignReach = data.campaign_reach_dict;
+                // this.campaignReach = data.campaign_reach_dict;
                 this.campaignInfluencerCounts = data.campaign_influencer_counts_dict;
-                this.pastCampaigns = data.past_campaigns;
-                this.presentCampaigns = data.present_campaigns;
-                this.futureCampaigns = data.future_campaigns;
-                this.sentRequests = data.sent_requests;
-                this.receivedRequests = data.received_requests;
 
             } catch (error) {
                 if (error.message.includes("422")) {
-                    console.error("Error fetching dashboard data (422):", error); // Examine the error details
+                    alert("Error fetching dashboard data (422):", error); // Examine the error details
                     // Display a user-friendly error message to the user
                 } else {
-                    console.error("Error fetching dashboard data:", error);
+                    alert("Error fetching dashboard data:", error);
                 }
             }
+        },
+        renderCharts() {
+            const countsCtx = document.getElementById('influencersCountChart').getContext('2d');
+            new CharacterData(countsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(this.campaignInfluencerCounts),
+                    datasets: [{
+                        label: 'Influencers by Campaign',
+                        data: Object.values(this.campaignInfluencerCounts),
+                        backgroungColor: 'rgba(255, 191, 0, 1)',
+                    }]
+                },
+                option: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            // const reachCtx = document.getElementById('campaignReachChart').getContext('2d');
+            // new CharacterData(reachCtx, {
+            //     type: 'bar',
+            //     data: {
+            //         labels: Object.keys(this.campaignReach),
+            //         datasets: [{
+            //             label: 'Reach by Campaign',
+            //             data: Object.values(this.campaignReach),
+            //             backgroungColor: 'rgba(255, 191, 0, 1)',
+            //         }]
+            //     },
+            //     option: {
+            //         scales: {
+            //             y: {
+            //                 beginAtZero: true
+            //             }
+            //         }
+            //     }
+            // })
         }
     },
     template: `
@@ -79,19 +109,19 @@ export default {
             <section>
                 <h2>Campaign Counts</h2>
                 <p>Total Campaigns: {{ totalCounts.total_campaigns }}</p>
-                <p>Past Campaigns: {{ totalCounts.total_past_campaigns }}</p>
-                <p>Ongoing Campaigns: {{ totalCounts.total_present_campaigns }}</p>
-                <p>Future Campaigns: {{ totalCounts.total_future_campaigns }}</p>
+                <p>Past Campaigns: {{ totalCounts.past_campaigns_count }}</p>
+                <p>Ongoing Campaigns: {{ totalCounts.present_campaigns_count }}</p>
+                <p>Future Campaigns: {{ totalCounts.future_campaigns_count }}</p>
             </section>
 
             <!-- Request Counts -->
             <section>
                 <h2>Request Counts</h2>
-                <p>Sent Requests: {{ totalCounts.total_sent_requests }}</p>
-                <p>Received Requests: {{ totalCounts.total_received_requests }}</p>
+                <p>Sent Requests: {{ totalCounts.sent_requests_count }}</p>
+                <p>Received Requests: {{ totalCounts.received_requests_count }}</p>
             </section>
 
-            <!-- Campaign Reach -->
+            <!-- Campaign Reach 
             <section>
                 <h2>Campaign Reach</h2>
                 <div v-if="campaignReach">
@@ -101,7 +131,7 @@ export default {
                         </li>
                     </ul>
                 </div>
-            </section>
+            </section> -->
 
             <!-- Influencer Counts by Campaign -->
             <section>
@@ -116,7 +146,7 @@ export default {
             </section>
 
             <!-- Campaign Listings -->
-            <section>
+            <!-- <section>
                 <h2>Campaign Listings</h2>
                 <h3>Past Campaigns</h3>
                 <ul v-if="pastCampaigns.length">
@@ -132,7 +162,11 @@ export default {
                 <ul v-if="futureCampaigns.length">
                     <li v-for="campaign in futureCampaigns" :key="campaign.id">{{ campaign.name }} (Starting Soon)</li>
                 </ul>
-            </section>
+            </section> -->
+            <div class="right">
+                <canvas id="influencersCountChart">Influencer Counts per Campaign Chart</canvas>
+                <!-- <canvas id="campaignReachChart">Reach by Campaign Chart</canvas> -->
+            </div>
         </div>
     `
 };

@@ -70,18 +70,7 @@ class Campaigns(db.Model):
     sponsors = db.relationship('Sponsors', back_populates = 'campaigns')
     ad_requests = db.relationship('AdRequests', back_populates = 'campaigns', cascade = 'all, delete-orphan')
 
-    def to_dict(self):
-        return {
-            'campaign_id': self.campaign_id,
-            'sponsor_id': self.sponsor_id,
-            'name': self.name,
-            'description': self.description,
-            'start_date': self.start_date.isoformat(),  # date format conversion
-            'end_date': self.end_date.isoformat(),
-            'budget': self.budget,
-            'visibility': self.visibility,
-            'goals': self.goals
-        }
+
 
 class AdRequests(db.Model):
     __tablename__ = '__ad_requests__'
@@ -101,18 +90,3 @@ class AdRequests(db.Model):
     campaigns = db.relationship('Campaigns', back_populates = 'ad_requests')
     influencers = db.relationship('Influencers', back_populates = 'ad_requests')
     sponsors = db.relationship('Sponsors', back_populates = 'ad_requests')
-
-    def to_dict(self):
-        return {
-            'request_id': self.request_id,
-            'campaign_id': self.campaign_id,
-            'influencer_id': self.influencer_id,
-            'sponsor_id': self.sponsor_id,
-            'is_flagged': self.is_flagged,
-            'initiator': self.initiator,
-            'requirements': self.requirements,
-            'payment_amount': self.payment_amount,
-            'negotiation_amount': self.negotiation_amount,
-            'messages': self.messages,
-            'status': self.status,
-        }

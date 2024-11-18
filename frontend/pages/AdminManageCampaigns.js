@@ -10,68 +10,88 @@ export default {
             <router-link to="/logout">Logout</router-link>
         </header>
 
-        <!-- Table for Active Campaigns -->
-        <h2>Campaigns</h2>
-        <table>
-        <thead>
-            <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="campaign in campaigns" :key="campaign.id">
-            <td>{{ campaign.id }}</td>
-            <td>{{ campaign.name }}</td>
-            <td>{{ campaign.description }}</td>
-            <td>
-                <button @click="viewCampaign(campaign)">View</button>
-                <button @click="flagCampaign(campaign)">Flag</button>
-            </td>
-            </tr>
-        </tbody>
-        </table>
+        <!-- Table for Unflagged/Active Campaigns -->
+        <section>
+            <h2>Campaigns</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campaign ID</th>
+                        <th>Sponsor</th>
+                        <th>Campaign Name</th>
+                        <th>Description</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="campaign in campaigns" :key="campaign.id">
+                        <td>{{ campaign.id }}</td>
+                        <td>{{ campaign.sponsor_name }}</td>
+                        <td>{{ campaign.name }}</td>
+                        <td>{{ campaign.description }}</td>
+                        <td>{{ campaign.start_date }}</td>
+                        <td>{{ campaign.end_date }}</td>
+                        <td> 
+                            <button @click="flagCampaign(campaign)">Flag</button>
+                            <details>
+                                <summary class="btn btn-view">View</summary>
+                                <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
+                                <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
+                                <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
+                                <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
+                            </details>                        
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
-        <!-- Table for Flagged Campaigns -->
-        <h2>Flagged Campaigns</h2>
-        <table>
-        <thead>
-            <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="flaggedCampaign in flaggedCampaigns" :key="flaggedCampaign.id">
-            <td>{{ flaggedCampaign.id }}</td>
-            <td>{{ flaggedCampaign.name }}</td>
-            <td>{{ flaggedCampaign.description }}</td>
-            <td>
-                <button @click="unflagCampaign(flaggedCampaign)">Unflag</button>
-            </td>
-            </tr>
-        </tbody>
-        </table>
 
-        <!-- Modal Popup for Viewing Campaign Details -->
-        <div v-if="selectedCampaign">
-        <h3>Campaign Details</h3>
-        <p><strong>ID:</strong> {{ selectedCampaign.id }}</p>
-        <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
-        <p><strong>Description:</strong> {{ selectedCampaign.description }}</p>
-        <button @click="closeModal">Close</button>
-        </div>
+        <!-- Table for flagged Campaigns -->
+        <section>
+            <h2>Flagged Campaigns</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campaign ID</th>
+                        <th>Sponsor</th>
+                        <th>Campaign Name</th>
+                        <th>Description</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="campaign in flaggedCampaigns" :key="campaign.id">
+                        <td>{{ campaign.id }}</td>
+                        <td>{{ campaign.sponsor_name }}</td>
+                        <td>{{ campaign.name }}</td>
+                        <td>{{ campaign.description }}</td>
+                        <td>{{ campaign.start_date }}</td>
+                        <td>{{ campaign.end_date }}</td>
+                        <td> 
+                            <button @click="unflagCampaign(campaign)">Unflag</button>
+                            <details>
+                                <summary class="btn btn-view">View</summary>
+                                <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
+                                <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
+                                <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
+                                <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
+                            </details>                        
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </div>
     `,
     data() {
         return {
             campaigns: [],
             flaggedCampaigns: [],
-            selectedCampaign: null
         };
     },
     methods: {
@@ -86,10 +106,10 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.token}`
+                        'Authorization': `Bearer ${token}`
                     },
                 });
-                alert('response text: ' + await response.text())
+                alert('response text get: ' + await response.text())
                 const data = await response.json();
                 this.campaigns = data.campaigns;
                 this.flaggedCampaigns = data.flagged_campaigns;
@@ -97,17 +117,29 @@ export default {
                 console.error("Error fetching campaigns:", error);
             }
         },
-        viewCampaign(campaign) {
-            this.selectedCampaign = campaign;
-        },
-        closeModal() {
-            this.selectedCampaign = null;
-        },
         async flagCampaign(campaign) {
-            await this.performAction(campaign.id, 'flag');
+            try {
+                const campaignId = campaign.campaign_id;
+                if (!campaignId) {
+                    console.error("Campaign ID is missing:", campaign);
+                    return;
+                }
+                await this.performAction(campaignId, 'flag')
+            } catch (error) {
+                console.error("Error flagging campaign:", error);
+            }
         },
         async unflagCampaign(campaign) {
-            await this.performAction(campaign.id, 'unflag');
+            try { 
+                const campaignId = campaign.campaign_id;
+                if (!campaignId) {
+                    console.error("Campaign ID is missing:", campaign);
+                    return;
+                }
+                await this.performAction(campaign.id, 'unflag');
+            } catch (error) {
+                console.error("Error unflagging campaign:", error);
+            }
         },
         async performAction(campaignId, action) {
             try {
@@ -116,7 +148,7 @@ export default {
                     console.error("Token is missing in localStorage.");
                     return;
                 }
-                await fetch('/admin-campaigns', {
+                const response = await fetch('/admin-campaigns', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -124,6 +156,11 @@ export default {
                     },
                     body: JSON.stringify({ campaign_id: campaignId, action })
                 });
+                const responseText = await response.text();
+                alert('response text post: ' + responseText)
+                if (!response.ok) {
+                    throw new Error(`Error (${response.status}): ${responseText}`);
+                }
                 this.fetchCampaigns();
             } catch (error) {
                 console.error(`Error performing action (${action}):`, error);

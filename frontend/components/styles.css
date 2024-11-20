@@ -1,9 +1,15 @@
 :root {
-    --dark-cyan: #008b8bff;
+    --persian-green: #00a693ff;
     --white-smoke: #f5f5f5ff;
-    --robin-egg-blue: #00ccccff;
+    --mint: #32c8a0ff;
     --oynx: #353839ff;
     --amber: #ffbf00ff;
+
+    /* --amber: #ffbf00ff;
+    --onyx: #353839ff;
+    --persian-green: #00a693ff;
+    --mint: #32c8a0ff;
+    --white-smoke: #f5f5f5ff; */
 }
 
 body {
@@ -37,7 +43,7 @@ body {
 
 .left h1 {
     font-size: 4em;
-    color: var(--robin-egg-blue);
+    color: var(--mint);
     margin: 0;
 }
 
@@ -54,7 +60,7 @@ body {
 
 .right p {
     font-size: 1.5em;
-    color: var(--robin-egg-blue)
+    color: var(--mint)
 }
 
 .button-container h4 {
@@ -66,7 +72,7 @@ body {
 
 .button-container h1 {
     font-size: 1.2em;
-    color: var(--robin-egg-blue);
+    color: var(--mint);
     margin: 0;
 }
 
@@ -90,13 +96,13 @@ input[type="password"] {
     font-size: 1em;
     color: var(--oynx);
     background-color: var(--white-smoke);
-    border: 1px solid var(--robin-egg-blue);
+    border: 1px solid var(--mint);
     border-radius: 5px;
     outline: none;
 }
 
 .button {
-    background-color: var(--robin-egg-blue);
+    background-color: var(--mint);
     color: #eeeeee;
     padding: 10px 20px;
     font-size: 1em;
@@ -125,7 +131,7 @@ footer {
     max-width: 600px; /* Limit the container width */
     margin: 0 auto; /* Center the container */
     padding: 20px;
-    background-color: var(--dark-cyan); /* Light background for contrast */
+    background-color: var(--persian-green); /* Light background for contrast */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
 }
@@ -159,7 +165,7 @@ footer {
 }
 
 .register-container button {
-    background-color: var(--robin-egg-blue);
+    background-color: var(--mint);
     color: white;
     padding: 10px;
     font-size: 16px;
@@ -216,8 +222,8 @@ footer {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #393e46;
-    color: #eeeeee;
+    background-color: var(--oynx);
+    color: var(--mint);
     padding: 10px 0;
     z-index: 1000;
     text-align: center;
@@ -226,7 +232,7 @@ footer {
 .navbar router-link {
     margin: 0 20px;
     text-decoration: none;
-    color: #eeeeee;
+    color: var(--white-smoke);
     font-size: 18px;
 }
 
@@ -254,16 +260,15 @@ footer {
 .navbar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ddd;
+    align-items: 40px;
+    background-color: var(--oynx);
+    border-bottom: 1px solid var(--persian-green);
 }
 
 .navbar-left h1 {
-    margin: 0;
+    padding: 10px;
     font-size: 20px;
-    color: #333;
+    color: var(--mint);
 }
 
 .navbar-links {
@@ -273,18 +278,19 @@ footer {
 
 .navbar-links a {
     text-decoration: none;
-    color: #007bff;
+    color: var(--mint);
     font-size: 16px;
 }
 
 .navbar-links a:hover {
-    text-decoration: underline;
+    color: var(--amber);
 }
 
 .navbar-right {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 10px;
 }
 
 .search-bar-container {
@@ -295,7 +301,7 @@ footer {
 
 .search-bar {
     padding: 5px 10px;
-    border: 1px solid #ccc;
+    border: 1px solid --white-smoke;
     border-radius: 4px;
     font-size: 14px;
 }
@@ -304,20 +310,12 @@ footer {
     padding: 6px 12px;
     border: none;
     border-radius: 4px;
-    background-color: #007bff;
-    color: white;
+    background-color: var(--mint);
+    color: var(--white-smoke);
     font-size: 14px;
     cursor: pointer;
 }
 
 .search-button:hover, .create-campaign-button:hover {
-    background-color: #0056b3;
-}
-
-.create-campaign-button {
-    background-color: #28a745;
-}
-
-.create-campaign-button:hover {
-    background-color: #218838;
+    background-color: var(--persian-green);
 }

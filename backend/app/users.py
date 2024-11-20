@@ -1,5 +1,5 @@
 # Standard library imports
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # Third-party imports
 from flask import request, jsonify, Blueprint, current_app as app
@@ -153,16 +153,22 @@ class UserLogin(Resource):
             if not (user and bcrypt.check_password_hash(user.password, password)):
                 return {'message': 'Invalid credentials.'}, 401
             
+            if user.is_flagged == True or user.is_approved == False:
+                return {'message': 'Your account has been flagged or it is yet to be approved.\nPlease contact the admin/support for further assistance.'}, 403
+    
+            
             access_token = create_access_token(identity = {
                 'user_id': user.user_id,
                 'username': user.username,
                 'role': user.role
             })
 
-            user.last_login_at = datetime.now()
+            IST = timezone(timedelta(hours=5, minutes=30))
+
+            user.last_login_at = datetime.now(IST)
             db.session.commit()
 
-            return {"message": "Login successful", "access_token": access_token}, 200
+            return {"message": "Login successful!", "access_token": access_token}, 200
         
         except Exception as e:
             db.session.rollback()

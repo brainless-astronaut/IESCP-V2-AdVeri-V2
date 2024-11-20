@@ -56,7 +56,7 @@ export default {
                     // console.log('Access Token:', data.access_token);
 
                     const decodedToken = jwt_decode(data.access_token);
-                    console.log('token: ' + decodedToken)
+                    // console.log('token: ' + decodedToken)
                     const userRole = decodedToken.sub.role;
 
                     if (userRole === 'admin') {

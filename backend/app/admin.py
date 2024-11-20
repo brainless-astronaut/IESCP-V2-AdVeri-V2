@@ -1,6 +1,6 @@
 # Standard library imports
-from collections import defaultdict
-from datetime import datetime
+# from collections import defaultdict
+# from datetime import datetime
 import os
 
 # Flask imports
@@ -229,8 +229,8 @@ class AdminManageCamapaigns(Resource):
                 'industry': sponsor.industry,
                 'name': campaign.name,
                 'description': campaign.description,
-                'start_date': campaign.start_date.isoformat(),
-                'end_date': campaign.end_date.isoformat(),
+                'start_date': campaign.start_date,
+                'end_date': campaign.end_date,
                 'budget': campaign.budget,
                 'visibility': campaign.visibility,
                 'goals': campaign.goals
@@ -248,8 +248,8 @@ class AdminManageCamapaigns(Resource):
                 'industry': sponsor.industry,
                 'name': campaign.name,
                 'description': campaign.description,
-                'start_date': campaign.start_date.isoformat(),
-                'end_date': campaign.end_date.isoformat(),
+                'start_date': campaign.start_date,
+                'end_date': campaign.end_date,
                 'budget': campaign.budget,
                 'visibility': campaign.visibility,
                 'goals': campaign.goals
@@ -362,6 +362,6 @@ class AdminReports(Resource):
 admin.add_resource(AdminDashboard, '/admin-dashboard')
 admin.add_resource(AdminManageUsers, '/admin-users')
 admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')
-admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor/<int:sponsor_id>')
+admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor')
 admin.add_resource(AdminReports, '/admin-reports', '/admin-reports/<string:task_id>')
 

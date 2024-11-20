@@ -1,5 +1,5 @@
 # Standard library imports
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # Third-party imports
 from flask import request, jsonify, Blueprint, make_response, current_app as app
@@ -14,6 +14,9 @@ cache = app.cache
 
 sponsor_bp = Blueprint('sponsor', __name__)
 sponsor = Api(sponsor_bp)
+
+## Defining IST timezone
+IST = timezone(timedelta(hours=5, minutes=30))
 
 class SponsorDashboard(Resource):
     @jwt_required()
@@ -46,7 +49,7 @@ class SponsorDashboard(Resource):
             #     Campaigns.name,
             #     func.sum(Influencers.reach)
             # ).join(AdRequests, AdRequests.campaign_id == Campaigns.campaign_id) \
-            # .join(Influencers, Influencers.id == AdRequests.influencer_id) \
+            # .join(Influencers, Influencers.influencer_id == AdRequests.influencer_id) \
             # .filter(AdRequests.status == 'Accepted') \
             # .group_by(Campaigns.name).all()
 
@@ -90,11 +93,13 @@ class SponsorCampaigns(Resource):
             campaigns = (
                 Campaigns.query.filter(
                     Campaigns.name.ilike(f'%{search_query}%') |
-                    Campaigns.description.ilike(f'%{search_query}%')
+                    Campaigns.description.ilike(f'%{search_query}%'),
+                    Campaigns.sponsor_id==current_user['user_id']
                 ).all()
                 if search_query
                 else Campaigns.query.filter_by(sponsor_id=current_user['user_id']).all()
             )
+
             campaigns_list = []
             today = datetime.today().date()
 
@@ -111,24 +116,28 @@ class SponsorCampaigns(Resource):
                 joined_influencers = db.session.query(Influencers.name).join(
                     AdRequests, Influencers.user_id == AdRequests.influencer_id
                 ).filter(
-                    AdRequests.campaign_id == campaign.id,
+                    AdRequests.campaign_id == campaign.campaign_id,
                     AdRequests.status == 'Accepted'
                 ).all()
 
                 campaigns_list.append({
-                    'campaign': campaign,
+                    'campaign': campaign.to_dict(),
                     'progress': progress,
                     'joined_influencers': [name for name, in joined_influencers]
                 })
 
+
             ## Listing
             flagged_campaigns = Campaigns.query.filter_by(sponsor_id = current_user['user_id'], is_flagged = True).all()
+
 
             ## Inlfuencers to send requests to:
             ## getting current sponsors industry tomatch the infleuncers category
             sponsor = Sponsors.query.filter_by(user_id = current_user['user_id']).first()
+
                 
             sponsor_industry = sponsor.industry if sponsor else None
+
 
             influencers = (
                 Influencers.query.filter_by(category=sponsor_industry).all()
@@ -139,7 +148,7 @@ class SponsorCampaigns(Resource):
             return make_response(jsonify({
                 'campaigns': campaigns_list,
                 'flagged_campaigns': flagged_campaigns,
-                'influencers': influencers
+                'influencers': [influencer.to_dict() for influencer in influencers]
             }), 200)
         except Exception as e:
             return make_response(jsonify({"message": f"Error occured in retrieving data. More information:\n{str(e)}"}), 500)
@@ -156,8 +165,20 @@ class SponsorCampaigns(Resource):
                         sponsor_id = current_user['user_id'],
                         name = data.get('name'),
                         description = data.get('description'),
-                        start_date = datetime.strptime(data.get('start_date'), '%d-%m-%Y'),
-                        end_date = datetime.strptime(data.get('end_date'), '%d-%m-%Y'),
+                        start_date = (
+                            datetime.strptime(data.get('start_date'), '%Y-%m-%d')
+                            .replace(tzinfo=timezone.utc)
+                            .astimezone(IST)
+                            .date()
+                            if data.get('start_date') else datetime.today(IST)
+                        ),
+                        end_date = (
+                            datetime.strptime(data.get('end_date'), '%Y-%m-%d')
+                            .replace(tzinfo=timezone.utc)
+                            .astimezone(IST)
+                            .date()
+                            if data.get('end_date') else datetime.today(IST)
+                        ),
                         budget = data.get('budget'),
                         visibility = data.get('visibility'),
                         goals = data.get('goals')
@@ -210,8 +231,14 @@ class SponsorCampaigns(Resource):
                 return make_response(jsonify({'message': 'You are not authorized to update this campaign.'}), 401)
             
             campaign.description = data.get('description', campaign.description)
-            campaign.start_date = datetime.strptime(data.get('start_date', campaign.start_date.strftime('%d-%m-%Y')), '%d-%m-%Y')
-            campaign.end_date = datetime.strptime(data.get('end_date', campaign.end_date.strftime('%d-%m-%Y')), '%d-%m-%Y')
+            campaign.start_date = (
+                datetime.strptime(data.get('start_date'), '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(IST).date()
+                if data.get('start_date') else campaign.start_date
+            )
+            campaign.end_date = (
+                datetime.strptime(data.get('end_date'), '%Y-%m-%d').replace(tzinfo=timezone.utc).astimezone(IST).date()
+                if data.get('end_date') else campaign.end_date
+            )
             campaign.budget = data.get('budget', campaign.budget)
             campaign.visibility = data.get('visibility', campaign.visibility)
             campaign.goals = data.get('goals', campaign.goals)
@@ -226,9 +253,13 @@ class SponsorCampaigns(Resource):
     def delete(self):
         try:
             current_user = get_jwt_identity()
+            print('raw request data:', request.data)
+            print(current_user['user_id'])
             data = request.get_json()
+            print('Received data:', data)  # Log the incoming data
             campaign_id = data.get('campaign_id')
-            campaign = Campaigns.query.filter_by(id = campaign_id, sponsor_id = current_user['user_id']).first()
+            print('campaign_id:', campaign_id)
+            campaign = Campaigns.query.filter_by(campaign_id = campaign_id, sponsor_id = current_user['user_id']).first()
 
             if not campaign:
                 return make_response(jsonify({'message': 'Campaign not found'}), 404)
@@ -370,7 +401,6 @@ class SponsorRequests(Resource):
         except Exception as e:
             db.session.rollback()
             return make_response(jsonify({'message': f'Error while deleting request. {str(e)}'}), 500)
-
 
 # Registering the resource with the API
 sponsor.add_resource(SponsorDashboard, '/sponsor-dashboard')

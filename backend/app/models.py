@@ -25,6 +25,9 @@ class Users(db.Model):
     influencers = db.relationship('Influencers', back_populates = 'users', uselist = False, cascade = 'all, delete-orphan')
     sponsors = db.relationship('Sponsors', back_populates = 'users', uselist = False, cascade = 'all, delete-orphan')
 
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 class Influencers(db.Model):
     __tablename__ = '__influencers__'
     influencer_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
@@ -40,6 +43,9 @@ class Influencers(db.Model):
     users = db.relationship('Users', back_populates = 'influencers', uselist = False)
     ad_requests = db.relationship('AdRequests', back_populates = 'influencers', cascade = 'all, delete-orphan')
 
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 class Sponsors(db.Model):
     __tablename__ = '__sponsors__'
     sponsor_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
@@ -52,6 +58,9 @@ class Sponsors(db.Model):
     users = db.relationship('Users', back_populates = 'sponsors', uselist = False)
     campaigns = db.relationship('Campaigns', back_populates = 'sponsors', cascade = 'all, delete-orphan')
     ad_requests = db.relationship('AdRequests', back_populates = 'sponsors', cascade = 'all, delete-orphan')
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 class Campaigns(db.Model):
     __tablename__ = '__campaigns__'
@@ -69,6 +78,9 @@ class Campaigns(db.Model):
     ## Relationships
     sponsors = db.relationship('Sponsors', back_populates = 'campaigns')
     ad_requests = db.relationship('AdRequests', back_populates = 'campaigns', cascade = 'all, delete-orphan')
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
 
@@ -90,3 +102,6 @@ class AdRequests(db.Model):
     campaigns = db.relationship('Campaigns', back_populates = 'ad_requests')
     influencers = db.relationship('Influencers', back_populates = 'ad_requests')
     sponsors = db.relationship('Sponsors', back_populates = 'ad_requests')
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}

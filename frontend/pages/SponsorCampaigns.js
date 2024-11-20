@@ -13,19 +13,19 @@ export default {
             </nav>
             <div class="navbar-right">
                 <div class="search-bar-container">
-                    <input 
-                        type="text" 
-                        v-model="searchQuery" 
-                        placeholder="Search by name or description" 
-                        class="search-bar" 
-                    />
+                    <input type="text" v-model="searchQuery" placeholder="Search by name or description" class="search-bar"/>
                     <button @click="fetchCampaigns" class="search-button" :disabled="loading">Search</button>
                 </div>
-                <button @click="showCreateCampaignModal" class="create-campaign-button">Create Campaign</button>
+                <button @click="openCreateCampaignModal">Create Campaign</button>
             </div>
         </header>
 
-
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
         <table class="campaigns-tables">
             <thead>
                 <tr>
@@ -58,58 +58,86 @@ export default {
             </tbody>
         </table>
 
-        <!-- View Modal -->
-        <div v-if="showViewModal" class="modal">
-            <div class="modal-content">
-                <h2>Details</h2>
-                <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
-                <p><strong>Description:</strong> {{ selectedCampaign.description }}</p>
-                <p><strong>Start Date:</strong> {{ selectedCampaign.start_date }}</p>
-                <p><strong>End Date:</strong> {{ selectedCampaign.end_date }}</p>
-                <p><strong>Budget:</strong> {{ selectedCampaign.budget }}</p>
-                <button @click="closeModals">Close</button>
+        <div> <!-- Root Element -->
+            <!-- Create Campaign Modal -->
+            <div v-if="showCreateCampaignModal" class="modal">
+                <div class="modal-content">
+                    <h2>Create Campaign</h2>
+                    <form @submit.prevent="createCampaign(campaignDetails)">
+                        <input type="text" v-model="campaignDetails.name" placeholder="Enter Campaign Name" required />
+                        <textarea v-model="campaignDetails.description" placeholder="Campaign Description" required></textarea>
+                        <input type="date" v-model="campaignDetails.start_date" placeholder="Start Date" required />
+                        <input type="date" v-model="campaignDetails.end_date" placeholder="End Date" required />
+                        <input type="number" v-model="campaignDetails.budget" placeholder="Budget" required />
+                        <select v-model="campaignDetails.visibility" placeholder="Select Visibility" required>
+                            <option value="">Select Visibility</option>
+                            <option value="public">Public</option>
+                            <option value="private">Private</option>
+                        </select>
+                        <input type="text" v-model="campaignDetails.goals" placeholder="Enter goals" required />
+                        <button type="submit">Create</button>
+                    </form>
+                    <button @click="closeCreateCampaignModal">Close</button>
+                </div>
             </div>
-        </div>
+        
+            <!-- View Modal -->
+            <div v-else-if="showViewModal" class="modal">
+                <div class="modal-content">
+                    <h2>Details</h2>
+                    <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
+                    <p><strong>Description:</strong> {{ selectedCampaign.description }}</p>
+                    <p><strong>Start Date:</strong> {{ selectedCampaign.start_date }}</p>
+                    <p><strong>End Date:</strong> {{ selectedCampaign.end_date }}</p>
+                    <p><strong>Budget:</strong> {{ selectedCampaign.budget }}</p>
+                    <p><strong>Visibility:</strong> {{ selectedCampaign.visibility }}</p>
+                    <p><strong>Goals:</strong> {{ selectedCampaign.goals }}</p>
+                    <button @click="closeViewModal">Close</button>
+                </div>
+            </div>
 
-        <!-- Edit Modal -->
-        <div v-if="showEditModal" class="modal">
-        <div class="modal-content">
-            <h2>Edit Campaign</h2>
-            <form @submit.prevent="editCampaign">
-            <input type="text" v-model="selectedCampaign.name" readonly />
-            <textarea v-model="selectedCampaign.description"></textarea>
-            <input type="date" v-model="selectedCampaign.start_date" />
-            <input type="date" v-model="selectedCampaign.end_date" />
-            <input type="number" v-model="selectedCampaign.budget" />
-            <button type="submit">Save Changes</button>
-            </form>
-            <button @click="closeModals">Close</button>
-        </div>
-        </div>
+            <!-- Edit Modal -->
+            <div v-else-if="showEditModal" class="modal">
+                <div class="modal-content">
+                    <h2>Edit Campaign</h2>
+                    <form @submit.prevent="editCampaign">
+                    <input type="text" v-model="selectedCampaign.name" readonly />
+                    <textarea v-model="selectedCampaign.description" placeholder="Edit campaign description..."></textarea>
+                    <input type="date" v-model="selectedCampaign.startDate" />
+                    <input type="date" v-model="selectedCampaign.endDate" />
+                    <input type="number" v-model="selectedCampaign.budget" />
+                    <select v-model="selectedCampaign.visibility">
+                        <option value="">Select Visibility</option>
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                    <input type="text" v-model="selectedCampaign.goals" />
+                    <button type="submit">Save Changes</button>
+                    </form>
+                    <button @click="closeEditModal">Close</button>
+                </div>
+            </div>
 
-        <!-- Send Request Modal -->
-        <div v-if="showSendRequestModal" class="modal">
-            <div class="modal-content">
-                <h2>Send Request to Influencers</h2>
-                <from @submit.prevent="sendRequest">
-                    <textareav-model="requestForms.requirements" placeholder="Requirements"></textarea>
-                    <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount"/>
+            <!-- Send Request Modal -->
+            <div v-else-if="showSendRequestModal" class="modal">
+                <div class="modal-content">
+                    <h2>Send Request to Influencers</h2>
+                    <form @submit.prevent="sendRequest">
+                    <textarea v-model="requestForm.requirements" placeholder="Requirements"></textarea>
+                    <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount" />
                     <div>
                         <h3>Influencers</h3>
                         <div v-for="influencer in influencers" :key="influencer.id">
-                            <input
-                                type="checkbox"
-                                :value="influencer.id"
-                                v-model="requestForm.selectedInfluencers"
-                            />
-                            {{ influencer.name }}
+                        <input type="checkbox" :value="influencer.id" v-model="requestForm.selectedInfluencers" />
+                        {{ influencer.name }}
                         </div>
                     </div>
                     <button type="submit">Send</button>
-                </form>
-                <button @click="closeModals">Close</button>
+                    </form>
+                    <button @click="closeSendRequestModal">Close</button>
+                </div>
             </div>
-        </div>
+        </div> <!-- End of Root Element -->
     </div>                
     `,
     data() {
@@ -121,24 +149,41 @@ export default {
             showEditModal: false,
             showSendRequestModal: false,
             showCreateCampaignModal: false,
-            selectedCampaign: {},
+            selectedCampaign: {
+                // can't send campaign id to front
+                //set campaign id
+                
+                description: '',
+                startDate: '',
+                endDate: '',
+                budget: '',
+                visibility: '',
+                goals: '',
+            },
             requestForm: {
                 requirements: "",
                 paymentAmount: 0,
                 selectedInfluencers: [],
             },
+            campaignDetails: {
+                name: '',
+                description: '',
+                startDate: '',
+                endDate: '',
+                budget: '',
+                visibility: '',
+                goals: '',
+            },
+            loading: false,
         };
+    
     },
     methods: {
-        getToken() {
-            const token = localStorage.getItem('accessToken');
-            if (!token) alert("Token is missing in localStorage.");
-            return token;
-        },
         async fetchCampaigns() {
             this.loading = true;
             try {
-                this.getToken();
+                const token = localStorage.getItem('accessToken');
+                if (!token) alert("Token is missing in localStorage.");
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'GET',
                     headers: {
@@ -146,15 +191,14 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
+                // alert('reponse text: ' + await response.text())
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
                 const data = await response.json();
                 this.campaigns = data.campaigns;
             } catch (error) {
-                    alert("Error fetching campaigns:", error);
+                    alert(`Error fetching campaigns: ${error}`);
             } finally {
                 this.loading = false;
             }
@@ -162,8 +206,8 @@ export default {
 
         async fetchFlaggedCampaigns() {
             try {
-                this.getToken();
-        
+                const token = localStorage.getItem('accessToken');
+                if (!token) alert("Token is missing in localStorage.");
                 const response = await fetch(`${location.origin}/sponsor-campaigns?flagged=true`, {
                     method: 'GET',
                     headers: {
@@ -171,22 +215,22 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-        
+                alert('reponse text: ' + await response.text())
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-        
+                alert('reponse text: ' + await response.text());
                 const data = await response.json();
                 this.flaggedCampaigns = data.flagged_campaigns;
             } catch (error) {
-                alert("Error fetching flagged campaigns: " + error.message);
+                alert(`Error fetching flagged campaigns: ${error}`);
             }
         },
         
         async createCampaign(campaignDetails) {
             try {
-                this.getToken();
-        
+                const token = localStorage.getItem('accessToken');
+                if (!token) alert("Token is missing in localStorage.");
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'POST',
                     headers: {
@@ -195,46 +239,48 @@ export default {
                     },
                     body: JSON.stringify({ action: 'create', ...campaignDetails })
                 });
-        
+                alert('reponse text: ' + await response.text());
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-        
                 alert("Campaign created successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after creation
             } catch (error) {
-                alert("Error creating campaign: " + error.message);
+                alert(`Error creating campaign ${error}`);
             }
         },
-        
-
        
-        async editCampaign() {
+        async editCampaign(selectedCampaign) {
             try {
-                this.getToken();
-                const response = await fetch(location.origin + '/sponsor-campaigns', {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    alert("Token is missing in localStorage.");
+                    return;
+                }
+                const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'PUT',
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,
                     },
-                    body: JSON.stringify(this.sleectedCampaign),
+                    body: JSON.stringify({...selectedCampaign}),
                 });
+                const responseText = await response.text(); // For debugging purposes
+                alert(`response text put: ${responseText}`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 alert("Campaign updated successfully!");
-                this.closeModals();
-                this.fetchCampaigns(); // Refresh after edit
-                
+                await this.fetchCampaigns(); // Refresh after edit
             } catch (error) {
-                alert("Error while editing campaign:", error);
+                alert(`Error occurred while editing campaign: ${error}`);
             }
         },
         
         async fetchInfluencers() {
             try {
-                this.getToken();
+                const token = localStorage.getItem('accessToken');
+                if (!token) alert("Token is missing in localStorage.");
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'GET',
                     headers: {
@@ -242,20 +288,20 @@ export default {
                         "Authorization": `Bearer ${token}`,
                     },
                 })
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                alert('reponse text: ' + await response.text());
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                alert('reponse text: ' + await response.text())
                 const data = await response.json();
                 this.influencers = data.influencers;
             } catch (error) {
-                alert("Error while fetching influencers:", error);
+                alert(`Error while fetching influencers: ${error}`);
             }
         },
+
         async sendRequest(campaignId, influencerIds, requirements, messages) {
             try {
-                this.getToken();
-        
+                const token = localStorage.getItem('accessToken');
+                if (!token) alert("Token is missing in localStorage.");
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'POST',
                     headers: {
@@ -270,22 +316,22 @@ export default {
                         messages
                     })
                 });
-        
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-        
+                alert('reponse text: ' + await response.text());
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 alert("Requests sent successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after sending requests
             } catch (error) {
-                alert("Error sending request: " + error.message);
+                alert(`Error senfin request: ${error}`);
             }
         },
 
         async deleteCampaign(campaignId) {
             try {
-                this.getToken();
-        
+                const token = localStorage.getItem('accessToken');
+                if (!token) alert("Token is missing in localStorage.");
+                const requestBody = { campaign_id: campaignId };
+                alert(`Request body: ${requestBody}`);  // Log the body to check
+
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'DELETE',
                     headers: {
@@ -294,42 +340,55 @@ export default {
                     },
                     body: JSON.stringify({ campaign_id: campaignId })
                 });
-        
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-        
+                alert(`response ${response}`)
+                // alert('reponse text: ' + await response.text());
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 alert("Campaign deleted successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after deletion
             } catch (error) {
-                alert("Error deleting campaign: " + error.message);
+                alert(`Error deleting campaign ${error}`);
             }
         },
-
+        
         async openSendRequestModal(campaign) {
             this.selectedCampaign = campaign.campaign;
             this.fetchInfluencers();
             this.showSendRequestModal = true;
         },
-        async showCreateCampaignModal() {
-            this.isCreateCampaignModalOpen = true; // Set this variable to control the modal visibility
+
+        async closeSendRequestModal() {
+            this.showSendRequestModal = false;
+            this.selectedCampaign = {};
         },
+
+        async openCreateCampaignModal() {
+            this.showCreateCampaignModal = true;  // Open modal
+        },
+    
+        async closeCreateCampaignModal() {
+            this.showCreateCampaignModal = false;  // Close modal
+            this.campaignDetails = {};  // Reset campaign details
+        },
+
         async openViewModal(campaign) {
             this.selectedCampaign = campaign.campaign;
             this.showViewModal = true;
         },
+
+        async closeViewModal() {
+            this.showViewModal = false;
+            this.selectedCampaign = {};
+        },
+
         async openEditModal(campaign) {
             this.selectedCampaign = { ...campaign.campaign };
             this.showEditModal = true;
         },
-        
-        async closeModals() {
+
+        async closeEditModal() {
             this.showEditModal = false;
-            this.showViewModal = false;
-            this.showSendRequestModal = false;
-            this.showCreateCampaignModal = false;
             this.selectedCampaign = {};
-        }
+        },
     },
     mounted() {
         this.fetchCampaigns();

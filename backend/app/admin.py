@@ -15,10 +15,6 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import func
 from .models import *
 
-# Celery imports
-from celery.result import AsyncResult
-from .jobs.tasks import trigger_reports
-
 # Initialize cache and blueprint
 cache = app.cache
 admin_bp = Blueprint('admin', __name__)
@@ -321,47 +317,8 @@ class AdminApproveSponsor(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': 'Failed to approve sponsor.'}, 500))
 
-# class AdminReports(Resource):
-#     @jwt_required()
-#     def get(self):
-#         # delay is given to indicate that it is a celery task.
-#         task = trigger_reports.delay()
-#         result = AsyncResult(task.id)
-
-#         if result.ready():
-#             return send_file(f'/frontend/downloads/{result.result}'), 200
-#         else:
-#             return {'message' : 'Task not ready.'}, 405
-
-class AdminReports(Resource):
-    @jwt_required()
-    def post(self):
-        '''Initiate the CSV generation task and return the task ID.'''
-        task = trigger_reports.delay()
-        return {'task_id': task.id}, 202  # Return task_id for client to poll
-
-    @jwt_required()
-    def get(self, task_id):
-        '''Check the status of a report and send the file if ready.'''
-        download_dir = './frontend/downloads/'
-
-        # Check the task status using Celery
-        result = AsyncResult(task_id)
-        if result.ready():
-            # Check for files that start with the task_id
-            files = [f for f in os.listdir(download_dir) if f.startswith(task_id)]
-            
-            if files:
-                # Send the first matching file for download
-                return send_from_directory(download_dir, files[0], as_attachment=True)
-            else:
-                return {'message': 'File not found, but task is complete.'}, 404
-        else:
-            return {'message': 'Task not ready.'}, 202
-
 admin.add_resource(AdminDashboard, '/admin-dashboard')
 admin.add_resource(AdminManageUsers, '/admin-users')
 admin.add_resource(AdminManageCamapaigns, '/admin-campaigns')
 admin.add_resource(AdminApproveSponsor, '/admin-approve-sponsor')
-admin.add_resource(AdminReports, '/admin-reports', '/admin-reports/<string:task_id>')
 

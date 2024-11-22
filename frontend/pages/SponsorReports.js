@@ -1,6 +1,13 @@
 export default {
     template: `
         <div>
+            <nav class="navbar-links">
+                <router-link to="/sponsor-dashboard">Dashboard</router-link>
+                <router-link to="/sponsor-campaigns">Campaigns</router-link>
+                <router-link to="/sponsor-requests">Requests</router-link>
+                <router-link to="/sponsor-reports">Reports</router-link>
+                <router-link to="/logout">Logout</router-link>
+            </nav>
             <h1>Click the button to generate report</h1>
             <button @click="trigger_report">Generate report</button>
         </div>    

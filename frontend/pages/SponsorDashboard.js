@@ -97,13 +97,13 @@ export default {
     },
     template: `
         <div id="app">
-            <header>
-                <h2>Sponsor Campaigns</h2>
+            <nav class="navbar-links">
                 <router-link to="/sponsor-dashboard">Dashboard</router-link>
                 <router-link to="/sponsor-campaigns">Campaigns</router-link>
                 <router-link to="/sponsor-requests">Requests</router-link>
+                <router-link to="/sponsor-reports">Reports</router-link>
                 <router-link to="/logout">Logout</router-link>
-            </header>
+            </nav>
 
             <!-- Campaign Counts -->
             <section>

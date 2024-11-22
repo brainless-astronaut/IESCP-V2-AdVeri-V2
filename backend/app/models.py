@@ -82,8 +82,6 @@ class Campaigns(db.Model):
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
-
-
 class AdRequests(db.Model):
     __tablename__ = '__ad_requests__'
     request_id = db.Column(db.Integer, primary_key = True, autoincrement = True)

@@ -6,7 +6,8 @@ import InfluencerRegisterPage from '../pages/InfluencerRegisterPage.js';
 import AdminDashboard from '../pages/AdminDashboard.js';
 import AdminManageCampaigns from '../pages/AdminManageCampaigns.js';
 import AdminManageUsers from '../pages/AdminManageUsers.js'
-import AdminReports from '../pages/AdminReports.js'
+import AdminApproveSponsor form '../pages/AdminApproveSponsor.js'
+import SponsorReports from '../pages/SponsorReports.js'
 import SponsorDashboard from '../pages/SponsorDashboard.js';
 import SponsorCampaigns from '../pages/SponsorCampaigns.js';
 import SponsorRequests from '../pages/SponsorRequests.js';
@@ -21,15 +22,13 @@ const routes = [
     { path: '/admin-dashboard', component: AdminDashboard },
     { path: '/admin-users', component: AdminManageUsers },
     { path: '/admin-campaigns', component: AdminManageCampaigns },
-    { path: '/admin-reports', component: AdminReports },
+    { path: '/admin-approve-sponsor', component: AdminApproveSponsor },
+    { path: '/sponsor-reports', component: SponsorReports },
     { path: '/sponsor-dashboard', component: SponsorDashboard },
     { path: '/sponsor-campaigns', component: SponsorCampaigns },
-  //   {path : '/sponsor-campaigns/:id', component : SponsorCampaigns, beforeEnter: checkSponsor },
     { path : '/sponsor-requests', component : SponsorRequests },
-  //   {path : '/sponsor-requests/:id', component : SponsorRequests, beforeEnter: checkSponsor },
     { path : '/influencer-dashboard', component : InfluencerDashboard },
     { path : '/influencer-requests', component : InfluencerRequests},
-  //   {path : '/influencer-requests/:id', component : InfluencerR equests},
   ];
 
 // to check if user is authenticated 

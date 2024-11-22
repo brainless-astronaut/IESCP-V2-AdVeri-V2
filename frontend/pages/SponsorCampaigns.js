@@ -9,12 +9,13 @@ export default {
                 <router-link to="/sponsor-dashboard">Dashboard</router-link>
                 <router-link to="/sponsor-campaigns">Campaigns</router-link>
                 <router-link to="/sponsor-requests">Requests</router-link>
+                <router-link to="/sponsor-reports">Reports</router-link>
                 <router-link to="/logout">Logout</router-link>
             </nav>
             <div class="navbar-right">
                 <div class="search-bar-container">
                     <input type="text" v-model="searchQuery" placeholder="Search by name or description" class="search-bar"/>
-                    <button @click="fetchCampaigns" class="search-button" :disabled="loading">Search</button>
+                    <button @click="fetchCampaigns" :disabled="loading">Search</button>
                 </div>
                 <button @click="openCreateCampaignModal">Create Campaign</button>
             </div>
@@ -52,7 +53,7 @@ export default {
                         <button @click="openViewModal(campaign)">View</button>
                         <button @click="openEditModal(campaign)">Edit</button>
                         <button @click="openSendRequestModal(campaign)">Send Request</button>
-                        <button @click="deleteCampaign(campaign.campaign.id)">Delete</button>
+                        <button @click="deleteCampaign(campaign.campaign.campaign_id)">Delete</button>
                     </td>
                 </tr>
             </tbody>
@@ -122,17 +123,33 @@ export default {
             <div v-else-if="showSendRequestModal" class="modal">
                 <div class="modal-content">
                     <h2>Send Request to Influencers</h2>
-                    <form @submit.prevent="sendRequest">
-                    <textarea v-model="requestForm.requirements" placeholder="Requirements"></textarea>
-                    <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount" />
-                    <div>
-                        <h3>Influencers</h3>
-                        <div v-for="influencer in influencers" :key="influencer.id">
-                        <input type="checkbox" :value="influencer.id" v-model="requestForm.selectedInfluencers" />
-                        {{ influencer.name }}
+                    <form @submit.prevent="sendRequest(selectedCampaign.campaignId, requestForm.selectedInfluencers, requestForm.requirements, requestForm.paymentAmount, requestForm.messages)">
+                        <textarea v-model="requestForm.messages" placeholder="Messages"></textarea>
+                        <textarea v-model="requestForm.requirements" placeholder="Requirements"></textarea>
+                        <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount" />
+                        <div>
+                            <h3>Influencers</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Name</th>
+                                        <th>Platform</th>
+                                        <th>Reach</th>
+                                    </tr>
+                                </thead>
+                                </tbody>
+                                    <tr v-for="influencer in influencers" :key="influencer.user_id">
+                                        <td><input type="checkbox" :value="influencer.user_id" v-model="requestForm.selectedInfluencers" /></td>
+                                        <td>{{ influencer.name }}</td>
+                                        <td>{{ influencer.platform }}</td>
+                                        <td>{{ influencer.reach }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                                        
                         </div>
-                    </div>
-                    <button type="submit">Send</button>
+                        <button type="submit">Send</button>
                     </form>
                     <button @click="closeSendRequestModal">Close</button>
                 </div>
@@ -152,7 +169,7 @@ export default {
             selectedCampaign: {
                 // can't send campaign id to front
                 //set campaign id
-                
+                campaignId: '',
                 description: '',
                 startDate: '',
                 endDate: '',
@@ -161,7 +178,8 @@ export default {
                 goals: '',
             },
             requestForm: {
-                requirements: "",
+                requirements: '',
+                messages: '',
                 paymentAmount: 0,
                 selectedInfluencers: [],
             },
@@ -192,9 +210,7 @@ export default {
                     }
                 });
                 // alert('reponse text: ' + await response.text())
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 this.campaigns = data.campaigns;
             } catch (error) {
@@ -278,6 +294,7 @@ export default {
         },
         
         async fetchInfluencers() {
+            this.loading = true;
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) alert("Token is missing in localStorage.");
@@ -288,17 +305,18 @@ export default {
                         "Authorization": `Bearer ${token}`,
                     },
                 })
-                alert('reponse text: ' + await response.text());
+                // alert('fetch inf reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                alert('reponse text: ' + await response.text())
                 const data = await response.json();
                 this.influencers = data.influencers;
             } catch (error) {
                 alert(`Error while fetching influencers: ${error}`);
+            } finally {
+                this.loading = false;
             }
         },
 
-        async sendRequest(campaignId, influencerIds, requirements, messages) {
+        async sendRequest(campaignId, influencerIds, requirements, paymentAmount, messages) {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) alert("Token is missing in localStorage.");
@@ -312,13 +330,22 @@ export default {
                         action: 'send',
                         campaign_id: campaignId,
                         influencer_ids: influencerIds,
-                        requirements,
-                        messages
+                        payment_amount: paymentAmount,
+                        requirements: requirements,
+                        messages: messages
                     })
                 });
+                if (!campaignId || !influencerIds || !requirements || !paymentAmount || !messages) {
+                    alert(`Invalid request parameters.`);
+                    alert(`campaign id: ${campaignId}`);
+                    alert(`influencersIds: ${influencerIds}`);
+                    alert(`requirements: ${requirements}`);
+                    alert(`paymentAmount: ${paymentAmount}`);
+                    alert(`messages: ${messages}`);
+                    return;
+                }
                 alert('reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                alert("Requests sent successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after sending requests
             } catch (error) {
                 alert(`Error senfin request: ${error}`);
@@ -340,8 +367,7 @@ export default {
                     },
                     body: JSON.stringify({ campaign_id: campaignId })
                 });
-                alert(`response ${response}`)
-                // alert('reponse text: ' + await response.text());
+                alert('reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 alert("Campaign deleted successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after deletion
@@ -351,8 +377,15 @@ export default {
         },
         
         async openSendRequestModal(campaign) {
-            this.selectedCampaign = campaign.campaign;
+            console.log('Raw campaign object:', campaign);
+            console.log('Campaign keys:', Object.keys(campaign));
+            this.selectedCampaign = { 
+                ...campaign,
+                campaignId: campaign.campaign.campaign_id, // Adjust as needed
+            };
+            console.log('Selected campaign:', this.selectedCampaign);
             this.fetchInfluencers();
+            this.requestForm.selectedInfluencers = [];
             this.showSendRequestModal = true;
         },
 

@@ -7,6 +7,10 @@ from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import func
 
+# Celery imports
+from celery.result import AsyncResult
+from .jobs.tasks import trigger_reports
+
 # Local application imports
 from .models import *
 
@@ -123,7 +127,7 @@ class SponsorCampaigns(Resource):
                 campaigns_list.append({
                     'campaign': campaign.to_dict(),
                     'progress': progress,
-                    'joined_influencers': [name for name, in joined_influencers]
+                    'joined_influencers': [name for name, in joined_influencers] or []
                 })
 
 
@@ -144,6 +148,10 @@ class SponsorCampaigns(Resource):
                 if sponsor_industry
                 else Influencers.query.all()
             )
+
+            print(f"Query Results: {joined_influencers}")  # Ensure this is not None
+            print(f"Flagged Campaigns: {flagged_campaigns}")
+            print(f"Influencers: {[influencer.to_dict() for influencer in influencers]}")
 
             return make_response(jsonify({
                 'campaigns': campaigns_list,
@@ -196,7 +204,7 @@ class SponsorCampaigns(Resource):
                     influencer_ids = data.get('influencer_ids')
                     for influencer_id in influencer_ids:
                         new_request = AdRequests(
-                            camapign_id = campaign_id,
+                            campaign_id = campaign_id,
                             influencer_id = influencer_id,
                             sponsor_id = current_user['user_id'],
                             initiator ='sponsor',   
@@ -296,7 +304,7 @@ class SponsorRequests(Resource):
                     'influencer_id': request.influencer_id,
                     'requirements': request.requirements,
                     'payment_amount': request.payment_amount,
-                    'negotiated_amount': request.negotiated_amount if request.negotiated_amount != 0 else 'Negotiation is not initiated.',
+                    'negotiation_amount': request.negotiation_amount if request.negotiation_amount != 0 else 'Negotiation is not initiated.',
                     'messages': request.messages,
                     'status': request.status
                 }
@@ -309,7 +317,7 @@ class SponsorRequests(Resource):
                     'influencer_id': request.influencer_id,
                     'requirements': request.requirements,
                     'payment_amount': request.payment_amount,
-                    'negotiated_amount': request.negotiated_amount if request.negotiated_amount != 0 else 'Negotiation is not initiated.',
+                    'negotiation_amount': request.negotiation_amount if request.negotiation_amount != 0 else 'Negotiation is not initiated.',
                     'messages': request.messages,
                     'status': request.status
                 }
@@ -402,7 +410,34 @@ class SponsorRequests(Resource):
             db.session.rollback()
             return make_response(jsonify({'message': f'Error while deleting request. {str(e)}'}), 500)
 
+class SponsorReports(Resource):
+    @jwt_required()
+    def post(self):
+        '''Initiate the CSV generation task and return the task ID.'''
+        task = trigger_reports.delay()
+        return {'task_id': task.id}, 202  # Return task_id for client to poll
+
+    @jwt_required()
+    def get(self, task_id):
+        '''Check the status of a report and send the file if ready.'''
+        download_dir = './frontend/downloads/'
+
+        # Check the task status using Celery
+        result = AsyncResult(task_id)
+        if result.ready():
+            # Check for files that start with the task_id
+            files = [f for f in os.listdir(download_dir) if f.startswith(task_id)]
+            
+            if files:
+                # Send the first matching file for download
+                return send_from_directory(download_dir, files[0], as_attachment=True)
+            else:
+                return {'message': 'File not found, but task is complete.'}, 404
+        else:
+            return {'message': 'Task not ready.'}, 202
+
 # Registering the resource with the API
 sponsor.add_resource(SponsorDashboard, '/sponsor-dashboard')
 sponsor.add_resource(SponsorCampaigns, '/sponsor-campaigns/')
 sponsor.add_resource(SponsorRequests, '/sponsor-requests')
+sponsor.add_resource(SponsorReports, '/sponsor-reports')

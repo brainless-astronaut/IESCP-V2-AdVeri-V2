@@ -1,8 +1,9 @@
 # Standard library imports
 from datetime import datetime, timedelta, timezone
+import os
 
 # Third-party imports
-from flask import request, jsonify, Blueprint, make_response, current_app as app
+from flask import request, jsonify, Blueprint, make_response, send_from_directory, current_app as app
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy import func
@@ -85,7 +86,7 @@ class SponsorDashboard(Resource):
                 'total_campaigns': total_campaigns,
             }), 200)
         except Exception as e:
-            return make_response(jsonify({'message': f'Error occured while retreiving data. More information:\n{str(e)}'}), 500)
+            return make_response(jsonify({'message': f'Error occured while retreiving data. More information: {str(e)}'}), 500)
 
 class SponsorCampaigns(Resource):
     @jwt_required()
@@ -159,7 +160,7 @@ class SponsorCampaigns(Resource):
                 'influencers': [influencer.to_dict() for influencer in influencers]
             }), 200)
         except Exception as e:
-            return make_response(jsonify({"message": f"Error occured in retrieving data. More information:\n{str(e)}"}), 500)
+            return make_response(jsonify({"message": f"Error occured in retrieving data. More information: {str(e)}"}), 500)
 
     @jwt_required()
     def post(self):
@@ -197,7 +198,7 @@ class SponsorCampaigns(Resource):
                         
                 except Exception as e:
                     db.session.rollback()
-                    return make_response(jsonify({'message': f'Error occured while creating campaign. More information:\n{str(e)}'}), 500)
+                    return make_response(jsonify({'message': f'Error occured while creating campaign. More information: {str(e)}'}), 500)
             elif action == 'send':
                 try:
                     campaign_id = data.get('campaign_id')
@@ -222,7 +223,7 @@ class SponsorCampaigns(Resource):
 
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': f'Error occured. More information:\n{str(e)}'}), 500)   
+            return make_response(jsonify({'message': f'Error occured. More information: {str(e)}'}), 500)   
             
     @jwt_required()
     def put(self):
@@ -255,7 +256,7 @@ class SponsorCampaigns(Resource):
             return make_response(jsonify({'message': 'Campaign updated successfully'}), 200)
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': f'Error occured while editing campaign. More information:\n{str(e)}'}), 500)
+            return make_response(jsonify({'message': f'Error occured while editing campaign. More information: {str(e)}'}), 500)
     
     @jwt_required()
     def delete(self):
@@ -280,135 +281,95 @@ class SponsorCampaigns(Resource):
             return make_response(jsonify({'message': 'Campaign deleted successfully'}), 200)
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': f'Error occured while deleting campaign. More information:\n{str(e)}'}), 500)
-     
+            return make_response(jsonify({'message': f'Error occured while deleting campaign. More information: {str(e)}'}), 500)
+
 class SponsorRequests(Resource):
     @jwt_required()
     @cache.memoize(timeout = 5)
     def get(self):
-        try:
-            current_user = get_jwt_identity()
-            sent_requests = AdRequests.query.filter_by(
-                sponsor_id = current_user['user_id'], 
-                initiator = 'sponsor'
-            ).all()
+        current_user = get_jwt_identity()
+        sponsor_id = current_user['user_id']
 
-            received_requests = AdRequests.query.filter_by(
-                sponsor_id = current_user['user_id'],
-                initiator = 'influencer'
-            ).all()
+        campaigns = Campaigns.query.filter_by(sponsor_id = sponsor_id).all()
 
-            sent_requests_list = [
-                {
-                    'campaign_id': request.campaign_id,
-                    'influencer_id': request.influencer_id,
-                    'requirements': request.requirements,
-                    'payment_amount': request.payment_amount,
-                    'negotiation_amount': request.negotiation_amount if request.negotiation_amount != 0 else 'Negotiation is not initiated.',
-                    'messages': request.messages,
-                    'status': request.status
-                }
-                for request in sent_requests
-            ]
+        campaign_ids = [campaign.campaign_id for campaign in campaigns]
 
-            received_requests_list = [
-                {
-                    'campaign_id': request.campaign_id,
-                    'influencer_id': request.influencer_id,
-                    'requirements': request.requirements,
-                    'payment_amount': request.payment_amount,
-                    'negotiation_amount': request.negotiation_amount if request.negotiation_amount != 0 else 'Negotiation is not initiated.',
-                    'messages': request.messages,
-                    'status': request.status
-                }
-                for request in received_requests
-            ]
+        requests = AdRequests.query.join(Influencers, AdRequests.influencer_id == Influencers.user_id) \
+                                .filter(AdRequests.campaign_id.in_(campaign_ids)) \
+                                .add_columns(Influencers.name, Influencers.reach, Influencers.platform) \
+                                .all()
+        request_details = {}
+        for campaign in campaigns:
+            campaign_requests = [req for req in requests if req[0].campaign_id == campaign.campaign_id]
+            request_details[campaign.campaign_id] = {
+                'campaign': campaign.to_dict(),
+                'request': [
+                    {
+                        'ad_request': req[0].to_dict(),
+                        'influencer_name': req[1],
+                        'influencer_reach': req[2],
+                        'influencer_platform': req[3]
+                    } for req in campaign_requests
+                ]
+            }
 
+        print('Request details:\n', request_details)
 
-            return make_response(jsonify({
-                'current_user': current_user,
-                'sent_requests': sent_requests_list,
-                'received_requests': received_requests_list
-            }), 200)
-
-        except Exception as e:
-            print(f"Error: {e}")  # This will help you see what's going wrong in the backend
-            return make_response(jsonify({'message': str(e)}), 500)
+        return make_response(jsonify({'request_details': request_details}), 200)
 
     @jwt_required()
-    def post(self):
+    def put(self):
         try:
-            current_user = get_jwt_identity()
             data = request.get_json()
-            campaign_id = data.get('campaign_id')
-            new_request = AdRequests(
-                camapign_id = campaign_id,
-                influencer_id = data.get('influencer_id'),
-                sponsor_id = current_user['user_id'],
-                initiator ='sponsor',   
-                requirements = data.get('requirements'),
-                payment_amount = data.get('payment_amount'),
-                messages = data.get('messages')
-            )
-            db.session.add(new_request)
-            db.session.commit()
-            return make_response(jsonify({'message': 'Request sent successfully'}), 201)
+            # request_id = data.get('request_id')
+            action = data.get('action')
+            # ad_request = AdRequests.query.get(request_id)
 
+            request_id = data.get('request_id')
+            print(f"Received request_id: {request_id}")  # Debugging
+            ad_request = AdRequests.query.get(request_id)
+            if not ad_request:
+                print(f"No AdRequest found for request_id: {request_id}")  # Debugging
+                return {'message': f'AdRequest with id {request_id} does not exist.'}, 400
+
+
+            campaign = Campaigns.query.filter(Campaigns.campaign_id == ad_request.campaign_id).first()
+            sponsor = Sponsors.query.filter(Sponsors.user_id == campaign.sponsor_id).first()
+            influencer = Influencers.query.filter(Influencers.user_id == ad_request.influencer_id).first()
+
+            if action == 'negotiate':
+                ad_request.negotiation_amount = float(data.get('negotiation_amount').strip())
+                ad_request.status = 'Negotiation'
+            elif action == 'accept':
+                amount = 0
+                if ad_request.negotiation_amount and ad_request.negotiation_amount > 0:
+                    amount = ad_request.negotiation_amount
+                else:
+                    amount = ad_request.payment_amount
+                if amount > 0:
+                    if sponsor.budget >= amount:
+                        influencer.earnings += amount
+                        campaign.budget -= amount
+                        sponsor.budget -= amount
+                        ad_request.status = 'Accepted'
+                    else:
+                        return {'message': 'Insufficient budget.'}, 400
+                else:
+                    return {'message': 'Amount must be greater than zero.'}
+            elif action == 'revoke':
+                db.session.delete(ad_request)
+            
+            db.session.commit()
+            return {'message': 'Action performed successfully!'}, 200
         except Exception as e:
             db.session.rollback()
-            return make_response(jsonify({'message': f'Error occured while sending request. {str(e)}'}))
-
-    @jwt_required()
-    def put(self, request_id):
-        try:
-            current_user = get_jwt_identity()
-            request = AdRequests.query.get(request_id)
-
-            if not request: 
-                return make_response(jsonify({'message': 'Request does not exists.'}))
-
-            if request.influencer_id!= current_user['user_id']: 
-                return make_response(jsonify({'message': 'You are not authorized to update this request.'}))
-
-            data = request.get_json()
-            action = data.get('action')
-            if action == 'update':
-                request.requirements = data.get('requirements')
-                request.payment_amount = data.get('payment_amount')
-                request.messages = data.get('messages')
-            elif  action == 'negotiate':
-                request.negotiation_amount = data.get('negotiation_amount')
-                request.status = 'negotiation'
-            elif  action == 'accept':
-                request.status = 'accepted'
-            elif action == 'rejected': 
-                request.status = 'rejected'
+            return {'message': f'Error occured. Action paused. More information: {str(e)}'}, 500
         
 
-            db.session.commit()
-            return make_response(jsonify({'message': 'Request action performed successfully'}), 200)
-        except Exception as e:
-            db.session.rollback()
-            return make_response(jsonify({'message': f'Error while updating request. {str(e)}'}), 500)
 
-    @jwt_required()
-    def delete(self, request_id):
-        try:
-            current_user = get_jwt_identity()
 
-            request = AdRequests.query.get(request_id)
 
-            if not request: 
-                return make_response(jsonify({'message': 'Request does not exists.'}))
 
-            if request.influencer_id!= current_user['user_id']: 
-                return make_response(jsonify({'message': 'You are not authorized to delete this request.'}))
-
-            db.session.delete(request)
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            return make_response(jsonify({'message': f'Error while deleting request. {str(e)}'}), 500)
 
 class SponsorReports(Resource):
     @jwt_required()

@@ -1,27 +1,102 @@
-// frontend/pages/SponsorRequests.js
-
 export default {
+    template: `
+        <div class="container">
+            <header class="navbar">
+                <div class="navbar-left">
+                    <h1>Sponsor | Manage Campaigns</h1>
+                </div>
+                <nav class="navbar-links">
+                    <router-link to="/sponsor-dashboard">Dashboard</router-link>
+                    <router-link to="/sponsor-campaigns">Campaigns</router-link>
+                    <router-link to="/sponsor-requests">Requests</router-link>
+                    <router-link to="/sponsor-reports">Reports</router-link>
+                    <router-link to="/logout">Logout</router-link>
+                </nav>
+                <!-- <div class="navbar-right">
+                    <div class="search-bar-container">
+                        <input type="text" v-model="searchQuery" placeholder="Search by name or description" class="search-bar"/>
+                        <button @click="fetchCampaigns" :disabled="loading">Search</button>
+                    </div>
+                    <button @click="openCreateCampaignModal">Create Campaign</button>
+                </div> -->
+            </header>
+
+            <!-- Flash Messages -->
+            <div v-if="messages.length" class="messages">
+                <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                    {{ message.text }}
+                </p>
+            </div>
+
+        <!-- Campaign Details -->
+            <div v-if="requestDetails && Object.keys(requestDetails).length">
+                <div v-for="(details, campaignId) in requestDetails" :key="campaignId">
+                    <h2>Campaign: {{ details.campaign.name }}</h2>
+                    <div v-if="details.request && details.request.length">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Influencer</th>
+                                    <th>Status</th>
+                                    <th>Message</th>
+                                    <th>Requirements</th>
+                                    <th>Payment Amount</th>
+                                    <th>Negotiated Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(request, index) in details.request" :key="index">
+                                    <td>{{ request.ad_request.request_id }}</td>
+                                    <td>{{ request.influencer_name }}</td>
+                                    <td>{{ request.ad_request.status }}</td>
+                                    <td>{{ request.ad_request.messages }}</td>
+                                    <td>{{ request.ad_request.requirements }}</td>
+                                    <td>{{ request.ad_request.payment_amount }}</td>
+                                    <td>{{ request.ad_request.negotiation_amount || 'N/A' }}</td>
+                                    <td>
+                                    <form @submit.prevent="handleAction('negotiate', request.ad_request.request_id, $event)">
+                                        <input
+                                        type="number"
+                                        name="negotiated_amount"
+                                        placeholder="Negotiated Amount"
+                                        required
+                                        />
+                                        <button type="submit" class="btn btn-negotiate">Negotiate</button>
+                                    </form>
+                                    <button @click="handleAction('accept', request.ad_request.request_id)" class="btn btn-accept">
+                                        Accept
+                                    </button>
+                                    <button @click="handleAction('revoke', request.ad_request.request_id)" class="btn btn-revoke">
+                                        Revoke
+                                    </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p v-else>No requests made.</p>
+                </div>
+            </div>
+        <p v-else>Create campaigns to make requests.</p>
+    </div>
+    `,
     data() {
         return {
-            requests: [], // For storing requests data
-            showCreatePopup: false, // Controls visibility of the Create Request popup
-            showEditPopup: false, // Controls visibility of the Edit Request popup
-            currentRequest: {}, // Stores request data for view/edit actions
-            token: localStorage.getItem('accessToken'), // Assuming token is stored here
+            messages: [],
+            requestDetails: {},
         };
     },
-    created() {
-        this.fetchRequests();
+    async mounted() {
+        await this.fetchRequestDetails();
     },
     methods: {
-        // Fetch requests for the current sponsor's campaigns
-        async fetchRequests() {
+        // Fetch campaign and request details
+        async fetchRequestDetails() {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
+                if (!token) throw new Error("Authentication token is missing.");
                 const response = await fetch(location.origin + '/sponsor-requests', {
                     method: 'GET',
                     headers: {
@@ -29,218 +104,51 @@ export default {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    this.requests = data.requests;
-                } else {
-                    console.error("Error fetching requests:", await response.text());
+                // const text = await response.text();
+                // alert(text);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to fetch data: ${errorText || response.statusText}`);
                 }
+                const data = await response.json();
+                console.log('Fetched Request Details:', data); // Debugging
+                this.requestDetails = data.request_details;
             } catch (error) {
-                console.error("Error fetching requests:", error);
+                this.messages.push({category: "error", text: error.message});
             }
         },
 
-        // Open the Create Request Popup
-        openCreatePopup() {
-            this.showCreatePopup = true;
-            this.currentRequest = {}; // Reset the form data
-        },
-
-        // Open the Edit Request Popup
-        openEditPopup(request) {
-            this.currentRequest = { ...request }; // Clone request data
-            this.showEditPopup = true;
-        },
-
-        // Close the current popup
-        closePopup() {
-            this.showCreatePopup = false;
-            this.showEditPopup = false;
-        },
-
-        // Create a new request
-        async createRequest(requestData) {
+        // Handle actions: Negotiate, Accept, Revoke
+        async handleAction(action, requestId, event = null) {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
+                if (!token) throw new Error("Authentication token is missing.");
+
+                console.log(` action: ${action}\n requestId ${requestId}\n event ${event}`)
+
+                const requestBody = { action, request_id: requestId };
+                if (action === 'negotiate' && event) {
+                    const formData = new FormData(event.target);
+                    requestBody.negotiation_amount = formData.get("negotiated_amount");
                 }
+
                 const response = await fetch(location.origin + '/sponsor-requests', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
-                    this.fetchRequests();
-                    this.closePopup();
-                } else {
-                    console.error("Error creating request:", await response.text());
-                }
-            } catch (error) {
-                console.error("Error creating request:", error);
-            }
-        },
-
-        // Edit the request
-        async editRequest(requestData) {
-            try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
-                const response = await fetch(location.origin + `/sponsor-requests/${this.currentRequest.id}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
                     },
-                    body: JSON.stringify(requestData)
+                    body: JSON.stringify(requestBody),
                 });
+                
+                if (!response.ok) throw new Error(await response.text());
+                const data = await response.json();
 
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
-                    this.fetchRequests();
-                    this.closePopup();
-                } else {
-                    console.error("Error editing request:", await response.text());
-                }
+                this.messages.push({ category: "success", text: data.message });
+                await this.fetchRequestDetails(); // Refresh data after action
             } catch (error) {
-                console.error("Error editing request:", error);
+                this.messages.push({ category: "error", text: error.message });
             }
         },
-
-        // Delete the request
-        async deleteRequest(requestId) {
-            try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
-                }
-                const response = await fetch(location.origin + `/sponsor-requests/${requestId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    alert(data.message);
-                    this.fetchRequests();
-                } else {
-                    console.error("Error deleting request:", await response.text());
-                }
-            } catch (error) {
-                console.error("Error deleting request:", error);
-            }
-        }
     },
-    template: `
-        <div id="app">
-            <nav class="navbar-links">
-                <router-link to="/sponsor-dashboard">Dashboard</router-link>
-                <router-link to="/sponsor-campaigns">Campaigns</router-link>
-                <router-link to="/sponsor-requests">Requests</router-link>
-                <router-link to="/sponsor-reports">Reports</router-link>
-                <router-link to="/logout">Logout</router-link>
-            </nav>
-            <button @click="openCreatePopup">Create Request</button>
-
-            <!-- Requests Table -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>Request ID</th>
-                        <th>Campaign ID</th>
-                        <th>Influencer ID</th>
-                        <th>Requirements</th>
-                        <th>Payment Amount</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="request in requests" :key="request.id">
-                        <td>{{ request.id }}</td>
-                        <td>{{ request.campaign_id }}</td>
-                        <td>{{ request.influencer_id }}</td>
-                        <td>{{ request.requirements }}</td>
-                        <td>{{ request.payment_amount }}</td>
-                        <td>{{ request.status }}</td>
-                        <td>
-                            <button @click="openEditPopup(request)">Edit</button>
-                            <button @click="deleteRequest(request.id)">Delete</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Create Request Popup -->
-            <div v-if="showCreatePopup">
-                <div>
-                    <h2>Create Request</h2>
-                    <form @submit.prevent="createRequest(currentRequest)">
-                        <input v-model="currentRequest.campaign_id" placeholder="Campaign ID" required>
-                        <input v-model="currentRequest.influencer_id" placeholder="Influencer ID" required>
-                        <textarea v-model="currentRequest.requirements" placeholder="Requirements" required></textarea>
-                        <input v-model="currentRequest.payment_amount" type="number" placeholder="Payment Amount" required>
-                        <textarea v-model="currentRequest.messages" placeholder="Messages"></textarea>
-                        <button type="submit">Create</button>
-                        <button @click="closePopup">Cancel</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Edit Request Popup -->
-            <div v-if="showEditPopup">
-                <div>
-                    <h2>Edit Request</h2>
-                    <form @submit.prevent="editRequest(currentRequest)">
-                        <input v-model="currentRequest.campaign_id" placeholder="Campaign ID" required>
-                        <input v-model="currentRequest.influencer_id" placeholder="Influencer ID" required>
-                        <textarea v-model="currentRequest.requirements" placeholder="Requirements" required></textarea>
-                        <input v-model="currentRequest.payment_amount" type="number" placeholder="Payment Amount" required>
-                        <textarea v-model="currentRequest.messages" placeholder="Messages"></textarea>
-                        <button type="submit">Save Changes</button>
-                        <button @click="closePopup">Cancel</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    `
 };
-
-
-// Data Handling:
-
-// requests: Stores all the requests fetched from the backend.
-// showCreatePopup, showEditPopup: Boolean values to control the visibility of the respective popups.
-// currentRequest: Stores the currently selected request’s data, used for editing.
-// Methods:
-
-// fetchRequests(): Fetches requests related to the sponsor’s campaigns from the backend.
-// openCreatePopup(), openEditPopup(): Opens the respective popups for creating or editing requests.
-// closePopup(): Closes any open popups.
-// createRequest(), editRequest(), deleteRequest(): Handles the respective CRUD operations with the backend.
-// Popups:
-
-// Create Request: This popup allows the sponsor to submit a new request, including campaign ID, influencer ID, requirements, payment amount, and messages.
-// Edit Request: This popup lets the sponsor edit an existing request's details.
-// The actions can include 'Update', 'Negotiate', 'Accept', or 'Reject' depending on the status of the request.
-// Button Actions:
-
-// Create: Opens the "Create Request" popup.
-// Edit: Opens the "Edit Request" popup to allow modifications to the selected request.
-// Delete: Deletes the request after confirmation.

@@ -6,14 +6,13 @@ import InfluencerRegisterPage from '../pages/InfluencerRegisterPage.js';
 import AdminDashboard from '../pages/AdminDashboard.js';
 import AdminManageCampaigns from '../pages/AdminManageCampaigns.js';
 import AdminManageUsers from '../pages/AdminManageUsers.js'
-import AdminApproveSponsor form '../pages/AdminApproveSponsor.js'
+import AdminApproveSponsor from '../pages/AdminApproveSponsor.js'
 import SponsorReports from '../pages/SponsorReports.js'
 import SponsorDashboard from '../pages/SponsorDashboard.js';
 import SponsorCampaigns from '../pages/SponsorCampaigns.js';
 import SponsorRequests from '../pages/SponsorRequests.js';
 import InfluencerDashboard from '../pages/InfluencerDashboard.js';
 import InfluencerRequests from '../pages/InfluencerRequests.js'
-
 
 const routes = [
     { path: '/', component: HomePage },

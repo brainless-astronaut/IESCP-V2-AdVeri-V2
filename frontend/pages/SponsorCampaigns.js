@@ -194,7 +194,6 @@ export default {
             },
             loading: false,
         };
-    
     },
     methods: {
         async fetchCampaigns() {

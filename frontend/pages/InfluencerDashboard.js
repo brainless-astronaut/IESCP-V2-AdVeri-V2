@@ -4,37 +4,50 @@ export default {
     template: `
         <div id="app">
             <header>
-                <h2>Influencer Dashboard</h2>
+                <h2>Influencer | Dashboard</h2>
                 <router-link to="/influencer-dashboard">Dashboard</router-link>
-                <router-link to="/influencer-requests">Requests</router-link>
+                <router-link to="/influencer-send-requests">Send Requests</router-link>
                 <router-link to="/logout">Logout</router-link>
             </header>
 
-            <div>
-                <h2>Counts</h2>
-                <p>Sponsors: {{ counts.sponsors_count }}</p>
-                <p>Influencers: {{ counts.influencers_count }}</p>
-                <p>Campaigns: {{ counts.campaigns_count }}</p>
-                <p>Pending Sponsors: {{ counts.sponsors_to_approve_count }}</p>
-                <p>Flagged Sponsors: {{ counts.flagged_sponsors_count }}</p>
-                <p>Flagged Influencers: {{ counts.flagged_influencers_count }}</p>
-                <p>Flagged Campaigns: {{ counts.flagged_campaigns_count }}</p>
+            <div class="dashboard-container">
+            
+                <!-- Cards Section -->
+                <div class="cards">
+                    <div class="card" v-for="(card, key) in cards" :key="key">
+                        <h3>{{ card.title }}</h3>
+                        <p>{{ card.value }}</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="dashboard-charts">
+                    <div class="chart-container">
+                        <h3>Earnings by Campaign</h3>
+                        <canvas id="earningsByCampaignChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Earnings by Industry</h3>
+                        <canvas id="earningsByIndustryChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <canvas id="sponsorsChart">spns ind</canvas>
-            <canvas id="campaignsChart">cmpps ind</canvas>
         </div>
     `,
     data() {
         return {
-            counts: {},
-            sponsorsDistribution: {},
-            campaignsDistribution: {},
-            token: localStorage.getItem('accessToken')
+            cards: {
+                requests_count: { title: "Total Requests", value: 0 },
+                pending_requests_count: { title: "Pending Requests", value: 0 },
+                negotiation_requests_count: { title: "Negotiation Requests", value: 0 },
+                joined_campaigns_count: { title: "Joined Campaigns", value: 0 },
+                earnings: { title: "Total Earnings", value: 0 },
+            },
+            earnings_by_campaign: [],
+            earnings_by_industry: [],
         };
     },
-    created() {
-        this.fetchDashboardData();
-    },
+    
     methods: {
         async fetchDashboardData() {
             try {
@@ -47,84 +60,87 @@ export default {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
                     }
-                });
-                
-                if (!token) {
-                    console.error("Token is missing in localStorage.");
-                    return;
+                })
+                // const text = await response.text();
+                // console.log(text);
+                if (response.ok) {
+                    const data = await response.json();
+                    this.cards.requests_count.value = data.total_requests;
+                    this.cards.pending_requests_count.value = data.pending_requests_count;
+                    this.cards.negotiation_requests_count.value = data.negotiation_requests_count;
+                    this.cards.joined_campaigns_count.value = data.joined_campaigns_count;
+                    this.cards.earnings.value = data.earnings;
+                    this.earnings_by_campaign = data.earnings_by_campaign;
+                    this.earnings_by_industry = data.earnings_by_industry;
                 }
-                console.log('Token:', token);
-             
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch dashboard data");
-                }
-
-                const data = await response.json();
-                this.counts = {
-                    sponsors_count: data.sponsors_count,
-                    influencers_count: data.influencers_count,
-                    campaigns_count: data.campaigns_count,
-                    sponsors_to_approve_count: data.sponsors_to_approve_count,
-                    flagged_sponsors_count: data.flagged_sponsors_count,
-                    flagged_influencers_count: data.flagged_influencers_count,
-                    flagged_campaigns_count: data.flagged_campaigns_count,
-                };
-                this.sponsorsDistribution = data.sponsors_distribution;
-                this.campaignsDistribution = data.campaigns_distribution;
-
-                this.renderCharts();
             } catch (error) {
-                console.error("Error fetching dashboard data:", error);
+                console.error("Failed to fetch dashboard data." + error);
             }
         },
-        renderCharts() {
-            const sponsorCtx = document.getElementById('sponsorsChart').getContext('2d');
-            new Chart(sponsorCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(this.sponsorsDistribution),
-                    datasets: [{
-                        label: 'Sponsors by Industry',
-                        data: Object.values(this.sponsorsDistribution),
-                        backgroundColor: 'rgba(225, 225, 255, 0.6)',
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        },
-                        x: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
 
-            const campaignsCtx = document.getElementById('campaignsChart').getContext('2d');
-            new Chart(campaignsCtx, {
+        async renderEarningsByCampaignChart() {
+            const labels= this.earnings_by_campaign.map((item) => item[1]) // Campaign names
+            const data = this.earnings_by_campaign.map((item) => item[0]) // Earnings
+
+            new CharacterData(document.getElementById('earningsByCampaignChart'), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(this.campaignsDistribution),
+                    labels,
                     datasets: [{
-                        label: 'Campaigns by Industry',
-                        data: Object.values(this.campaignsDistribution),
-                        backgroundColor: 'rgba(0, 105, 62, 0.6)',
+                        label: 'Earnings by Campaign',
+                        data,
+                        backgroundColor: 'rgba(255, 191, 0, 1)',
                     }]
                 },
                 options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {display: true },
+                        tooltip: { enabled: true},
+                    },
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
+                        x: { title: { display: true, text: "Campaigns" } },
+                        y: { title: { display: true, text: "Earnings (₹)" } },
+                      },
+                },
             });
+        },
+
+        async renderEarningsByIndustryChart() {
+            const labels = this.earnings_by_industry.map((itme) => item[0]); // Indistries
+            const data = this.earnings_by_industry.map((item) => item.total_payment); // Earnings
+
+            new Chart(document.getElementById('earningsByIndustryChart'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Earnings by Industry',
+                        data,
+                        backgroundColor: 'rgba(0, 171, 213, 1)',
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: { enabled: true},
+                    },
+                    scales: {
+                        x: { title: { display: true, text: "Industries" } },
+                        y: { title: { display: true, text: "Earnings (₹)" } },
+                    },
+                },
+            })
         }
-    }
+    },
+    mounted() {
+        this.fetchDashboardData();
+        this.renderEarningsByCampaignChart();
+        this.renderEarningsByIndustryChart();
+    },
 };
 
 

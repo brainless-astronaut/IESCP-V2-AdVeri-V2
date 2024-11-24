@@ -39,8 +39,8 @@ export default {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="campaign in campaigns" :key="campaign.campaign.id">
-                    <td>{{ campaign.campaign.id }}</td>
+                <tr v-for="campaign in campaigns" :key="campaign.campaign.campaign_id">
+                    <td>{{ campaign.campaign.campaign_id }}</td>
                     <td>{{ campaign.campaign.name }}</td>
                     <td>{{ campaign.campaign.description }}</td>
                     <td>{{ campaign.progress }}</td>
@@ -282,6 +282,7 @@ export default {
                 });
                 const responseText = await response.text(); // For debugging purposes
                 alert(`response text put: ${responseText}`)
+                alert(`selected campaign: ${selectedCampaign}`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

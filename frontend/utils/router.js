@@ -12,7 +12,8 @@ import SponsorDashboard from '../pages/SponsorDashboard.js';
 import SponsorCampaigns from '../pages/SponsorCampaigns.js';
 import SponsorRequests from '../pages/SponsorRequests.js';
 import InfluencerDashboard from '../pages/InfluencerDashboard.js';
-import InfluencerRequests from '../pages/InfluencerRequests.js'
+import InfluencerSendRequests from '../pages/InfluencerSendRequests.js'
+import InfluencerManageRequests from '../pages/InfluencerManageRequests.js';
 
 const routes = [
     { path: '/', component: HomePage },
@@ -27,7 +28,8 @@ const routes = [
     { path: '/sponsor-campaigns', component: SponsorCampaigns },
     { path : '/sponsor-requests', component : SponsorRequests },
     { path : '/influencer-dashboard', component : InfluencerDashboard },
-    { path : '/influencer-requests', component : InfluencerRequests},
+    { path : '/influencer-send-requests', component : InfluencerSendRequests },
+    { path : '/influencer-manage-requests', component : InfluencerManageRequests },
   ];
 
 // to check if user is authenticated 

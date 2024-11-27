@@ -19,28 +19,38 @@ export default {
                 console.error("Token is missing in localStorage.");
                 return;
             }
-            const res = await fetch(location.origin + '/admin-reports', {
-                method: 'GET',
+            const res = await fetch(location.origin + '/sponsor-reports', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
             })
+
+            // const text = await res.text()
+
+            // alert(text);
+
             const task_id = (await res.json()).task_id // from the response
             const interval = setInterval(async() => {
-                const res = await fetch(`${location.origin}/admin-reports/${task_id}`, {
-                    method: POST,
+                const res = await fetch(`${location.origin}/sponsor-reports`, {
+                    method: 'GET',
                     headers : {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     }
                 }) // to use the task_id
+
+                // const text = await res.text()
+
+                // alert(text);
+
                 if (res.ok) {
                     console.log('Report Generated!')
-                    window.open(`${location.origin}/admin-reports/${task_id}`)
+                    window.open(`${location.origin}/sponsor-reports`)
                     clearInterval(interval)
                 }
-            }, 100)  // fixed interval pulling every 100 milliseconds          
+            })  // fixed interval pulling every 2000 milliseconds          
         },
     },
 }

@@ -18,7 +18,7 @@ influencer = Api(influencer_bp)
 
 class InfluencerDashboard(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
 
@@ -111,7 +111,7 @@ class InfluencerDashboard(Resource):
 class InfluencerSendRequests(Resource):
 
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()
@@ -209,7 +209,7 @@ class InfluencerSendRequests(Resource):
 class InfluencerManageRequests(Resource):
 
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()
@@ -231,6 +231,24 @@ class InfluencerManageRequests(Resource):
                     Campaigns.name.ilike(f'%{search_query}%') |
                     AdRequests.status.ilike(f'%{search_query}%')
                 )
+
+            ad_requests = [
+                {
+                    "request_id": req.request_id,
+                    "campaign": {"name": req.campaigns.name},
+                    "messages": req.messages,
+                    "requirements": req.requirements,
+                    "payment_amount": req.payment_amount,
+                    "negotiation_amount": req.negotiation_amount,
+                    "status": req.status,
+                }
+                for req in ad_requests_query.all()
+            ]
+            
+            return make_response(jsonify({
+                'current_user': current_user,
+                'ad_requests': ad_requests
+            }), 200)
 
         except Exception as e:
             return make_response(jsonify({'message': f'Error while fetching requests. {str(e)}'}), 500)
@@ -255,7 +273,7 @@ class InfluencerManageRequests(Resource):
             ad_request = AdRequests.query.filter_by(request_id=request_id).first()
             campaign = Campaigns.query.filter_by(campaign_id=ad_request.campaign_id).first()
             sponsor = Sponsors.query.filter_by(user_id = campaign.sponsor_id).first()
-            influencer = Influencers.query.filter_by(user_id = ad_request.influencer_id).first
+            influencer = Influencers.query.filter_by(user_id = ad_request.influencer_id).first()
 
             if not ad_request:
                 return make_response(jsonify({'message': 'Request does not exist.'}), 400)
@@ -267,25 +285,41 @@ class InfluencerManageRequests(Resource):
                 return make_response(jsonify({'message': 'Sponsor does not exist.'}), 400)
             
             if action == 'accept':
+                # amount = 0
+                # if ad_request.negotiation_amount:
+                #     amount = ad_request.negotiation_amount
+                # else:
+                #     amount = ad_request.payment_amount
+                
+                # if amount > 0:
+                #     if sponsor.budget >= amount and campaign.budget >= amount:
+                #         sponsor.budget -= amount
+                #         campaign.budget -= amount
+                #         influencer.earnings += amount
+                #         ad_request.status = 'Accepted'
+                #     else: 
+                #         return make_response(jsonify({'message': 'Can\'t accept request as the sponsor faces budget constraints.'}), 400)
+                # else:
+                #     return make_response(jsonify({'message': 'Amount should be greater than zero.'}), 400)
+
                 amount = 0
-                if ad_request.negotiation_amount:
+                if ad_request.negotiation_amount and ad_request.negotiation_amount > 0:
                     amount = ad_request.negotiation_amount
                 else:
                     amount = ad_request.payment_amount
-                
                 if amount > 0:
-                    if sponsor.budget >= amount and campaign.budget >= amount:
-                        sponsor.budget -= amount
-                        campaign.budget -= amount
+                    if sponsor.budget >= amount:
                         influencer.earnings += amount
+                        campaign.budget -= amount
+                        sponsor.budget -= amount
                         ad_request.status = 'Accepted'
-                    else: 
-                        return make_response(jsonify({'message': 'Can\'t accept request as the sponsor faces budget constraints.'}), 400)
+                    else:
+                        return {'message': 'Insufficient budget.'}, 400
                 else:
-                    return make_response(jsonify({'message': 'Amount should be greater than zero.'}), 400)
+                    return {'message': 'Amount must be greater than zero.'}
                 
             elif action == 'negotiate':
-                negotiation_amount = float(data.get('negotiation_amount', 0).strip())
+                negotiation_amount = float(data.get('negotiation_amount', 0))
                 
                 if not negotiation_amount:
                     return make_response(jsonify({'message': 'Negotiation amount is required.'}), 400)
@@ -307,7 +341,7 @@ class InfluencerManageRequests(Resource):
 class InfluencerJoinedCampaigns(Resource):
 
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()

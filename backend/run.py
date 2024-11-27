@@ -9,11 +9,11 @@ from flask_bcrypt import Bcrypt
 import flask_excel as excel
 
 # Local Application Imports - These are my application modules that are modularized in the app folder.
-from app.config import Config
-from app.models import *
-from app.jobs.celery_factory import celery_init_app
-from app.jobs.tasks import add
+from application.config import Config
+from application.models import *
+from application.jobs.celery_factory import celery_init_app
 from celery.result import AsyncResult
+
 
 cache = Cache(config={'CACHE_TYPE': 'RedisCache'})
 
@@ -32,10 +32,10 @@ def create_app():
     app.app_context().push()
     # mailer.init_app(app)
 
-    from app.users import auth_bp, create_admin
-    from app.admin import admin_bp
-    from app.sponsor import sponsor_bp
-    from app.influencer import influencer_bp
+    from application.users import auth_bp, create_admin
+    from application.admin import admin_bp
+    from application.sponsor import sponsor_bp
+    from application.influencer import influencer_bp
 
     # Initialize the app context before database operations
     with app.app_context():
@@ -56,9 +56,16 @@ app = create_app()
 
 celery_app = celery_init_app(app)
 
+import application.jobs.celery_schedule
+
 @app.route('/')
 def home():
     return send_from_directory('../frontend', 'index.html')
+
+# from application.jobs.mailer import send_email
+# send_email('test@example.com', 'Test Subject', '<h1>Test Body</h1>')
+
+print('mail sent!')
 
 if __name__ == "__main__":
     app.run(debug=True)

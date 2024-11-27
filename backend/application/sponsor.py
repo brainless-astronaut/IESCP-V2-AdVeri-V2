@@ -25,7 +25,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 
 class SponsorDashboard(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()
@@ -90,7 +90,7 @@ class SponsorDashboard(Resource):
 
 class SponsorCampaigns(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()
@@ -285,7 +285,7 @@ class SponsorCampaigns(Resource):
 
 class SponsorRequests(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
         sponsor_id = current_user['user_id']
@@ -365,12 +365,6 @@ class SponsorRequests(Resource):
             db.session.rollback()
             return {'message': f'Error occured. Action paused. More information: {str(e)}'}, 500
         
-
-
-
-
-
-
 class SponsorReports(Resource):
     @jwt_required()
     def post(self):
@@ -379,9 +373,15 @@ class SponsorReports(Resource):
         return {'task_id': task.id}, 202  # Return task_id for client to poll
 
     @jwt_required()
-    def get(self, task_id):
+    @cache.cached(timeout = 5)
+    def get(self):
         '''Check the status of a report and send the file if ready.'''
         download_dir = './frontend/downloads/'
+
+        task_id = request.args.get('task_id')
+
+        if not task_id:
+            return {'message': 'Task ID is required.'}, 400
 
         # Check the task status using Celery
         result = AsyncResult(task_id)

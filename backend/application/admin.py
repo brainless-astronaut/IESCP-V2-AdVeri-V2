@@ -23,7 +23,7 @@ admin = Api(admin_bp)
 
 class AdminDashboard(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
         print('token', current_user) ## debugging point
@@ -78,7 +78,7 @@ class AdminDashboard(Resource):
 
 class AdminManageUsers(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             #Getting jwt_identity
@@ -193,7 +193,7 @@ class AdminManageUsers(Resource):
         
 class AdminManageCamapaigns(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         current_user = get_jwt_identity()
 
@@ -288,7 +288,7 @@ class AdminManageCamapaigns(Resource):
 
 class AdminApproveSponsor(Resource):
     @jwt_required()
-    @cache.memoize(timeout = 5)
+    @cache.cached(timeout = 5)
     def get(self):
         try:
             current_user = get_jwt_identity()

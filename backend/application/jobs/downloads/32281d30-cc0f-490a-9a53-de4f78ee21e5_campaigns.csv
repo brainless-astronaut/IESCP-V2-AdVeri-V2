@@ -1,0 +1,3 @@
+campaign_id,sponsor_id,is_flagged,name,description,start_date,end_date,budget,visibility,goals
+2,6,False,samsung test 2,samsung test 2,2024-11-20,2024-11-30,178000.0000000000,private,samsung test 2
+3,6,False,PUBLIC CAMPAIGN TEST,PUBLIC CAMPAIGN TEST,2024-11-11,2024-11-30,980000.0000000000,public,PUBLIC CAMPAIGN TEST

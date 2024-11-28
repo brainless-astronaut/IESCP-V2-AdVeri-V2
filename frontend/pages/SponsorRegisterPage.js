@@ -52,11 +52,11 @@ export default {
     },
     template: `
         <div class="register-container">
-            <h1>Sponsors Registration</h1>
             <div v-if="message">
                 <p>{{ message }}</p>
             </div>
             <form @submit.prevent="registerSponsor">
+                <h1>Sponsors Registration</h1>
                 <label for="username">Username:</label>
                 <input type="text" v-model="form.username" placeholder="Enter your username" required>
 

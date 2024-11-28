@@ -1,12 +1,10 @@
 # Standard library imports
-# from collections import defaultdict
-# from datetime import datetime
 import os
 
 # Flask imports
 from flask import (
-    jsonify, Blueprint, make_response, send_file, request,
-    current_app as app, send_from_directory
+    jsonify, Blueprint, make_response, request,
+    current_app as app
 )
 from flask_restful import Api, Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -203,7 +201,7 @@ class AdminManageCamapaigns(Resource):
         #     Campaigns.is_flagged == False
         # ).all()
 
-        campaigns = Campaigns.query.filter(Campaigns.is_flagged == False)
+        campaigns = Campaigns.query.filter_by(is_flagged = False).all()
 
         print('Campaign - query: \n', campaigns)
 
@@ -293,14 +291,47 @@ class AdminApproveSponsor(Resource):
         try:
             current_user = get_jwt_identity()
 
-            sponsors_to_approve = Users.query.filter_by(role='sponsor', is_approved=False).all()
+            # sponsors_to_approve = Users.query.filter_by(role='sponsor', is_approved=False).all()
+
+            sponsors_to_approve = (
+                Users.query
+                .join(Sponsors, Users.user_id == Sponsors.user_id)
+                .filter(Users.role == 'sponsor', Users.is_approved == False)
+                .add_columns(
+                    Users.user_id,
+                    Users.username,
+                    Users.email,
+                    Users.role,
+                    Sponsors.entity_name,
+                    Sponsors.industry,
+                    Sponsors.budget
+                )
+                .all()
+            )
+
+            # print('Sponsors to approve - query: \n', sponsors_to_approve)
+
+            sponsors_to_approve_list = [
+                {
+                    'user_id': item[0],
+                    'username': item[1],
+                    'email': item[2],
+                    'role': item[3],
+                    'name': item[4],
+                    'industry': item[5],
+                    'budget': item[6]
+                }
+                for item in sponsors_to_approve
+            ]
+
+            print(type(sponsors_to_approve_list))
 
             return make_response(jsonify({
                 'current_user': current_user,
-                'sponsors_to_approve': sponsors_to_approve
+                'sponsors_to_approve': sponsors_to_approve_list
             }), 200)
         except Exception as e:
-            return make_response(jsonify({'message': 'Failed to retrieve sponsors to approve.'}, 500))
+            return make_response(jsonify({'message': f'Failed to retrieve sponsors to approve. {str(e)}'}, 500))
     
     @jwt_required()
     def post(self):
@@ -308,8 +339,15 @@ class AdminApproveSponsor(Resource):
             data = request.get_json()
 
             user_id = data.get('user_id')
+            action = data.get('action')
             user = Users.query.filter_by(user_id = user_id)
-            user.is_approved = True
+
+            if action == 'approve':
+                user.is_aproved = True
+            elif action == 'deny':
+                db.session.delete(user)
+            else:
+                return make_response(jsonify({'message': 'Invalid action.'}, 400))
             db.session.commit()
             return make_response(jsonify({'message': 'Sponsor approved successfully!'}, 200))
         

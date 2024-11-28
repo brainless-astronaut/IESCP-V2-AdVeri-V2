@@ -8,11 +8,11 @@ export default {
             <p>Where Ads Meet Authenticity</p>
         </div>
         <div class="right">
+            <div v-if="message" class="message">
+                {{ message }}
+            </div>
             <div class="button-container">
                 <h2>Login</h2>
-                <div v-if="message" class="message">
-                    <p>{{ message }}</p>
-                </div>
                 <form @submit.prevent="login">
                     <input type="text" v-model="username" placeholder="Enter username" required>
                     <input type="password" v-model="password" placeholder="Enter password" required>

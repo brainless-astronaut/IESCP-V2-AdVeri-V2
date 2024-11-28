@@ -15,14 +15,8 @@ export default {
                 </nav>
             </header>
 
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-        
-            <div class="container">
-                <!-- Campaign Search -->
+            <!-- Campaign Search -->
+            <div class="search-container">
                 <h2>Search Campaigns</h2>
                 <form @submit.prevent="fetchCampaigns">
                     <input
@@ -32,6 +26,10 @@ export default {
                     />
                     <button type="submit" class="button">Search</button>
                 </form>
+            </div>
+
+            <div class="table-container">
+                
 
                 <!-- Display messages -->
                 <div v-if="messages.length" class="messages">
@@ -58,7 +56,7 @@ export default {
                         <td>{{ detail.progress }}</td>
                         <td>
                             <!-- View Modal Trigger -->
-                            <button @click="openModal(detail.campaign.campaign_id)" class="btn btn-view">
+                            <button @click="openModal(detail.campaign.campaign_id)" class="button">
                             View
                             </button>
 
@@ -82,7 +80,7 @@ export default {
                                 placeholder="Enter your qualifications to join"
                                 required
                             />
-                            <button type="submit" class="btn-request">
+                            <button type="submit" class="button">
                                 Request to Join
                             </button>
                             </form>
@@ -104,7 +102,7 @@ export default {
                     <p><strong>Budget:</strong> {{ modalData.budget }}</p>
                     <p><strong>Visibility:</strong> {{ modalData.visibility }}</p>
                     <p><strong>Goals:</strong> {{ modalData.goals }}</p>
-                    <button @click="closeModal" class="btn btn-close">Close</button>
+                    <button @click="closeModal" class="button">Close</button>
                     </div>
                 </div>
             </div>

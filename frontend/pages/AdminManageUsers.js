@@ -189,7 +189,7 @@ export default {
                     body: JSON.stringify({ user_id: userId, action })
                 });
                 
-                const responseText = await response.text();
+                // const responseText = await response.text();
                 // alert("Response text:", responseText);
                 
                 if (!response.ok) {

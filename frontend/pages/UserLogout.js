@@ -1,10 +1,10 @@
 export default {
     template: `
         <div class="logout-container">
-            <p>{{ message }}</p>
-            <p v-if="!redirecting">
-            If you are not redirected, click 
-            <a :href="homeUrl">here</a> to return to the homepage.
+            <p class="message">{{ message }}</p>
+            <p v-if="!redirecting" class="info-text">
+            If you are not redirected, click
+            <a :href="homeUrl" class="redirect-link">here</a> to return to the homepage.
             </p>
         </div>
     `,
@@ -31,9 +31,10 @@ export default {
                 const data = await response.json();
                 this.message = data.message;
                 this.redirectAfterDelay();
-            } else {
-                this.message = "Failed to log out. Please try again.";
-            }
+            } 
+            // else {
+            //     this.message = "An error occurred while logging out.";
+            // }
             } catch (error) {
                 this.message = "An error occurred while logging out.";
                 console.error("Logout Error:", error);
@@ -50,4 +51,5 @@ export default {
       this.logout();
     },
   };
-  
+
+

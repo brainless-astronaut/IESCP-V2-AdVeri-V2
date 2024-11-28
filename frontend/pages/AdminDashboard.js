@@ -14,7 +14,7 @@ export default {
                 <router-link to="/admin-approve-sponsor">Sponsor Applications</router-link>
                 <router-link to="/logout">Logout</router-link>
             </nav>
-        </header>
+        </header> 
 
         <div class="container">
             <div class="left">

@@ -2,7 +2,7 @@
 
 export default {
     template: `
-        <div class="container">
+        <div>
             <header class="navbar">
                 <h2>Influencer | manage Requests</h2>
                 <router-link to="/influencer-dashboard">Dashboard</router-link>
@@ -10,7 +10,7 @@ export default {
                 <router-link to="/influencer-manage-requests">Manage Requests</router-link>
                 <router-link to="/logout">Logout</router-link>
             </header>
-
+            <div class="table-container">
             <form @submit.prevent="fetchAdRequests">
             <input 
                 type="text" 
@@ -25,7 +25,7 @@ export default {
                 {{ message.text }}
             </p>
             </div>
-
+            
             <!-- Ad Requests Table -->
             <table v-if="adRequests.length">
                 <thead>
@@ -68,6 +68,7 @@ export default {
                 </tbody>
             </table>
             <p v-else>No ad requests found.</p>
+        </div>
         </div>
     `,
     data() {

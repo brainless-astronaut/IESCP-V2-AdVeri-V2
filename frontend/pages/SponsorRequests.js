@@ -1,6 +1,6 @@
 export default {
     template: `
-        <div class="container">
+        <div>
             <header class="navbar">
                 <div class="navbar-left">
                     <h1>Sponsor | Manage Campaigns</h1>
@@ -20,7 +20,7 @@ export default {
                     <button @click="openCreateCampaignModal">Create Campaign</button>
                 </div> -->
             </header>
-
+        <div class="table-container">
             <!-- Flash Messages -->
             <div v-if="messages.length" class="messages">
                 <p v-for="(message, index) in messages" :key="index" :class="message.category">
@@ -80,6 +80,7 @@ export default {
                 </div>
             </div>
         <p v-else>Create campaigns to make requests.</p>
+    </div>
     </div>
     `,
     data() {

@@ -2,7 +2,7 @@
 
 export default {
     template: `
-    <div class="container">
+    <div>
         <header class="navbar">
             <div class="navbar-left">
                 <h1>Admin | Dashboard</h1>
@@ -15,42 +15,45 @@ export default {
                 <router-link to="/logout">Logout</router-link>
             </nav>
         </header>
-        <div class="left">
-            <h2>Counts</h2>
-            <div class="card-container">
-                <div class="card">
-                    <h3>Sponsors</h3>
-                    <p>{{ counts.sponsors_count }}</p>
-                </div>
-                <div class="card">
-                    <h3>Influencers</h3>
-                    <p>{{ counts.influencers_count }}</p>
-                </div>
-                <div class="card">
-                    <h3>Campaigns</h3>
-                    <p>{{ counts.campaigns_count }}</p>
-                </div>
-                <div class="card">
-                    <h3>Pending Sponsors</h3>
-                    <p>{{ counts.sponsors_to_approve_count }}</p>
-                </div>
-                <div class="card">
-                    <h3>Flagged Sponsors</h3>
-                    <p>{{ counts.flagged_sponsors_count }}</p>
-                </div>
-                <div class="card">
-                    <h3>Flagged Influencers</h3>
-                    <p>{{ counts.flagged_influencers_count }}</p>
-                </div>
-                <div class="card">
-                    <h3>Flagged Campaigns</h3>
-                    <p>{{ counts.flagged_campaigns_count }}</p>
+
+        <div class="container">
+            <div class="left">
+                <h2>Counts</h2>
+                <div class="card-container">
+                    <div class="card">
+                        <h3>Sponsors</h3>
+                        <p>{{ counts.sponsors_count }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Influencers</h3>
+                        <p>{{ counts.influencers_count }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Campaigns</h3>
+                        <p>{{ counts.campaigns_count }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pending Sponsors</h3>
+                        <p>{{ counts.sponsors_to_approve_count }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Flagged Sponsors</h3>
+                        <p>{{ counts.flagged_sponsors_count }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Flagged Influencers</h3>
+                        <p>{{ counts.flagged_influencers_count }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Flagged Campaigns</h3>
+                        <p>{{ counts.flagged_campaigns_count }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="right">
-            <canvas id="sponsorsChart">spns ind</canvas>
-            <canvas id="campaignsChart">cmpps ind</canvas>
+            <div class="right">
+                <canvas id="sponsorsChart">spns ind</canvas>
+                <canvas id="campaignsChart">cmpps ind</canvas>
+            </div>
         </div>
     </div>
     `,

@@ -14,6 +14,7 @@ import SponsorRequests from '../pages/SponsorRequests.js';
 import InfluencerDashboard from '../pages/InfluencerDashboard.js';
 import InfluencerSendRequests from '../pages/InfluencerSendRequests.js'
 import InfluencerManageRequests from '../pages/InfluencerManageRequests.js';
+import UserLogout from '../pages/UserLogout.js';
 
 const routes = [
     { path: '/', component: HomePage },
@@ -30,6 +31,7 @@ const routes = [
     { path : '/influencer-dashboard', component : InfluencerDashboard },
     { path : '/influencer-send-requests', component : InfluencerSendRequests },
     { path : '/influencer-manage-requests', component : InfluencerManageRequests },
+    { path : '/logout', component : UserLogout },
   ];
 
 // to check if user is authenticated 

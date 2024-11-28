@@ -177,9 +177,12 @@ class UserLogin(Resource):
 class UserLogout(Resource):
     @jwt_required()
     def post(self):
-        response = {"message": "Logout successful"}
+        print("Request Headers:", request.headers)
+        print("Request JSON:", request.json)
+        response = {"message": "Logout successful! Redirecting back to home page in 5 seconds."}
         unset_jwt_cookies(response)
         return response, 200
+
 
 auth.add_resource(SponsorRegistration, '/register-sponsor')
 auth.add_resource(InfluencerRegistration, '/register-influencer')

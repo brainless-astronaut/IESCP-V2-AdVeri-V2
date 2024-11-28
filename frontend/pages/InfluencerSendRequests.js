@@ -2,13 +2,17 @@
 
 export default {
     template: `
-        <div class="container">
+        <div>
             <header class="navbar">
-                <h2>Influencer | Send Requests</h2>
-                <router-link to="/influencer-dashboard">Dashboard</router-link>
-                <router-link to="/influencer-send-requests">Send Requests</router-link>
-                <router-link to="/influencer-manage-requests">Manage Requests</router-link>
-                <router-link to="/logout">Logout</router-link>
+                <div class="navbar-left">
+                    <h2>Influencer | Send Requests</h2>
+                </div>
+                <nav class="navbar-links">
+                    <router-link to="/influencer-dashboard">Dashboard</router-link>
+                    <router-link to="/influencer-send-requests">Send Requests</router-link>
+                    <router-link to="/influencer-manage-requests">Manage Requests</router-link>
+                    <router-link to="/logout">Logout</router-link>
+                </nav>
             </header>
 
             <br>
@@ -16,91 +20,92 @@ export default {
             <br>
             <br>
             <br>
-            
+        
+            <div class="container">
+                <!-- Campaign Search -->
+                <h2>Search Campaigns</h2>
+                <form @submit.prevent="fetchCampaigns">
+                    <input
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Search by name or description"
+                    />
+                    <button type="submit" class="button">Search</button>
+                </form>
 
-            <!-- Campaign Search -->
-            <h2>Search Campaigns</h2>
-            <form @submit.prevent="fetchCampaigns">
-                <input
-                type="text"
-                v-model="searchQuery"
-                placeholder="Search by name or description"
-                />
-                <button type="submit" class="btn">Search</button>
-            </form>
+                <!-- Display messages -->
+                <div v-if="messages.length" class="messages">
+                    <p v-for="(messages, index) in messages" :key="index" :class="messages.category">
+                    {{ messages.text }}
+                    </p>
+                </div>
 
-            <!-- Display messages -->
-            <div v-if="messages.length" class="messages">
-                <p v-for="(messages, index) in messages" :key="index" :class="messages.category">
-                {{ messages.text }}
-                </p>
-            </div>
+                <!-- Campaign Details -->
+                <div v-if="campaignDetails.length">
+                    <table>
+                    <thead>
+                        <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Progress</th>
+                        <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(detail, index) in campaignDetails" :key="index">
+                        <td>{{ detail.campaign.name }}</td>
+                        <td>{{ detail.campaign.description }}</td>
+                        <td>{{ detail.progress }}</td>
+                        <td>
+                            <!-- View Modal Trigger -->
+                            <button @click="openModal(detail.campaign.campaign_id)" class="btn btn-view">
+                            View
+                            </button>
 
-            <!-- Campaign Details -->
-            <div v-if="campaignDetails.length">
-                <table>
-                <thead>
-                    <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Progress</th>
-                    <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(detail, index) in campaignDetails" :key="index">
-                    <td>{{ detail.campaign.name }}</td>
-                    <td>{{ detail.campaign.description }}</td>
-                    <td>{{ detail.progress }}</td>
-                    <td>
-                        <!-- View Modal Trigger -->
-                        <button @click="openModal(detail.campaign.campaign_id)" class="btn btn-view">
-                        View
-                        </button>
+                            <!-- Request Form -->
+                            <form @submit.prevent="sendRequest(detail.campaign.campaign_id)">
+                            <input
+                                type="number"
+                                v-model="requestForm.paymentAmount"
+                                placeholder="Request a payment amount"
+                                required
+                            />
+                            <input
+                                type="text"
+                                v-model="requestForm.messages"
+                                placeholder="Send messages request to the sponsor"
+                                required
+                            />
+                            <input
+                                type="text"
+                                v-model="requestForm.requirements"
+                                placeholder="Enter your qualifications to join"
+                                required
+                            />
+                            <button type="submit" class="btn-request">
+                                Request to Join
+                            </button>
+                            </form>
+                        </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+                <p v-else>No campaigns found.</p>
 
-                        <!-- Request Form -->
-                        <form @submit.prevent="sendRequest(detail.campaign.campaign_id)">
-                        <input
-                            type="number"
-                            v-model="requestForm.paymentAmount"
-                            placeholder="Request a payment amount"
-                            required
-                        />
-                        <input
-                            type="text"
-                            v-model="requestForm.messages"
-                            placeholder="Send messages request to the sponsor"
-                            required
-                        />
-                        <input
-                            type="text"
-                            v-model="requestForm.requirements"
-                            placeholder="Enter your qualifications to join"
-                            required
-                        />
-                        <button type="submit" class="btn-request">
-                            Request to Join
-                        </button>
-                        </form>
-                    </td>
-                    </tr>
-                </tbody>
-                </table>
-            </div>
-            <p v-else>No campaigns found.</p>
-
-            <!-- View Modal -->
-            <div v-if="showModal" class="modal">
-                <div class="modal-content">
-                <h2 class="modal-title">View Campaign</h2>
-                <p><strong>Name:</strong> {{ modalData.name }}</p>
-                <p><strong>Description:</strong> {{ modalData.description }}</p>
-                <p><strong>Start Date:</strong> {{ modalData.start_date }}</p>
-                <p><strong>End Date:</strong> {{ modalData.end_date }}</p>
-                <p><strong>Budget:</strong> {{ modalData.budget }}</p>
-                <p><strong>Visibility:</strong> {{ modalData.visibility }}</p>
-                <p><strong>Goals:</strong> {{ modalData.goals }}</p>
-                <button @click="closeModal" class="btn btn-close">Close</button>
+                <!-- View Modal -->
+                <div v-if="showModal" class="modal">
+                    <div class="modal-content">
+                    <h2 class="modal-title">View Campaign</h2>
+                    <p><strong>Name:</strong> {{ modalData.name }}</p>
+                    <p><strong>Description:</strong> {{ modalData.description }}</p>
+                    <p><strong>Start Date:</strong> {{ modalData.start_date }}</p>
+                    <p><strong>End Date:</strong> {{ modalData.end_date }}</p>
+                    <p><strong>Budget:</strong> {{ modalData.budget }}</p>
+                    <p><strong>Visibility:</strong> {{ modalData.visibility }}</p>
+                    <p><strong>Goals:</strong> {{ modalData.goals }}</p>
+                    <button @click="closeModal" class="btn btn-close">Close</button>
+                    </div>
                 </div>
             </div>
         </div>

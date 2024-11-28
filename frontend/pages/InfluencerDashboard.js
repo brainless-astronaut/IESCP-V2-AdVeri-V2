@@ -3,20 +3,26 @@
 export default {
     template: `
         <div id="app">
-            <header>
-                <h2>Influencer | Dashboard</h2>
-                <router-link to="/influencer-dashboard">Dashboard</router-link>
-                <router-link to="/influencer-send-requests">Send Requests</router-link>
-                <router-link to="/logout">Logout</router-link>
+            <header class="navbar">
+                <div class="navber-left">
+                    <h2>Influencer | Dashboard</h2>
+                </div>
+                <div class="navbar-links">
+                    <router-link to="/influencer-dashboard">Dashboard</router-link>
+                    <router-link to="/influencer-send-requests">Send Requests</router-link>
+                    <router-link to="/logout">Logout</router-link>
+                </div>
             </header>
-
-            <div class="dashboard-container">
             
-                <!-- Cards Section -->
-                <div class="cards">
-                    <div class="card" v-for="(card, key) in cards" :key="key">
-                        <h3>{{ card.title }}</h3>
-                        <p>{{ card.value }}</p>
+
+            <div class="container">
+                <div class="left">
+                    <!-- Cards Section -->
+                    <div class="card-container">
+                        <div class="card" v-for="(card, key) in cards" :key="key">
+                            <h3>{{ card.title }}</h3>
+                            <p>{{ card.value }}</p>
+                        </div>
                     </div>
                 </div>
 

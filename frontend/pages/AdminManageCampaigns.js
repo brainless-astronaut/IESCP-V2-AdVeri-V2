@@ -1,9 +1,9 @@
 export default {
     template: `
-    <div class="container">
+    <div>
         <header class="navbar">
             <div class="navbar-left">
-                <h1>Admin | Dashboard</h1>
+                <h1>Admin | Manage Campaigns</h1>
             </div>
             <nav class="navbar-links">
                 <router-link to="/admin-dashboard">Dashboard</router-link>
@@ -13,83 +13,84 @@ export default {
                 <router-link to="/logout">Logout</router-link>
             </nav>
         </header>
+        <div class="table-container">
+            <!-- Table for Unflagged/Active Campaigns -->
+            <section>
+                <h2>Campaigns</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campaign ID</th>
+                            <th>Sponsor</th>
+                            <th>Campaign Name</th>
+                            <th>Description</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="campaign in campaigns" :key="campaign.id">
+                            <td>{{ campaign.id }}</td>
+                            <td>{{ campaign.sponsor_name }}</td>
+                            <td>{{ campaign.name }}</td>
+                            <td>{{ campaign.description }}</td>
+                            <td>{{ campaign.start_date }}</td>
+                            <td>{{ campaign.end_date }}</td>
+                            <td> 
+                                <button @click="flagCampaign(campaign)">Flag</button>
+                                <details>
+                                    <summary class="btn btn-view">View</summary>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
+                                </details>                        
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
-        <!-- Table for Unflagged/Active Campaigns -->
-        <section>
-            <h2>Campaigns</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Campaign ID</th>
-                        <th>Sponsor</th>
-                        <th>Campaign Name</th>
-                        <th>Description</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="campaign in campaigns" :key="campaign.id">
-                        <td>{{ campaign.id }}</td>
-                        <td>{{ campaign.sponsor_name }}</td>
-                        <td>{{ campaign.name }}</td>
-                        <td>{{ campaign.description }}</td>
-                        <td>{{ campaign.start_date }}</td>
-                        <td>{{ campaign.end_date }}</td>
-                        <td> 
-                            <button @click="flagCampaign(campaign)">Flag</button>
-                            <details>
-                                <summary class="btn btn-view">View</summary>
-                                <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
-                                <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
-                                <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
-                                <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
-                            </details>                        
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
 
-
-        <!-- Table for flagged Campaigns -->
-        <section>
-            <h2>Flagged Campaigns</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Campaign ID</th>
-                        <th>Sponsor</th>
-                        <th>Campaign Name</th>
-                        <th>Description</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="campaign in flaggedCampaigns" :key="campaign.id">
-                        <td>{{ campaign.id }}</td>
-                        <td>{{ campaign.sponsor_name }}</td>
-                        <td>{{ campaign.name }}</td>
-                        <td>{{ campaign.description }}</td>
-                        <td>{{ campaign.start_date }}</td>
-                        <td>{{ campaign.end_date }}</td>
-                        <td> 
-                            <button @click="unflagCampaign(campaign)">Unflag</button>
-                            <details>
-                                <summary class="btn btn-view">View</summary>
-                                <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
-                                <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
-                                <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
-                                <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
-                            </details>                        
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+            <!-- Table for flagged Campaigns -->
+            <section>
+                <h2>Flagged Campaigns</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campaign ID</th>
+                            <th>Sponsor</th>
+                            <th>Campaign Name</th>
+                            <th>Description</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="campaign in flaggedCampaigns" :key="campaign.id">
+                            <td>{{ campaign.id }}</td>
+                            <td>{{ campaign.sponsor_name }}</td>
+                            <td>{{ campaign.name }}</td>
+                            <td>{{ campaign.description }}</td>
+                            <td>{{ campaign.start_date }}</td>
+                            <td>{{ campaign.end_date }}</td>
+                            <td> 
+                                <button @click="unflagCampaign(campaign)">Unflag</button>
+                                <details>
+                                    <summary class="btn btn-view">View</summary>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
+                                </details>                        
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
     </div>
     `,
     data() {

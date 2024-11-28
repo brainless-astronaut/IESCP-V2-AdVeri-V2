@@ -97,75 +97,111 @@ export default {
     },
     template: `
         <div id="app">
-            <nav class="navbar-links">
-                <router-link to="/sponsor-dashboard">Dashboard</router-link>
-                <router-link to="/sponsor-campaigns">Campaigns</router-link>
-                <router-link to="/sponsor-requests">Requests</router-link>
-                <router-link to="/sponsor-reports">Reports</router-link>
-                <router-link to="/logout">Logout</router-link>
-            </nav>
-
-            <!-- Campaign Counts -->
-            <section>
-                <h2>Campaign Counts</h2>
-                <p>Total Campaigns: {{ totalCounts.total_campaigns }}</p>
-                <p>Past Campaigns: {{ totalCounts.past_campaigns_count }}</p>
-                <p>Ongoing Campaigns: {{ totalCounts.present_campaigns_count }}</p>
-                <p>Future Campaigns: {{ totalCounts.future_campaigns_count }}</p>
-            </section>
-
-            <!-- Request Counts -->
-            <section>
-                <h2>Request Counts</h2>
-                <p>Sent Requests: {{ totalCounts.sent_requests_count }}</p>
-                <p>Received Requests: {{ totalCounts.received_requests_count }}</p>
-            </section>
-
-            <!-- Campaign Reach 
-            <section>
-                <h2>Campaign Reach</h2>
-                <div v-if="campaignReach">
-                    <ul>
-                        <li v-for="(reach, campaignName) in campaignReach" :key="campaignName">
-                            <strong>{{ campaignName }}:</strong> {{ reach }} reach
-                        </li>
-                    </ul>
+            <div class="navbar">    
+                <div class="navbar-left">
+                    <h1>Sponsor | Dashboard</h1>
                 </div>
-            </section> -->
-
-            <!-- Influencer Counts by Campaign -->
-            <section>
-                <h2>Influencer Counts by Campaign</h2>
-                <div v-if="campaignInfluencerCounts">
-                    <ul>
-                        <li v-for="(count, campaignName) in campaignInfluencerCounts" :key="campaignName">
-                            <strong>{{ campaignName }}:</strong> {{ count }} influencers
-                        </li>
-                    </ul>
+                <div class="navbar-links">
+                    <router-link to="/sponsor-dashboard">Dashboard</router-link>
+                    <router-link to="/sponsor-campaigns">Campaigns</router-link>
+                    <router-link to="/sponsor-requests">Requests</router-link>
+                    <router-link to="/sponsor-reports">Reports</router-link>
+                    <router-link to="/logout">Logout</router-link>
                 </div>
-            </section>
+            </div>
+            <div class="container">
+            
+                <div class="left">
+                    <h2>Counts</h2>
+                    <div class="card-container">
+                        <div class="card">
+                            <h3>Total Campaigns</h3>
+                            <p>{{ totalCounts.total_campaigns_count }}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Past Campaigns</h3>
+                            <p>{{ totalCounts.past_campaigns_count }}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Present Campaigns</h3>
+                            <p>{{ totalCounts.present_campaigns_count }}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Future Campaigns</h3>
+                            <p>{{ totalCounts.future_campaigns_count }}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Sent Requests</h3>
+                            <p>{{ totalCounts.sent_requests_count }}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Received Requests</h3>
+                            <p>{{ totalCounts.received_requests_count }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Campaign Counts 
+                <section>
+                    <h2>Campaign Counts</h2>
+                    <p>Total Campaigns: {{ totalCounts.total_campaigns }}</p>
+                    <p>Past Campaigns: {{ totalCounts.past_campaigns_count }}</p>
+                    <p>Ongoing Campaigns: {{ totalCounts.present_campaigns_count }}</p>
+                    <p>Future Campaigns: {{ totalCounts.future_campaigns_count }}</p>
+                </section>
 
-            <!-- Campaign Listings -->
-            <!-- <section>
-                <h2>Campaign Listings</h2>
-                <h3>Past Campaigns</h3>
-                <ul v-if="pastCampaigns.length">
-                    <li v-for="campaign in pastCampaigns" :key="campaign.id">{{ campaign.name }} (Ended)</li>
-                </ul>
-                
-                <h3>Ongoing Campaigns</h3>
-                <ul v-if="presentCampaigns.length">
-                    <li v-for="campaign in presentCampaigns" :key="campaign.id">{{ campaign.name }} (Ongoing)</li>
-                </ul>
+                <!-- Request Counts 
+                <section>
+                    <h2>Request Counts</h2>
+                    <p>Sent Requests: {{ totalCounts.sent_requests_count }}</p>
+                    <p>Received Requests: {{ totalCounts.received_requests_count }}</p>
+                </section> -->
 
-                <h3>Future Campaigns</h3>
-                <ul v-if="futureCampaigns.length">
-                    <li v-for="campaign in futureCampaigns" :key="campaign.id">{{ campaign.name }} (Starting Soon)</li>
-                </ul>
-            </section> -->
-            <div class="right">
-                <canvas id="influencersCountChart">Influencer Counts per Campaign Chart</canvas>
-                <!-- <canvas id="campaignReachChart">Reach by Campaign Chart</canvas> -->
+                <!-- Campaign Reach 
+                <section>
+                    <h2>Campaign Reach</h2>
+                    <div v-if="campaignReach">
+                        <ul>
+                            <li v-for="(reach, campaignName) in campaignReach" :key="campaignName">
+                                <strong>{{ campaignName }}:</strong> {{ reach }} reach
+                            </li>
+                        </ul>
+                    </div>
+                </section> -->
+
+                <!-- Influencer Counts by Campaign 
+                <section>
+                    <h2>Influencer Counts by Campaign</h2>
+                    <div v-if="campaignInfluencerCounts">
+                        <ul>
+                            <li v-for="(count, campaignName) in campaignInfluencerCounts" :key="campaignName">
+                                <strong>{{ campaignName }}:</strong> {{ count }} influencers
+                            </li>
+                        </ul>
+                    </div>
+                </section> -->
+
+                <!-- Campaign Listings -->
+                <!-- <section>
+                    <h2>Campaign Listings</h2>
+                    <h3>Past Campaigns</h3>
+                    <ul v-if="pastCampaigns.length">
+                        <li v-for="campaign in pastCampaigns" :key="campaign.id">{{ campaign.name }} (Ended)</li>
+                    </ul>
+                    
+                    <h3>Ongoing Campaigns</h3>
+                    <ul v-if="presentCampaigns.length">
+                        <li v-for="campaign in presentCampaigns" :key="campaign.id">{{ campaign.name }} (Ongoing)</li>
+                    </ul>
+
+                    <h3>Future Campaigns</h3>
+                    <ul v-if="futureCampaigns.length">
+                        <li v-for="campaign in futureCampaigns" :key="campaign.id">{{ campaign.name }} (Starting Soon)</li>
+                    </ul>
+                </section> -->
+                <div class="right">
+                    <canvas id="influencersCountChart">Influencer Counts per Campaign Chart</canvas>
+                    <!-- <canvas id="campaignReachChart">Reach by Campaign Chart</canvas> -->
+                </div>
             </div>
         </div>
     `

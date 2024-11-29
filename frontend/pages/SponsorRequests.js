@@ -20,67 +20,72 @@ export default {
                     <button @click="openCreateCampaignModal">Create Campaign</button>
                 </div> -->
             </header>
-        <div class="table-container">
-            <!-- Flash Messages -->
-            <div v-if="messages.length" class="messages">
-                <p v-for="(message, index) in messages" :key="index" :class="message.category">
-                    {{ message.text }}
-                </p>
-            </div>
 
-        <!-- Campaign Details -->
-            <div v-if="requestDetails && Object.keys(requestDetails).length">
-                <div v-for="(details, campaignId) in requestDetails" :key="campaignId">
-                    <h2>Campaign: {{ details.campaign.name }}</h2>
-                    <div v-if="details.request && details.request.length">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Influencer</th>
-                                    <th>Status</th>
-                                    <th>Message</th>
-                                    <th>Requirements</th>
-                                    <th>Payment Amount</th>
-                                    <th>Negotiated Amount</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(request, index) in details.request" :key="index">
-                                    <td>{{ request.ad_request.request_id }}</td>
-                                    <td>{{ request.influencer_name }}</td>
-                                    <td>{{ request.ad_request.status }}</td>
-                                    <td>{{ request.ad_request.messages }}</td>
-                                    <td>{{ request.ad_request.requirements }}</td>
-                                    <td>{{ request.ad_request.payment_amount }}</td>
-                                    <td>{{ request.ad_request.negotiation_amount || 'N/A' }}</td>
-                                    <td>
-                                    <form @submit.prevent="handleAction('negotiate', request.ad_request.request_id, $event)">
-                                        <input
-                                        type="number"
-                                        name="negotiated_amount"
-                                        placeholder="Negotiated Amount"
-                                        required
-                                        />
-                                        <button type="submit" class="btn btn-negotiate">Negotiate</button>
-                                    </form>
-                                    <button @click="handleAction('accept', request.ad_request.request_id)" class="btn btn-accept">
-                                        Accept
-                                    </button>
-                                    <button @click="handleAction('revoke', request.ad_request.request_id)" class="btn btn-revoke">
-                                        Revoke
-                                    </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+            <div class="table-container">
+                <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            {{ message.text }}
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
                     </div>
-                    <p v-else>No requests made.</p>
                 </div>
-            </div>
-        <p v-else>Create campaigns to make requests.</p>
-    </div>
+
+
+                <!-- Campaign Details -->
+                <div v-if="requestDetails && Object.keys(requestDetails).length">
+                    <div v-for="(details, campaignId) in requestDetails" :key="campaignId">
+                        <h2>Campaign: {{ details.campaign.name }}</h2>
+                        <div v-if="details.request && details.request.length">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Influencer</th>
+                                        <th>Status</th>
+                                        <th>Message</th>
+                                        <th>Requirements</th>
+                                        <th>Payment Amount</th>
+                                        <th>Negotiated Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(request, index) in details.request" :key="index">
+                                        <td>{{ request.ad_request.request_id }}</td>
+                                        <td>{{ request.influencer_name }}</td>
+                                        <td>{{ request.ad_request.status }}</td>
+                                        <td>{{ request.ad_request.messages }}</td>
+                                        <td>{{ request.ad_request.requirements }}</td>
+                                        <td>{{ request.ad_request.payment_amount }}</td>
+                                        <td>{{ request.ad_request.negotiation_amount || 'N/A' }}</td>
+                                        <td>
+                                        <form @submit.prevent="handleAction('negotiate', request.ad_request.request_id, $event)">
+                                            <input
+                                            type="number"
+                                            name="negotiated_amount"
+                                            placeholder="Negotiated Amount"
+                                            required
+                                            />
+                                            <button type="submit" class="btn btn-negotiate">Negotiate</button>
+                                        </form>
+                                        <button @click="handleAction('accept', request.ad_request.request_id)" class="btn btn-accept">
+                                            Accept
+                                        </button>
+                                        <button @click="handleAction('revoke', request.ad_request.request_id)" class="btn btn-revoke">
+                                            Revoke
+                                        </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p v-else>No requests made.</p>
+                    </div>
+                </div>
+            <p v-else>Create campaigns to make requests.</p>
+        </div>
     </div>
     `,
     data() {
@@ -97,7 +102,26 @@ export default {
         async fetchRequestDetails() {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) throw new Error("Authentication token is missing.");
+                if (!token) {
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'sponsor') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-requests', {
                     method: 'GET',
                     headers: {
@@ -123,7 +147,26 @@ export default {
         async handleAction(action, requestId, event = null) {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) throw new Error("Authentication token is missing.");
+                if (!token) {
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'sponsor') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
 
                 console.log(` action: ${action}\n requestId ${requestId}\n event ${event}`)
 
@@ -150,6 +193,9 @@ export default {
             } catch (error) {
                 this.messages.push({ category: "error", text: error.message });
             }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
         },
     },
 };

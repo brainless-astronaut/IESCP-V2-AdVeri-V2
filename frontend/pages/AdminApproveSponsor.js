@@ -15,9 +15,15 @@ export default {
             </nav>
         </header>
 
-        <div v-if="message" class="message">
-            {{ message }}
+        <div v-if="messages.length" class="modal">
+            <div class="modal-content">
+                <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                    {{ message.text }}
+                </p>
+                <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+            </div>
         </div>
+
 
         <div class="table-container">
             <h2>Sponsor Applications</h2>
@@ -55,7 +61,7 @@ export default {
     data() {
         return {
             sponsorsToApprove: [],
-            message: '',
+            messages: [],
         };
     },
     methods: {
@@ -63,9 +69,24 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
                     return;
                 }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+                
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
+
                 const response = await fetch('/admin-approve-sponsor', {
                     method: 'GET',
                     headers: {
@@ -94,7 +115,21 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+                
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
                 const response = await fetch('/admin-approve-sponsor', {
@@ -116,6 +151,9 @@ export default {
                 console.error(`Error during ${action} action:`, error);
                 this.message = `An unexpected error occurred while trying to ${action} the sponsor.`;
             }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
         },
     },
     mounted() {

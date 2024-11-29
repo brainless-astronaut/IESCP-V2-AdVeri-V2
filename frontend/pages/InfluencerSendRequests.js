@@ -32,11 +32,15 @@ export default {
                 
 
                 <!-- Display messages -->
-                <div v-if="messages.length" class="messages">
-                    <p v-for="(messages, index) in messages" :key="index" :class="messages.category">
-                    {{ messages.text }}
-                    </p>
+                <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            {{ message.text }}
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                    </div>
                 </div>
+
 
                 <!-- Campaign Details -->
                 <div v-if="campaignDetails.length">
@@ -129,6 +133,26 @@ export default {
         async fetchCampaigns() {
             try {
                 const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'influencer') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
                 const url = new URL(location.origin + '/influencer-send-requests');
                 url.searchParams.append('search_query', this.searchQuery);
 
@@ -194,6 +218,9 @@ export default {
             this.showModal = false;
             this.modalData = {};
         },
+        closeMessageModal() {
+            this.messages = [];
+        }
     },
     mounted() {
         this.fetchCampaigns();

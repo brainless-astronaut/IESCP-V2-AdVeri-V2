@@ -32,7 +32,7 @@ export default {
         return {
             username: '',
             password: '',
-            message: ''
+            message: this.$route.query.message || ''
         };
     },
     methods: {

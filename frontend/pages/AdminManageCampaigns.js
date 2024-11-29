@@ -14,6 +14,15 @@ export default {
             </nav>
         </header>
         <div class="table-container">
+            <div v-if="messages.length" class="modal">
+                <div class="modal-content">
+                    <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                        {{ message.text }}
+                    </p>
+                    <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                </div>
+            </div>
+
             <!-- Table for Unflagged/Active Campaigns -->
             <section>
                 <h2>Campaigns</h2>
@@ -97,6 +106,7 @@ export default {
         return {
             campaigns: [],
             flaggedCampaigns: [],
+            messages: [],
         };
     },
     methods: {
@@ -104,7 +114,21 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+                
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
                 const response = await fetch('/admin-campaigns', {
@@ -150,7 +174,21 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+                
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
                 const response = await fetch('/admin-campaigns', {
@@ -170,7 +208,10 @@ export default {
             } catch (error) {
                 console.error(`Error performing action (${action}):`, error);
             }
-        }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
+        },
     },
     mounted() {
         this.fetchCampaigns();

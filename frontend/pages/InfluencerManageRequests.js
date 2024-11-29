@@ -20,11 +20,15 @@ export default {
             <button type="submit" class="btn btn-search">Search</button>
             </form>
 
-            <div class="messages" v-if="messages.length">
-            <p v-for="(message, index) in messages" :key="index" :class="message.category">
-                {{ message.text }}
-            </p>
+            <div v-if="messages.length" class="modal">
+                <div class="modal-content">
+                    <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                        {{ message.text }}
+                    </p>
+                    <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                </div>
             </div>
+
             
             <!-- Ad Requests Table -->
             <table v-if="adRequests.length">
@@ -52,16 +56,16 @@ export default {
                                 v-model.number="adRequest.negotiationAmount" 
                                 placeholder="Enter amount" 
                             />
-                            <button class="btn btn-negotiate">Negotiate</button>
+                            <button class="button">Negotiate</button>
                             </form>
                         </td>
                         <td>{{ adRequest.status }}</td>
                         <td>
                             <form @submit.prevent="handleAction(adRequest.request_id, 'accept')">
-                            <button class="btn btn-accept">Accept</button>
+                            <button class="button">Accept</button>
                             </form>
                             <form @submit.prevent="handleAction(adRequest.request_id, 'reject')">
-                            <button class="btn btn-reject">Reject</button>
+                            <button class="button">Reject</button>
                             </form>
                         </td>
                     </tr>
@@ -84,7 +88,23 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'influencer') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
 
@@ -147,6 +167,9 @@ export default {
             } catch (error) {
                 this.messages = [{ category: 'error', text: error.message }];
             }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
         },
     },
     mounted() {

@@ -30,9 +30,9 @@ EMAIL_TEMPLATES_DIR = os.path.join(BASE_DIR, "emails")
 #     time.sleep(10)
 #     return x+y
 
-@shared_task(ignore_result = True)
-def email_reminder(to, subject, body):
-    send_email(to, subject, body)
+# @shared_task(ignore_result = True)
+# def email_reminder(to, subject, body):
+#     send_email(to, subject, body)
 
 @shared_task(ignore_result = True)
 def daily_login_reminder():
@@ -107,3 +107,29 @@ def trigger_reports(self):
         return {'status': 'success', 'files': filenames}  # Return the list of filenames
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
+    
+@shared_task(bind = True, ignore_result = True)
+def monthly_report():
+    try:
+        campaigns = Campaigns.query.all()
+        approved_sponsors = (
+            db.session.query(Users, Sponsors)
+            .join(Sponsors, Users.user_id == Sponsors.user_id)
+            .filter(Users.is_approved == True)
+            .all()
+        )
+        all_influencers = (
+            db.session.query(Users, Influencers)
+            .join(Influencers, Users.user_id == Influencers.user_id)
+            .all()
+        )
+        sponsors_to_approve = (
+            db.session.query(Users, Sponsors)
+            .join(Sponsors, Users.user_id == Sponsors.user_id)
+            .filter(Users.is_approved == False)
+            .all()
+        )
+
+        ## 
+    except Exception as e:
+        app.logger.error(f"Error in monthly report: {e}")

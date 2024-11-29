@@ -95,6 +95,18 @@ class InfluencerDashboard(Resource):
             ).all()
         ]
 
+        # dataset = {
+        #     'current_user': current_user,
+        #     'requests_count': requests_count,
+        #     'pending_requests_count': pending_requests_count,
+        #     'negotiation_requests_count': negotiation_requests_count,
+        #     'joined_campaigns_count': joined_campaigns_count,
+        #     'earnings': earnings,
+        #     'earnings_by_campaign': earnings_by_campaign,
+        #     'earnings_by_industry': earnings_by_industry
+        # }
+
+        # print(dataset) ## debug
 
 
         return make_response(jsonify({

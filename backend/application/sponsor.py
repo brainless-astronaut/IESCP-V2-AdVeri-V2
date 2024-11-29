@@ -105,6 +105,9 @@ class SponsorCampaigns(Resource):
                 else Campaigns.query.filter_by(sponsor_id=current_user['user_id']).all()
             )
 
+            if not campaigns:
+                return make_response(jsonify({'message': 'No campaigns found'}), 404)
+
             campaigns_list = []
             today = datetime.today().date()
 
@@ -373,10 +376,11 @@ class SponsorReports(Resource):
         return {'task_id': task.id}, 202  # Return task_id for client to poll
 
     @jwt_required()
-    @cache.cached(timeout = 5)
     def get(self):
         '''Check the status of a report and send the file if ready.'''
-        download_dir = './frontend/downloads/'
+
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Path to the current file (sponsor.py)
+        DOWNLOADS_DIR = os.path.join(BASE_DIR, "jobs", "downloads")  # Path to the 'downloads' directory
 
         task_id = request.args.get('task_id')
 
@@ -387,11 +391,16 @@ class SponsorReports(Resource):
         result = AsyncResult(task_id)
         if result.ready():
             # Check for files that start with the task_id
-            files = [f for f in os.listdir(download_dir) if f.startswith(task_id)]
+            files = [f for f in os.listdir(DOWNLOADS_DIR) if f.startswith(task_id)]
             
             if files:
                 # Send the first matching file for download
-                return send_from_directory(download_dir, files[0], as_attachment=True)
+                # return send_from_directory(DOWNLOADS_DIR, files[0], as_attachment=True)
+                return send_from_directory(
+                    DOWNLOADS_DIR, files[0], as_attachment=True, mimetype="text/csv"
+                )
+
+
             else:
                 return {'message': 'File not found, but task is complete.'}, 404
         else:

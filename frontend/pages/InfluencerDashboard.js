@@ -10,12 +10,25 @@ export default {
                 <div class="navbar-links">
                     <router-link to="/influencer-dashboard">Dashboard</router-link>
                     <router-link to="/influencer-send-requests">Send Requests</router-link>
+                    <router-link to="/influencer-manage-requests">Manage Requests</router-link>
                     <router-link to="/logout">Logout</router-link>
                 </div>
             </header>
             
 
+
             <div class="container">
+
+                <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            {{ message.text }}
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                    </div>
+                </div>
+
+
                 <div class="left">
                     <!-- Cards Section -->
                     <div class="card-container">
@@ -42,6 +55,7 @@ export default {
     `,
     data() {
         return {
+            messages: [],           
             cards: {
                 requests_count: { title: "Total Requests", value: 0 },
                 pending_requests_count: { title: "Pending Requests", value: 0 },
@@ -59,9 +73,26 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
                     return;
                 }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'influencer') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
+
                 const response = await fetch(location.origin + '/influencer-dashboard', {
                     method: 'GET',
                     headers: {
@@ -69,8 +100,9 @@ export default {
                         'Authorization': `Bearer ${token}`,
                     }
                 })
-                // const text = await response.text();
-                // console.log(text);
+                const text = await response.text();
+                console.log(text);
+
                 if (response.ok) {
                     const data = await response.json();
                     this.cards.requests_count.value = data.total_requests;
@@ -140,7 +172,10 @@ export default {
                     },
                 },
             })
-        }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
+        },
     },
     mounted() {
         this.fetchDashboardData();

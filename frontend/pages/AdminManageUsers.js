@@ -14,6 +14,15 @@ export default {
             </nav>
         </header>
         <div class="table-container">
+            <div v-if="messages.length" class="modal">
+                <div class="modal-content">
+                    <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                        {{ message.text }}
+                    </p>
+                    <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                </div>
+            </div>
+
             <!-- Table for Influencers -->
             <section>
                 <h2>Influencers</h2>
@@ -114,6 +123,7 @@ export default {
             influencers: [],
             sponsors: [],
             flaggedUsers: [],
+            messages: [],
         };
     },
     methods: {
@@ -121,7 +131,21 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+                
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
                 const response = await fetch('/admin-users', {
@@ -153,7 +177,6 @@ export default {
                 console.error("Error flagging user:", error);
             }
         },
-        
         async unflagUser(user) {
             try {
                 // alert("Unflagging user:", user); // Debugging: Log the user object
@@ -167,18 +190,27 @@ export default {
                 console.error("Error unflagging user:", error);
             }
         },
-        
         async performAction(userId, action) {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
                     return;
                 }
-                // alert("Performing action:", action, "for user ID:", userId);
-                // alert("Token:", token);
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
                 
-                // const response = await fetch(`/admin-users/${userId}`, {
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
 
                 const response = await fetch(`/admin-users`, {
                     method: 'POST',
@@ -201,7 +233,10 @@ export default {
                 // alert(`Error (${action})`, error)
                 console.error(`Error performing action (${action}):`, error);
             }
-        }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
+        },
     },
     mounted() {
         this.fetchUsers();

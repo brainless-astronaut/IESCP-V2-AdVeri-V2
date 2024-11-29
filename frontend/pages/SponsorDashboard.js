@@ -6,6 +6,7 @@ export default {
             totalCounts: {},
             // campaignReach: {},
             campaignInfluencerCounts: {},
+            messages: [],
         };
     },
     created() {
@@ -16,7 +17,23 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    alert("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'sponsor') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
                 const response = await fetch(location.origin + '/sponsor-dashboard', {
@@ -46,12 +63,7 @@ export default {
                 this.campaignInfluencerCounts = data.campaign_influencer_counts_dict;
 
             } catch (error) {
-                if (error.message.includes("422")) {
-                    alert("Error fetching dashboard data (422):", error); // Examine the error details
-                    // Display a user-friendly error message to the user
-                } else {
-                    alert("Error fetching dashboard data:", error);
-                }
+                alert("Error fetching dashboard data:", error);
             }
         },
         renderCharts() {
@@ -93,6 +105,9 @@ export default {
             //         }
             //     }
             // })
+        },
+        async closeMessageModal() {
+            this.message = [];
         }
     },
     template: `
@@ -110,6 +125,15 @@ export default {
                 </div>
             </div>
             <div class="container">
+
+                <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            {{ message.text }}
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                    </div>
+                </div>
             
                 <div class="left">
                     <h2>Counts</h2>

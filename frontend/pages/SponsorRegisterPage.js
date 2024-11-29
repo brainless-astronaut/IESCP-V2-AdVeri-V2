@@ -12,7 +12,7 @@ export default {
                 budget: '',
                 role: 'sponsor' // Hardcoded role as per requirement
             },
-            message: ''
+            messages: [],
         };
     },
     methods: {
@@ -48,6 +48,9 @@ export default {
                 budget: '',
                 role: 'sponsor'
             };
+        },
+        async closeMessageModal () {
+            this.messages = [];
         }
     },
     template: `

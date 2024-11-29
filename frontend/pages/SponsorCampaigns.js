@@ -1,6 +1,6 @@
 export default {
     template: `
-    <div class="sponsor-container">
+    <div id="app">
         <header class="navbar">
             <div class="navbar-left">
                 <h1>Sponsor | Manage Campaigns</h1>
@@ -20,145 +20,159 @@ export default {
                 <button @click="openCreateCampaignModal">Create Campaign</button>
             </div>
         </header>
+        <div class="table-container">
+            <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            {{ message.text }}
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                    </div>
+                </div>
+            <table class="campaigns-tables" v-if="campaigns > 0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Progress</th>
+                        <th>Joined Influencers</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="campaign in campaigns" :key="campaign.campaign.campaign_id">
+                        <td>{{ campaign.campaign.campaign_id }}</td>
+                        <td>{{ campaign.campaign.name }}</td>
+                        <td>{{ campaign.campaign.description }}</td>
+                        <td>{{ campaign.progress }}</td>
+                        <td> 
+                            <div v-for="influencer in campaign.joined_influencers" :key="influencer">
+                                {{ influencer}}
+                            </div>
+                        </td>
+                        <td>
+                            <button @click="openViewModal(campaign)">View</button>
+                            <button @click="openEditModal(campaign)">Edit</button>
+                            <button @click="openSendRequestModal(campaign)">Send Request</button>
+                            <button @click="deleteCampaign(campaign.campaign.campaign_id)">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div v-else class="no-data-message">
+                <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            No campaigns found. Please create a campaign.
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                    </div>
+                </div>
+            </div>
 
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <table class="campaigns-tables">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Progress</th>
-                    <th>Joined Influencers</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="campaign in campaigns" :key="campaign.campaign.campaign_id">
-                    <td>{{ campaign.campaign.campaign_id }}</td>
-                    <td>{{ campaign.campaign.name }}</td>
-                    <td>{{ campaign.campaign.description }}</td>
-                    <td>{{ campaign.progress }}</td>
-                    <td> 
-                        <div v-for="influencer in campaign.joined_influencers" :key="influencer">
-                            {{ influencer}}
-                        </div>
-                    </td>
-                    <td>
-                        <button @click="openViewModal(campaign)">View</button>
-                        <button @click="openEditModal(campaign)">Edit</button>
-                        <button @click="openSendRequestModal(campaign)">Send Request</button>
-                        <button @click="deleteCampaign(campaign.campaign.campaign_id)">Delete</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+            <div> <!-- Root Element -->
+                <!-- Create Campaign Modal -->
+                <div v-if="showCreateCampaignModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Create Campaign</h2>
+                        <form @submit.prevent="createCampaign(campaignDetails)">
+                            <input type="text" v-model="campaignDetails.name" placeholder="Enter Campaign Name" required />
+                            <textarea v-model="campaignDetails.description" placeholder="Campaign Description" required></textarea>
+                            <input type="date" v-model="campaignDetails.start_date" placeholder="Start Date" required />
+                            <input type="date" v-model="campaignDetails.end_date" placeholder="End Date" required />
+                            <input type="number" v-model="campaignDetails.budget" placeholder="Budget" required />
+                            <select v-model="campaignDetails.visibility" placeholder="Select Visibility" required>
+                                <option value="">Select Visibility</option>
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                            </select>
+                            <input type="text" v-model="campaignDetails.goals" placeholder="Enter goals" required />
+                            <button type="submit">Create</button>
+                        </form>
+                        <button @click="closeCreateCampaignModal">Close</button>
+                    </div>
+                </div>
+            
+                <!-- View Modal -->
+                <div v-else-if="showViewModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Details</h2>
+                        <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
+                        <p><strong>Description:</strong> {{ selectedCampaign.description }}</p>
+                        <p><strong>Start Date:</strong> {{ selectedCampaign.start_date }}</p>
+                        <p><strong>End Date:</strong> {{ selectedCampaign.end_date }}</p>
+                        <p><strong>Budget:</strong> {{ selectedCampaign.budget }}</p>
+                        <p><strong>Visibility:</strong> {{ selectedCampaign.visibility }}</p>
+                        <p><strong>Goals:</strong> {{ selectedCampaign.goals }}</p>
+                        <button @click="closeViewModal">Close</button>
+                    </div>
+                </div>
 
-        <div> <!-- Root Element -->
-            <!-- Create Campaign Modal -->
-            <div v-if="showCreateCampaignModal" class="modal">
-                <div class="modal-content">
-                    <h2>Create Campaign</h2>
-                    <form @submit.prevent="createCampaign(campaignDetails)">
-                        <input type="text" v-model="campaignDetails.name" placeholder="Enter Campaign Name" required />
-                        <textarea v-model="campaignDetails.description" placeholder="Campaign Description" required></textarea>
-                        <input type="date" v-model="campaignDetails.start_date" placeholder="Start Date" required />
-                        <input type="date" v-model="campaignDetails.end_date" placeholder="End Date" required />
-                        <input type="number" v-model="campaignDetails.budget" placeholder="Budget" required />
-                        <select v-model="campaignDetails.visibility" placeholder="Select Visibility" required>
+                <!-- Edit Modal -->
+                <div v-else-if="showEditModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Edit Campaign</h2>
+                        <form @submit.prevent="editCampaign">
+                        <input type="text" v-model="selectedCampaign.name" readonly />
+                        <textarea v-model="selectedCampaign.description" placeholder="Edit campaign description..."></textarea>
+                        <input type="date" v-model="selectedCampaign.startDate" />
+                        <input type="date" v-model="selectedCampaign.endDate" />
+                        <input type="number" v-model="selectedCampaign.budget" />
+                        <select v-model="selectedCampaign.visibility">
                             <option value="">Select Visibility</option>
                             <option value="public">Public</option>
                             <option value="private">Private</option>
                         </select>
-                        <input type="text" v-model="campaignDetails.goals" placeholder="Enter goals" required />
-                        <button type="submit">Create</button>
-                    </form>
-                    <button @click="closeCreateCampaignModal">Close</button>
+                        <input type="text" v-model="selectedCampaign.goals" />
+                        <button type="submit">Save Changes</button>
+                        </form>
+                        <button @click="closeEditModal">Close</button>
+                    </div>
                 </div>
-            </div>
-        
-            <!-- View Modal -->
-            <div v-else-if="showViewModal" class="modal">
-                <div class="modal-content">
-                    <h2>Details</h2>
-                    <p><strong>Name:</strong> {{ selectedCampaign.name }}</p>
-                    <p><strong>Description:</strong> {{ selectedCampaign.description }}</p>
-                    <p><strong>Start Date:</strong> {{ selectedCampaign.start_date }}</p>
-                    <p><strong>End Date:</strong> {{ selectedCampaign.end_date }}</p>
-                    <p><strong>Budget:</strong> {{ selectedCampaign.budget }}</p>
-                    <p><strong>Visibility:</strong> {{ selectedCampaign.visibility }}</p>
-                    <p><strong>Goals:</strong> {{ selectedCampaign.goals }}</p>
-                    <button @click="closeViewModal">Close</button>
-                </div>
-            </div>
 
-            <!-- Edit Modal -->
-            <div v-else-if="showEditModal" class="modal">
-                <div class="modal-content">
-                    <h2>Edit Campaign</h2>
-                    <form @submit.prevent="editCampaign">
-                    <input type="text" v-model="selectedCampaign.name" readonly />
-                    <textarea v-model="selectedCampaign.description" placeholder="Edit campaign description..."></textarea>
-                    <input type="date" v-model="selectedCampaign.startDate" />
-                    <input type="date" v-model="selectedCampaign.endDate" />
-                    <input type="number" v-model="selectedCampaign.budget" />
-                    <select v-model="selectedCampaign.visibility">
-                        <option value="">Select Visibility</option>
-                        <option value="public">Public</option>
-                        <option value="private">Private</option>
-                    </select>
-                    <input type="text" v-model="selectedCampaign.goals" />
-                    <button type="submit">Save Changes</button>
-                    </form>
-                    <button @click="closeEditModal">Close</button>
+                <!-- Send Request Modal -->
+                <div v-else-if="showSendRequestModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Send Request to Influencers</h2>
+                        <form @submit.prevent="sendRequest(selectedCampaign.campaignId, requestForm.selectedInfluencers, requestForm.requirements, requestForm.paymentAmount, requestForm.messages)">
+                            <textarea v-model="requestForm.messages" placeholder="Messages"></textarea>
+                            <textarea v-model="requestForm.requirements" placeholder="Requirements"></textarea>
+                            <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount" />
+                            <div>
+                                <h3>Influencers</h3>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Name</th>
+                                            <th>Platform</th>
+                                            <th>Reach</th>
+                                        </tr>
+                                    </thead>
+                                    </tbody>
+                                        <tr v-for="influencer in influencers" :key="influencer.user_id">
+                                            <td><input type="checkbox" :value="influencer.user_id" v-model="requestForm.selectedInfluencers" /></td>
+                                            <td>{{ influencer.name }}</td>
+                                            <td>{{ influencer.platform }}</td>
+                                            <td>{{ influencer.reach }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                            
+                            </div>
+                            <button type="submit">Send</button>
+                        </form>
+                        <button @click="closeSendRequestModal">Close</button>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Send Request Modal -->
-            <div v-else-if="showSendRequestModal" class="modal">
-                <div class="modal-content">
-                    <h2>Send Request to Influencers</h2>
-                    <form @submit.prevent="sendRequest(selectedCampaign.campaignId, requestForm.selectedInfluencers, requestForm.requirements, requestForm.paymentAmount, requestForm.messages)">
-                        <textarea v-model="requestForm.messages" placeholder="Messages"></textarea>
-                        <textarea v-model="requestForm.requirements" placeholder="Requirements"></textarea>
-                        <input type="number" v-model="requestForm.paymentAmount" placeholder="Payment Amount" />
-                        <div>
-                            <h3>Influencers</h3>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Select</th>
-                                        <th>Name</th>
-                                        <th>Platform</th>
-                                        <th>Reach</th>
-                                    </tr>
-                                </thead>
-                                </tbody>
-                                    <tr v-for="influencer in influencers" :key="influencer.user_id">
-                                        <td><input type="checkbox" :value="influencer.user_id" v-model="requestForm.selectedInfluencers" /></td>
-                                        <td>{{ influencer.name }}</td>
-                                        <td>{{ influencer.platform }}</td>
-                                        <td>{{ influencer.reach }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                                        
-                        </div>
-                        <button type="submit">Send</button>
-                    </form>
-                    <button @click="closeSendRequestModal">Close</button>
-                </div>
-            </div>
-        </div> <!-- End of Root Element -->
+            </div> <!-- End of Root Element -->
+        </div>
     </div>                
     `,
     data() {
         return {
+            messages: [],
             searchQuery: "",
             campaigns: [],
             influencers: [],
@@ -200,7 +214,26 @@ export default {
             this.loading = true;
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) alert("Token is missing in localStorage.");
+                if (!token) {
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+
+                // alert(userRole)
+
+                if (userRole !== 'sponsor') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
+                    return;
+                }
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'GET',
                     headers: {
@@ -209,7 +242,15 @@ export default {
                     }
                 });
                 // alert('reponse text: ' + await response.text())
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    // throw new Error(`HTTP error! status: ${response.status}`);
+                    // alert('reponse text: ' + await response.text())
+                    this.messages.push({
+                        text: 'No campaigns found. Please create a campaign.',
+                        category: 'error'
+                    });
+
+                }
                 const data = await response.json();
                 this.campaigns = data.campaigns;
             } catch (error) {
@@ -421,6 +462,9 @@ export default {
         async closeEditModal() {
             this.showEditModal = false;
             this.selectedCampaign = {};
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
         },
     },
     mounted() {

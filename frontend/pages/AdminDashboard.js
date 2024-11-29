@@ -17,6 +17,15 @@ export default {
         </header> 
 
         <div class="container">
+            <div v-if="messages.length" class="modal">
+                <div class="modal-content">
+                    <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                        {{ message.text }}
+                    </p>
+                    <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                </div>
+            </div>
+
             <div class="left">
                 <h2>Counts</h2>
                 <div class="card-container">
@@ -59,6 +68,7 @@ export default {
     `,
     data() {
         return {
+            messages: [],
             counts: {},
             sponsorsDistribution: {},
             campaignsDistribution: {},
@@ -75,7 +85,21 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    console.error("Token is missing in localStorage.");
+                    this.$router.push({
+                        path: '/login',
+                        query: { message: 'Token has expired. Please login again.' }
+                    });
+                    return;
+                }
+
+                const decodedToken = jwt_decode(token);
+                const userRole = decodedToken.sub.role;
+                
+                if (userRole !== 'admin') {
+                    this.$router.push({
+                        path: '/',
+                        query: { message: 'You are not authorized to access this page.' }
+                    });
                     return;
                 }
 
@@ -170,6 +194,9 @@ export default {
             //         }
             //     }
             // });
-        }
+        },
+        async closeMessageModal() {
+            this.messages = []; // Clear messages to hide the modal
+        },
     }
 };

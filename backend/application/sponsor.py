@@ -50,40 +50,28 @@ class SponsorDashboard(Resource):
                 Campaigns.start_date >= datetime.today()
             ).count()
 
-            # campaign_reach = db.session.query(
-            #     Campaigns.name,
-            #     func.sum(Influencers.reach)
-            # ).join(AdRequests, AdRequests.campaign_id == Campaigns.campaign_id) \
-            # .join(Influencers, Influencers.influencer_id == AdRequests.influencer_id) \
-            # .filter(AdRequests.status == 'Accepted') \
-            # .group_by(Campaigns.name).all()
-
-            # Mapping result to a dictionary
-            # campaign_reach_dict = {name: reach for name, reach in campaign_reach}
-
-            # Get campaign influencer counts without additional list brackets
-            campaign_influencer_counts = db.session.query(
-                Campaigns.name, 
-                func.count(AdRequests.influencer_id).label('influencer_count')
+            campaign_reach = db.session.query(
+                Campaigns.name,
+                db.func.sum(Influencers.reach).label('total_reach')
             ).join(AdRequests, AdRequests.campaign_id == Campaigns.campaign_id) \
-            .filter(AdRequests.sponsor_id == current_user['user_id'], AdRequests.status == 'accepted') \
-            .group_by(Campaigns.name).all()
+            .join(Influencers, Influencers.user_id == AdRequests.influencer_id) \
+            .filter(
+                Campaigns.sponsor_id == current_user['user_id'],
+                AdRequests.status == 'Accepted'
+            ).group_by(Campaigns.name).all()
 
-            # Convert to dictionary safely
-            campaign_influencer_counts_dict = {
-                campaign: count for campaign, count in campaign_influencer_counts
-            } if campaign_influencer_counts else {}
-                
+
+            campaign_reach_dict = {campaign_name: reach_value or 0 for campaign_name, reach_value in campaign_reach}
+
             return make_response(jsonify({
                 'current_user': current_user,
+                'total_campaigns_count': total_campaigns,
                 'past_campaigns_count': past_campaigns_count,
                 'present_campaigns_count': present_campaigns_count,
                 'future_campaigns_count': future_campaigns_count,
                 'sent_requests_count': sent_requests_count,
                 'received_requests_count': received_requests_count,
-                # 'campaign_reach_dict': campaign_reach_dict,
-                'campaign_influencer_counts_dict': campaign_influencer_counts_dict,
-                'total_campaigns': total_campaigns,
+                'campaign_reach_dict': campaign_reach_dict
             }), 200)
         except Exception as e:
             return make_response(jsonify({'message': f'Error occured while retreiving data. More information: {str(e)}'}), 500)

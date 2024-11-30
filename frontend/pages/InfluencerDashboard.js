@@ -122,7 +122,7 @@ export default {
             const labels= this.earnings_by_campaign.map((item) => item[1]) // Campaign names
             const data = this.earnings_by_campaign.map((item) => item[0]) // Earnings
 
-            new CharacterData(document.getElementById('earningsByCampaignChart'), {
+            new Chart(document.getElementById('earningsByCampaignChart'), {
                 type: 'bar',
                 data: {
                     labels,

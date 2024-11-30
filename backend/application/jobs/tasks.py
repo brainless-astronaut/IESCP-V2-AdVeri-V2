@@ -20,24 +20,11 @@ from .mailer import send_email
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Path to the current file
 EMAIL_TEMPLATES_DIR = os.path.join(BASE_DIR, "emails")
 
-# @shared_task(ignore_result = False)
-# def sendHi(user_id):
-#     user = Users.query.filter_by(user_id=user_id).first()
-#     return "Hi " + user.username
-
-# @shared_task(ignore_result = False)
-# def add(x,y):
-#     time.sleep(10)
-#     return x+y
-
-# @shared_task(ignore_result = True)
-# def email_reminder(to, subject, body):
-#     send_email(to, subject, body)
-
 @shared_task(ignore_result = True)
 def daily_login_reminder():
     app.logger.info("Daily login reminder task started.")
-    _24_hrs_ago = datetime.now() - timedelta(hours=24)
+    # _24_hrs_ago = datetime.now() - timedelta(hours=24)
+    _24_hrs_ago = datetime.now() - timedelta(minutes=5)
     inactive_users = Users.query.filter(
         Users.last_login_at < _24_hrs_ago,
         Users.role.in_(['sponsor', 'influencer'])
@@ -108,28 +95,98 @@ def trigger_reports(self):
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
     
-@shared_task(bind = True, ignore_result = True)
-def monthly_report():
-    try:
-        campaigns = Campaigns.query.all()
-        approved_sponsors = (
-            db.session.query(Users, Sponsors)
-            .join(Sponsors, Users.user_id == Sponsors.user_id)
-            .filter(Users.is_approved == True)
-            .all()
-        )
-        all_influencers = (
-            db.session.query(Users, Influencers)
-            .join(Influencers, Users.user_id == Influencers.user_id)
-            .all()
-        )
-        sponsors_to_approve = (
-            db.session.query(Users, Sponsors)
-            .join(Sponsors, Users.user_id == Sponsors.user_id)
-            .filter(Users.is_approved == False)
-            .all()
-        )
+# @shared_task(bind=True, ignore_result=False)
+# def create_csv(self):
+#     campaigns = Campaigns.query.all()
+#     approved_sponsors = (
+#         db.session.query(Users, Sponsors)
+#         .join(Sponsors, Users.user_id == Sponsors.user_id)
+#         .filter(Users.is_approved == True)
+#         .all()
+#     )
+#     all_influencers = (
+#         db.session.query(Users, Influencers)
+#         .join(Influencers, Users.user_id == Influencers.user_id)
+#         .all()
+#     )
+#     sponsors_to_approve = (
+#         db.session.query(Users, Sponsors)
+#         .join(Sponsors, Users.user_id == Sponsors.user_id)
+#         .filter(Users.is_approved == False)
+#         .all()
+#     )
+#     # Task ID for unique filenames
+#     task_id = self.request.id
+    
+#     # Dictionary of datasets and corresponding column names
+#     datasets = {
+#         'campaigns': (campaigns, [column.name for column in Campaigns.__table__.columns]),
+#         'approved_sponsors': (approved_sponsors, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns]),
+#         'all_influencers': (all_influencers, [column.name for column in Users.__table__.columns + Influencers.__table__.columns]),
+#         'sponsors_to_approve': (sponsors_to_approve, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns])
+#     }
+#     # Loop through each dataset to generate and save CSV files
+#     filenames = []
+#     for name, (data, columns) in datasets.items():
+#         filename = f'{name}_data_{task_id}.csv'
+#         csv_out = flask_excel.make_response_from_query_sets(data, column_names=columns, file_type='csv')
+        
+#         # Save CSV to file
+#         with open(f'./backend/celery/downloads/{filename}', 'wb') as file:
+#             file.write(csv_out.data)
+        
+#         filenames.append(filename)  # Collect the filename
+#     return filenames  # Return the list of filenames
 
-        ## 
-    except Exception as e:
-        app.logger.error(f"Error in monthly report: {e}")
+@shared_task(bind=True, ignore_result=False)
+def monthly_report(self):
+    campaigns = Campaigns.query.all()
+    approved_sponsors = (
+        db.session.query(Users, Sponsors)
+        .join(Sponsors, Users.user_id == Sponsors.user_id)
+        .filter(Users.is_approved == True)
+        .all()
+    )
+    all_influencers = (
+        db.session.query(Users, Influencers)
+        .join(Influencers, Users.user_id == Influencers.user_id)
+        .all()
+    )
+    sponsors_to_approve = (
+        db.session.query(Users, Sponsors)
+        .join(Sponsors, Users.user_id == Sponsors.user_id)
+        .filter(Users.is_approved == False)
+        .all()
+    )
+    # Task ID for unique filenames
+    task_id = self.request.id
+    
+    # Dictionary of datasets and corresponding column names
+    datasets = {
+        'campaigns': (campaigns, [column.name for column in Campaigns.__table__.columns]),
+        'approved_sponsors': (approved_sponsors, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns]),
+        'all_influencers': (all_influencers, [column.name for column in Users.__table__.columns + Influencers.__table__.columns]),
+        'sponsors_to_approve': (sponsors_to_approve, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns])
+    }
+    
+    # Loop through each dataset to generate and save CSV files
+    filenames = []
+    for name, (data, columns) in datasets.items():
+        filename = f'{name}_data_{task_id}.csv'
+        csv_out = flask_excel.make_response_from_query_sets(data, column_names=columns, file_type='csv')
+        
+        # Save CSV to file
+        file_path = f'./backend/celery/downloads/{filename}'
+        with open(file_path, 'wb') as file:
+            file.write(csv_out.data)
+        
+        filenames.append(file_path)  # Collect the full path of the file
+    
+    # Send email with attachments (CSV files)
+    recipient_email = 'admin@adveri.com'  # Specify the recipient's email
+    subject = 'Monthy Report'
+    body = '<h1 style="font-family: Fira Code, sans-serif;">Please find the attached CSV files</h1>'
+    
+    send_email(recipient_email, subject, body, attachments=filenames)
+
+    return filenames  # Return the list of filenames

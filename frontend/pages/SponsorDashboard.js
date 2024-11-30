@@ -4,8 +4,7 @@ export default {
     data() {
         return {
             totalCounts: {},
-            // campaignReach: {},
-            campaignInfluencerCounts: {},
+            campaignReach: {},
             messages: [],
         };
     },
@@ -27,8 +26,6 @@ export default {
                 const decodedToken = jwt_decode(token);
                 const userRole = decodedToken.sub.role;
 
-                // alert(userRole)
-
                 if (userRole !== 'sponsor') {
                     this.$router.push({
                         path: '/',
@@ -44,6 +41,9 @@ export default {
                     }
                 });
 
+                // const text = await response.text();
+                // console.log(text);
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -52,60 +52,57 @@ export default {
 
                 // Extracting data from the response
                 this.totalCounts = {
-                    total_campaigns: data.total_campaigns,
+                    total_campaigns_count: data.total_campaigns_count, // Correct key alignment
                     past_campaigns_count: data.past_campaigns_count,
                     present_campaigns_count: data.present_campaigns_count,
-                    future_campaigns_count: data.future_campaigns,
+                    future_campaigns_count: data.future_campaigns_count,
                     sent_requests_count: data.sent_requests_count,
                     received_requests_count: data.received_requests_count
                 };
-                // this.campaignReach = data.campaign_reach_dict;
-                this.campaignInfluencerCounts = data.campaign_influencer_counts_dict;
-
+                this.campaignReach = data.campaign_reach_dict;
+                this.$nextTick(() => {
+                    this.renderCharts();
+                });
             } catch (error) {
-                alert("Error fetching dashboard data:", error);
+                alert(`Error fetching dashboard data:, ${error}`);
             }
         },
         renderCharts() {
-            const countsCtx = document.getElementById('influencersCountChart').getContext('2d');
-            new CharacterData(countsCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(this.campaignInfluencerCounts),
-                    datasets: [{
-                        label: 'Influencers by Campaign',
-                        data: Object.values(this.campaignInfluencerCounts),
-                        backgroungColor: 'rgba(255, 191, 0, 1)',
-                    }]
-                },
-                option: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
+            try {
+                const canvas = document.getElementById('campaignReachChart');
+                if (!canvas) {
+                    console.error('Canvas element not found.');
+                    return;
+                }
+        
+                const countsCtx = canvas.getContext('2d');
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+        
+                this.chart = new Chart(countsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(this.campaignReach),
+                        datasets: [{
+                            label: 'Reach by Campaign',
+                            data: Object.values(this.campaignReach),
+                            backgroundColor: 'rgba(255, 191, 0, 1)',
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
                         }
                     }
-                }
-            });
-            // const reachCtx = document.getElementById('campaignReachChart').getContext('2d');
-            // new CharacterData(reachCtx, {
-            //     type: 'bar',
-            //     data: {
-            //         labels: Object.keys(this.campaignReach),
-            //         datasets: [{
-            //             label: 'Reach by Campaign',
-            //             data: Object.values(this.campaignReach),
-            //             backgroungColor: 'rgba(255, 191, 0, 1)',
-            //         }]
-            //     },
-            //     option: {
-            //         scales: {
-            //             y: {
-            //                 beginAtZero: true
-            //             }
-            //         }
-            //     }
-            // })
-        },
+                });
+            } catch (error) {
+                console.error("Error rendering chart:", error);
+            }
+        }
+        ,
         async closeMessageModal() {
             this.message = [];
         }
@@ -192,12 +189,12 @@ export default {
                     </div>
                 </section> -->
 
-                <!-- Influencer Counts by Campaign 
+                <!-- Reach by Campaign 
                 <section>
-                    <h2>Influencer Counts by Campaign</h2>
-                    <div v-if="campaignInfluencerCounts">
+                    <h2>Teach by Campaign</h2>
+                    <div v-if="campaignReach">
                         <ul>
-                            <li v-for="(count, campaignName) in campaignInfluencerCounts" :key="campaignName">
+                            <li v-for="(count, campaignName) in campaignReach" :key="campaignName">
                                 <strong>{{ campaignName }}:</strong> {{ count }} influencers
                             </li>
                         </ul>
@@ -222,10 +219,12 @@ export default {
                         <li v-for="campaign in futureCampaigns" :key="campaign.id">{{ campaign.name }} (Starting Soon)</li>
                     </ul>
                 </section> -->
-                <div class="right">
-                    <canvas id="influencersCountChart">Influencer Counts per Campaign Chart</canvas>
-                    <!-- <canvas id="campaignReachChart">Reach by Campaign Chart</canvas> -->
+
+                <div v-if="Object.keys(campaignReach).length > 0" class="right">
+                    <canvas id="campaignReachChart"></canvas>
                 </div>
+
+
             </div>
         </div>
     `

@@ -158,7 +158,7 @@ export default {
                         progress: campaign.progress,
                         requestForm: {
                             paymentAmount: '',
-                            messages: '',
+                            messages: [],
                             requirements: ''
                         }
                     }));

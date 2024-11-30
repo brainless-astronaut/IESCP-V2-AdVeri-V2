@@ -45,7 +45,7 @@ export default {
                             <td>{{ campaign.start_date }}</td>
                             <td>{{ campaign.end_date }}</td>
                             <td> 
-                                <button @click="flagCampaign(campaign)">Flag</button>
+                                <button class="button" @click="flagCampaign(campaign)">Flag</button>
                                 <details>
                                     <summary class="button">View</summary>
                                     <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
@@ -82,13 +82,13 @@ export default {
                             <td>{{ campaign.start_date }}</td>
                             <td>{{ campaign.end_date }}</td>
                             <td> 
-                                <button @click="unflagCampaign(campaign)">Unflag</button>
+                                <button class="button" @click="unflagCampaign(campaign)">Unflag</button>
                                 <details>
                                     <summary class="button">View</summary>
                                     <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
-                                    <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
-                                    <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
-                                    <p><strong>Campaign Name:</strong> {{ campaign.goals }}</p>
+                                    <p><strong>Budget:</strong> {{ campaign.budget }}</p>
+                                    <p><strong>Visibility:</strong> {{ campaign.visibility }}</p>
+                                    <p><strong>Goals:</strong> {{ campaign.goals }}</p>
                                 </details>                        
                             </td>
                         </tr>
@@ -161,7 +161,7 @@ export default {
                     console.error("Campaign ID is missing:", campaign);
                     return;
                 }
-                await this.performAction(campaign.campaign_id, 'unflag');
+                await this.performAction(campaignId, 'unflag');
             } catch (error) {
                 console.error("Error unflagging campaign:", error);
             }
@@ -187,6 +187,9 @@ export default {
                     });
                     return;
                 }
+
+                alert('passed token check');
+
                 const response = await fetch('/admin-campaigns', {
                     method: 'POST',
                     headers: {
@@ -195,12 +198,18 @@ export default {
                     },
                     body: JSON.stringify({ campaign_id: campaignId, action })
                 });
+
                 const responseText = await response.text();
-                alert('response text post: ' + responseText)
+                console.log("Response from action:", responseText);
+                
                 if (!response.ok) {
+                    // const responseText = await response.text(); // Define responseText
+                    // console.log(responseText);
                     throw new Error(`Error (${response.status}): ${responseText}`);
                 }
+                
                 this.fetchCampaigns();
+                
             } catch (error) {
                 console.error(`Error performing action (${action}):`, error);
             }

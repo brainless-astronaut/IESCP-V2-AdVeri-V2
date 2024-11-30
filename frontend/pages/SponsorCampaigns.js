@@ -198,7 +198,7 @@ export default {
             },
             requestForm: {
                 requirements: '',
-                messages: '',
+                messages: [],
                 paymentAmount: 0,
                 selectedInfluencers: [],
             },

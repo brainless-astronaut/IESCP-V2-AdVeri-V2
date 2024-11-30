@@ -37,7 +37,7 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="influencer in influencers" :key="influencer.id">
+                        <tr v-for="influencer in influencers" :key="influencer.user_id">
                             <td>{{ influencer.username }}</td>
                             <td>{{ influencer.email }}</td>
                             <td>{{ influencer.name }}</td>
@@ -73,7 +73,7 @@ export default {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="sponsor in sponsors" :key="sponsor.id">
+                            <tr v-for="sponsor in sponsors" :key="sponsor.user_id">
                                 <td>{{ sponsor.username }}</td>
                                 <td>{{ sponsor.email }}</td>
                                 <td>{{ sponsor.entity_name}}</td>
@@ -105,7 +105,7 @@ export default {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="user in flaggedUsers" :key="user.id">
+                            <tr v-for="user in flaggedUsers" :key="user.user_id">
                                 <td>{{ user.username }}</td>
                                 <td>{{ user.email }}</td>
                                 <td>
@@ -223,6 +223,7 @@ export default {
                 
                 // const responseText = await response.text();
                 // alert("Response text:", responseText);
+
                 
                 if (!response.ok) {
                     throw new Error(`Error (${response.status}): ${responseText}`);

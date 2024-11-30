@@ -21,7 +21,7 @@ admin = Api(admin_bp)
 
 class AdminDashboard(Resource):
     @jwt_required()
-    @cache.cached(timeout = 5)
+    @cache.cached(timeout = 2)
     def get(self):
         current_user = get_jwt_identity()
         print('token', current_user) ## debugging point
@@ -76,7 +76,7 @@ class AdminDashboard(Resource):
 
 class AdminManageUsers(Resource):
     @jwt_required()
-    @cache.cached(timeout = 5)
+    @cache.cached(timeout = 2)
     def get(self):
         try:
             #Getting jwt_identity
@@ -159,16 +159,11 @@ class AdminManageUsers(Resource):
     @jwt_required()
     def post(self):        
         try:
-            # print("Headers:", request.headers)
-            
-            # Debugging: Log the JWT identity
             current_user = get_jwt_identity()
-            # print("JWT Identity:", current_user)            
 
             data = request.get_json()
 
             user_id = data.get('user_id')
-            # user_id = user_id
             action = data.get('action')
             user = Users.query.filter_by(user_id = user_id).first()
             
@@ -191,7 +186,7 @@ class AdminManageUsers(Resource):
         
 class AdminManageCamapaigns(Resource):
     @jwt_required()
-    @cache.cached(timeout = 5)
+    # @cache.cached(timeout = 2)
     def get(self):
         current_user = get_jwt_identity()
 
@@ -203,21 +198,15 @@ class AdminManageCamapaigns(Resource):
 
         campaigns = Campaigns.query.filter(Campaigns.is_flagged == False).all()
 
-        print('Campaign - query: \n', campaigns)
-
-
         flagged_campaigns = Campaigns.query.filter(Campaigns.is_flagged == True).all()
-
-        print('Flagged Campaign - query: \n', flagged_campaigns)
 
         campaigns_list = [campaign.to_dict() for campaign in campaigns]
 
-
-        print('Campaigns_list: \n', campaigns_list)
-
         flagged_campaigns_list = [campaign.to_dict() for campaign in flagged_campaigns]
 
-        print('Flagged_campaigns list:\n', flagged_campaigns_list)
+        print('campaigns', campaigns_list)
+
+        print('flagged campaigns', flagged_campaigns_list)
 
         return make_response(jsonify({
             'current_user': current_user,
@@ -228,22 +217,25 @@ class AdminManageCamapaigns(Resource):
     @jwt_required()
     def post(self):
         try:
+            current_user = get_jwt_identity()
             data = request.get_json()
 
             campaign_id = data.get('campaign_id')
             action = data.get('action')
-            campaign = Campaigns.query.filter_by(campaign_id = campaign_id)
+            campaign = Campaigns.query.filter_by(campaign_id = campaign_id).first()
+
+            if not campaign:
+                return {'message': 'Campaign not found'}, 404
+
             if action == 'flag':
                 campaign.is_flagged = True
             elif action == 'unflag':
                 campaign.is_flagged = False
-            elif action == 'delete':
-                campaign.delete() 
             else:
-                return make_response(jsonify({'message': 'Invalid action.'}, 400))
+                return {'message': 'Invalid action.'}, 400
             
             db.session.commit()
-            return make_response(jsonify({'message': 'Action performed successfully!'}, 200))
+            return {'message': 'Action performed successfully!'}, 200
         
         except Exception as e:
             db.session.rollback()
@@ -251,7 +243,7 @@ class AdminManageCamapaigns(Resource):
 
 class AdminApproveSponsor(Resource):
     @jwt_required()
-    @cache.cached(timeout = 5)
+    @cache.cached(timeout = 2)
     def get(self):
         try:
             current_user = get_jwt_identity()
@@ -302,13 +294,9 @@ class AdminApproveSponsor(Resource):
     def post(self):
         try:
             data = request.get_json()
-
-            if not data:
-                return make_response(jsonify({'message': 'No JSON payload received.'}), 422)
-
             user_id = data.get('user_id')
             action = data.get('action')
-            user = Users.query.filter_by(user_id = user_id)
+            user = Users.query.filter_by(user_id = user_id).first()
 
             if action == 'approve':
                 user.is_approved = True

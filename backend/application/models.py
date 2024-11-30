@@ -66,7 +66,7 @@ class Campaigns(db.Model):
     __tablename__ = '__campaigns__'
     campaign_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     sponsor_id = db.Column(db.Integer, db.ForeignKey('__sponsors__.sponsor_id'), nullable = False)
-    is_flagged = db.Column(db.String(5), default = 'False')
+    is_flagged = db.Column(db.Boolean(5), default = False)
     name = db.Column(db.String(60), nullable = False)
     description = db.Column(db.String(60), nullable = False)
     start_date = db.Column(db.Date, nullable = False)

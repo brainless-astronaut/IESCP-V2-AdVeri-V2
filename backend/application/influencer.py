@@ -164,7 +164,12 @@ class InfluencerSendRequests(Resource):
 
             # print([campaign for campaign in public_campaigns_details])
 
-            print(public_campaigns_details)
+            details = {
+                'current_user': current_user,
+                'public_campaigns': public_campaigns_details
+                }
+
+            print(details)
 
             return make_response(jsonify({
                 'current_user': current_user,

@@ -95,11 +95,13 @@ export default {
                     },
                 });
 
-                const text = await response.text();
-                console.log(text);
+                // const text = await response.text();
+                // console.log(text);
 
                 const data = await response.json();
-                this.sponsorsToApprove = data.sponsors_to_approve_list;
+                // this.sponsorsToApprove = data.sponsors_to_approve_list;
+                this.sponsorsToApprove = data.sponsors_to_approve;
+
             } catch (error) {
                 console.error('Error fetching sponsors:', error);
                 this.message = 'An unexpected error occurred while fetching sponsors.';
@@ -136,7 +138,7 @@ export default {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify({ user_id, action }),
                 });

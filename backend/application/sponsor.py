@@ -234,7 +234,11 @@ class SponsorCampaigns(Resource):
             current_user = get_jwt_identity()
             data = request.get_json()
             campaign_id = data.get('campaign_id')
-            campaign = Campaigns.query.filter_by(campaign_id = campaign_id, sponsor_id = current_user['user_id']).first()
+
+            print('Campaign id:', campaign_id)
+            campaign = Campaigns.query.filter_by(campaign_id = campaign_id).first()
+
+            print('Campaign:', campaign)
 
             if not campaign:
                 return make_response(jsonify({'message': 'Campaign not found'}), 404)

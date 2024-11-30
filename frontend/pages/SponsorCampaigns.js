@@ -20,16 +20,18 @@ export default {
                 <button @click="openCreateCampaignModal">Create Campaign</button>
             </div>
         </header>
+        
+        <div v-if="messages.length" class="modal">
+            <div class="modal-content">
+                <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                    {{ message.text }}
+                </p>
+                <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+            </div>
+        </div>
+
         <div class="table-container">
-            <div v-if="messages.length" class="modal">
-                    <div class="modal-content">
-                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
-                            {{ message.text }}
-                        </p>
-                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
-                    </div>
-                </div>
-            <table class="campaigns-tables" v-if="campaigns > 0">
+            <table class="campaigns-tables" v-if="campaigns && Object.keys(campaigns).length">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -46,13 +48,16 @@ export default {
                         <td>{{ campaign.campaign.name }}</td>
                         <td>{{ campaign.campaign.description }}</td>
                         <td>{{ campaign.progress }}</td>
-                        <td> 
-                            <div v-for="influencer in campaign.joined_influencers" :key="influencer">
-                                {{ influencer}}
+                        <td>
+                            <div v-if="campaign.joined_influencers && Object.keys(campaign.joined_influencers).length">
+                                <div v-for="influencer in campaign.joined_influencers" :key="influencer">
+                                    {{ influencer}}
+                                </div>
                             </div>
+                            <div v-else>No influencers joined.</div>
                         </td>
                         <td>
-                            <button @click="openViewModal(campaign)">View</button>
+                            <button @click="openViewModal(campaign)">View</button> 
                             <button @click="openEditModal(campaign)">Edit</button>
                             <button @click="openSendRequestModal(campaign)">Send Request</button>
                             <button @click="deleteCampaign(campaign.campaign.campaign_id)">Delete</button>
@@ -225,7 +230,7 @@ export default {
                 const decodedToken = jwt_decode(token);
                 const userRole = decodedToken.sub.role;
 
-                // alert(userRole)
+                // console.log(userRole)
 
                 if (userRole !== 'sponsor') {
                     this.$router.push({
@@ -241,10 +246,10 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                // alert('reponse text: ' + await response.text())
+                // console.log('reponse text: ' + await response.text())
                 if (!response.ok) {
                     // throw new Error(`HTTP error! status: ${response.status}`);
-                    // alert('reponse text: ' + await response.text())
+                    // console.log('reponse text: ' + await response.text())
                     this.messages.push({
                         text: 'No campaigns found. Please create a campaign.',
                         category: 'error'
@@ -254,7 +259,7 @@ export default {
                 const data = await response.json();
                 this.campaigns = data.campaigns;
             } catch (error) {
-                    alert(`Error fetching campaigns: ${error}`);
+                    console.log(`Error fetching campaigns: ${error}`);
             } finally {
                 this.loading = false;
             }
@@ -263,7 +268,7 @@ export default {
         async fetchFlaggedCampaigns() {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) alert("Token is missing in localStorage.");
+                if (!token) console.log("Token is missing in localStorage.");
                 const response = await fetch(`${location.origin}/sponsor-campaigns?flagged=true`, {
                     method: 'GET',
                     headers: {
@@ -271,22 +276,22 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                alert('reponse text: ' + await response.text())
+                console.log('reponse text: ' + await response.text())
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                alert('reponse text: ' + await response.text());
+                console.log('reponse text: ' + await response.text());
                 const data = await response.json();
                 this.flaggedCampaigns = data.flagged_campaigns;
             } catch (error) {
-                alert(`Error fetching flagged campaigns: ${error}`);
+                console.log(`Error fetching flagged campaigns: ${error}`);
             }
         },
         
         async createCampaign(campaignDetails) {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) alert("Token is missing in localStorage.");
+                if (!token) console.log("Token is missing in localStorage.");
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'POST',
                     headers: {
@@ -295,14 +300,16 @@ export default {
                     },
                     body: JSON.stringify({ action: 'create', ...campaignDetails })
                 });
-                alert('reponse text: ' + await response.text());
+                console.log('reponse text: ' + await response.text());
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                alert("Campaign created successfully!");
+                console.log("Campaign created successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after creation
             } catch (error) {
-                alert(`Error creating campaign ${error}`);
+                console.log(`Error creating campaign ${error}`);
+            } finally {
+                this.closeCreateCampaignModal()
             }
         },
        
@@ -310,27 +317,36 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) {
-                    alert("Token is missing in localStorage.");
+                    console.log("Token is missing in localStorage.");
                     return;
                 }
+
+                // Dynamically add campaign_id while sending the request
+                const payload = {
+                    ...this.selectedCampaign, // Include the rest of the selectedCampaign fields
+                    campaign_id: this.selectedCampaign.campaign_id, // Add campaign_id dynamically
+                };
+
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'PUT',
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,
                     },
-                    body: JSON.stringify({...selectedCampaign}),
+                    body: JSON.stringify(payload),
                 });
                 const responseText = await response.text(); // For debugging purposes
-                alert(`response text put: ${responseText}`)
-                alert(`selected campaign: ${selectedCampaign}`)
+                console.log(`response text put: ${responseText}`)
+                console.log(`selected campaign: ${selectedCampaign}`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                alert("Campaign updated successfully!");
+                console.log("Campaign updated successfully!");
                 await this.fetchCampaigns(); // Refresh after edit
             } catch (error) {
-                alert(`Error occurred while editing campaign: ${error}`);
+                console.log(`Error occurred while editing campaign: ${error}`);
+            } finally {
+                this.closeEditModal()
             }
         },
         
@@ -338,7 +354,7 @@ export default {
             this.loading = true;
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) alert("Token is missing in localStorage.");
+                if (!token) console.log("Token is missing in localStorage.");
                 const response = await fetch(location.origin + '/sponsor-campaigns', {
                     method: 'GET',
                     headers: {
@@ -346,12 +362,12 @@ export default {
                         "Authorization": `Bearer ${token}`,
                     },
                 })
-                // alert('fetch inf reponse text: ' + await response.text());
+                // console.log('fetch inf reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 this.influencers = data.influencers;
             } catch (error) {
-                alert(`Error while fetching influencers: ${error}`);
+                console.log(`Error while fetching influencers: ${error}`);
             } finally {
                 this.loading = false;
             }
@@ -360,7 +376,7 @@ export default {
         async sendRequest(campaignId, influencerIds, requirements, paymentAmount, messages) {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) alert("Token is missing in localStorage.");
+                if (!token) console.log("Token is missing in localStorage.");
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'POST',
                     headers: {
@@ -377,28 +393,30 @@ export default {
                     })
                 });
                 if (!campaignId || !influencerIds || !requirements || !paymentAmount || !messages) {
-                    alert(`Invalid request parameters.`);
-                    alert(`campaign id: ${campaignId}`);
-                    alert(`influencersIds: ${influencerIds}`);
-                    alert(`requirements: ${requirements}`);
-                    alert(`paymentAmount: ${paymentAmount}`);
-                    alert(`messages: ${messages}`);
+                    console.log(`Invalid request parameters.`);
+                    console.log(`campaign id: ${campaignId}`);
+                    console.log(`influencersIds: ${influencerIds}`);
+                    console.log(`requirements: ${requirements}`);
+                    console.log(`paymentAmount: ${paymentAmount}`);
+                    console.log(`messages: ${messages}`);
                     return;
                 }
-                alert('reponse text: ' + await response.text());
+                console.log('reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 await this.fetchCampaigns(); // Refresh campaigns after sending requests
             } catch (error) {
-                alert(`Error senfin request: ${error}`);
+                console.log(`Error senfin request: ${error}`);
+            } finally {
+                this.closeSendRequestModal()
             }
         },
 
         async deleteCampaign(campaignId) {
             try {
                 const token = localStorage.getItem('accessToken');
-                if (!token) alert("Token is missing in localStorage.");
+                if (!token) console.log("Token is missing in localStorage.");
                 const requestBody = { campaign_id: campaignId };
-                alert(`Request body: ${requestBody}`);  // Log the body to check
+                console.log(`Request body: ${requestBody}`);  // Log the body to check
 
                 const response = await fetch(`${location.origin}/sponsor-campaigns`, {
                     method: 'DELETE',
@@ -408,12 +426,12 @@ export default {
                     },
                     body: JSON.stringify({ campaign_id: campaignId })
                 });
-                alert('reponse text: ' + await response.text());
+                console.log('reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                alert("Campaign deleted successfully!");
+                console.log("Campaign deleted successfully!");
                 await this.fetchCampaigns(); // Refresh campaigns after deletion
             } catch (error) {
-                alert(`Error deleting campaign ${error}`);
+                console.log(`Error deleting campaign ${error}`);
             }
         },
         
@@ -455,7 +473,16 @@ export default {
         },
 
         async openEditModal(campaign) {
-            this.selectedCampaign = { ...campaign.campaign };
+            this.selectedCampaign = { 
+                campaign_id: campaign.campaign.campaign_id,  // Ensure campaign_id is included
+                name: campaign.campaign.name,
+                description: campaign.campaign.description,
+                startDate: new Date(campaign.campaign.start_date).toISOString().split('T')[0], // Converts to yyyy-MM-dd
+        endDate: new Date(campaign.campaign.end_date).toISOString().split('T')[0], // Converts to yyyy-MM-dd
+                budget: campaign.campaign.budget,
+                visibility: campaign.campaign.visibility,
+                goals: campaign.campaign.goals,
+            };
             this.showEditModal = true;
         },
 

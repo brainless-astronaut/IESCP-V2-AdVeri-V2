@@ -201,56 +201,21 @@ class AdminManageCamapaigns(Resource):
         #     Campaigns.is_flagged == False
         # ).all()
 
-        campaigns = Campaigns.query.filter_by(is_flagged = False).all()
+        campaigns = Campaigns.query.filter(Campaigns.is_flagged == False).all()
 
         print('Campaign - query: \n', campaigns)
 
 
-        flagged_campaigns = Campaigns.query.join(
-            Sponsors, Campaigns.sponsor_id == Sponsors.user_id
-        ).filter(
-            Campaigns.is_flagged == True
-        ).all()
+        flagged_campaigns = Campaigns.query.filter(Campaigns.is_flagged == True).all()
 
         print('Flagged Campaign - query: \n', flagged_campaigns)
 
+        campaigns_list = [campaign.to_dict() for campaign in campaigns]
 
-        ## dict conversions
-        campaigns_list = [
-            {
-                'campaign_id': campaign.campaign_id,
-                'sponsor_name': sponsor.entity_name,
-                'industry': sponsor.industry,
-                'name': campaign.name,
-                'description': campaign.description,
-                'start_date': campaign.start_date,
-                'end_date': campaign.end_date,
-                'budget': campaign.budget,
-                'visibility': campaign.visibility,
-                'goals': campaign.goals
-            } 
-            for campaign in flagged_campaigns
-            if (sponsor := Sponsors.query.get(campaign.sponsor_id))
-        ]
 
         print('Campaigns_list: \n', campaigns_list)
 
-        flagged_campaigns_list = [
-            {
-                'campaign_id': campaign.campaign_id,
-                'sponsor_name': sponsor.entity_name,
-                'industry': sponsor.industry,
-                'name': campaign.name,
-                'description': campaign.description,
-                'start_date': campaign.start_date,
-                'end_date': campaign.end_date,
-                'budget': campaign.budget,
-                'visibility': campaign.visibility,
-                'goals': campaign.goals
-            }
-            for campaign in flagged_campaigns
-            if (sponsor := Sponsors.query.get(campaign.sponsor_id))
-        ]
+        flagged_campaigns_list = [campaign.to_dict() for campaign in flagged_campaigns]
 
         print('Flagged_campaigns list:\n', flagged_campaigns_list)
 
@@ -313,18 +278,18 @@ class AdminApproveSponsor(Resource):
 
             sponsors_to_approve_list = [
                 {
-                    'user_id': item[0],
-                    'username': item[1],
-                    'email': item[2],
-                    'role': item[3],
-                    'name': item[4],
-                    'industry': item[5],
-                    'budget': item[6]
+                    'user_id': item[1],
+                    'username': item[2],
+                    'email': item[3],
+                    'role': item[4],
+                    'name': item[5],
+                    'industry': item[6],
+                    'budget': item[7]
                 }
                 for item in sponsors_to_approve
             ]
 
-            print(type(sponsors_to_approve_list))
+            print('sponsors to approve list', sponsors_to_approve_list)
 
             return make_response(jsonify({
                 'current_user': current_user,
@@ -338,12 +303,15 @@ class AdminApproveSponsor(Resource):
         try:
             data = request.get_json()
 
+            if not data:
+                return make_response(jsonify({'message': 'No JSON payload received.'}), 422)
+
             user_id = data.get('user_id')
             action = data.get('action')
             user = Users.query.filter_by(user_id = user_id)
 
             if action == 'approve':
-                user.is_aproved = True
+                user.is_approved = True
             elif action == 'deny':
                 db.session.delete(user)
             else:

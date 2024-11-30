@@ -11,68 +11,72 @@ export default {
                 <router-link to="/logout">Logout</router-link>
             </header>
             <div class="table-container">
-            <form @submit.prevent="fetchAdRequests">
-            <input 
-                type="text" 
-                v-model="searchQuery" 
-                placeholder="Search by campaign name or status" 
-            />
-            <button type="submit" class="btn btn-search">Search</button>
-            </form>
-
-            <div v-if="messages.length" class="modal">
-                <div class="modal-content">
-                    <p v-for="(message, index) in messages" :key="index" :class="message.category">
-                        {{ message.text }}
-                    </p>
-                    <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                <div class="search-container">
+                    <h2>Search Requests</h2>
+                    <!-- Search Bar -->
+                    <form @submit.prevent="fetchAdRequests">
+                        <input 
+                            type="text" 
+                            v-model="searchQuery" 
+                            placeholder="Search by campaign name or status" 
+                        />
+                        <button type="submit" class="button">Search</button>
+                    </form>
                 </div>
-            </div>
+
+                <div v-if="messages.length" class="modal">
+                    <div class="modal-content">
+                        <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                            {{ message.text }}
+                        </p>
+                        <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
+                    </div>
+                </div>
 
             
-            <!-- Ad Requests Table -->
-            <table v-if="adRequests.length">
-                <thead>
-                    <tr>
-                        <th>Campaign</th>
-                        <th>Message</th>
-                        <th>Requirements</th>
-                        <th>Payment</th>
-                        <th>Negotiated Amount</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="adRequest in adRequests" :key="adRequest.request_id">
-                        <td>{{ adRequest.campaign.name }}</td>
-                        <td>{{ adRequest.messages }}</td>
-                        <td>{{ adRequest.requirements }}</td>
-                        <td>{{ adRequest.payment_amount }}</td>
-                        <td>
-                            <form @submit.prevent="handleAction(adRequest.request_id, 'negotiate')">
-                            <input 
-                                type="number" 
-                                v-model.number="adRequest.negotiationAmount" 
-                                placeholder="Enter amount" 
-                            />
-                            <button class="button">Negotiate</button>
-                            </form>
-                        </td>
-                        <td>{{ adRequest.status }}</td>
-                        <td>
-                            <form @submit.prevent="handleAction(adRequest.request_id, 'accept')">
-                            <button class="button">Accept</button>
-                            </form>
-                            <form @submit.prevent="handleAction(adRequest.request_id, 'reject')">
-                            <button class="button">Reject</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <p v-else>No ad requests found.</p>
-        </div>
+                <!-- Ad Requests Table -->
+                <table v-if="adRequests.length">
+                    <thead>
+                        <tr>
+                            <th>Campaign</th>
+                            <th>Message</th>
+                            <th>Requirements</th>
+                            <th>Payment</th>
+                            <th>Negotiated Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="adRequest in adRequests" :key="adRequest.request_id">
+                            <td>{{ adRequest.campaign.name }}</td>
+                            <td>{{ adRequest.messages }}</td>
+                            <td>{{ adRequest.requirements }}</td>
+                            <td>{{ adRequest.payment_amount }}</td>
+                            <td>
+                                <form @submit.prevent="handleAction(adRequest.request_id, 'negotiate')">
+                                <input 
+                                    type="number" 
+                                    v-model.number="adRequest.negotiationAmount" 
+                                    placeholder="Enter amount" 
+                                />
+                                <button class="button">Negotiate</button>
+                                </form>
+                            </td>
+                            <td>{{ adRequest.status }}</td>
+                            <td>
+                                <form @submit.prevent="handleAction(adRequest.request_id, 'accept')">
+                                <button class="button">Accept</button>
+                                </form>
+                                <form @submit.prevent="handleAction(adRequest.request_id, 'reject')">
+                                <button class="button">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p v-else>No ad requests found.</p>
+            </div>
         </div>
     `,
     data() {

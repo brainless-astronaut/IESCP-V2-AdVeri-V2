@@ -1,4 +1,4 @@
-// frontend/pages/InfleuncerSendRequests.js
+// // frontend/pages/InfleuncerSendRequests.js
 
 export default {
     template: `
@@ -15,22 +15,19 @@ export default {
                 </nav>
             </header>
 
-            <!-- Campaign Search -->
-            <div class="search-container">
-                <h2>Search Campaigns</h2>
-                <form @submit.prevent="fetchCampaigns">
-                    <input
-                    type="text"
-                    v-model="searchQuery"
-                    placeholder="Search by name or description"
-                    />
-                    <button type="submit" class="button">Search</button>
-                </form>
-            </div>
-
             <div class="table-container">
-                
-
+                <!-- Campaign Search -->
+                <div class="search-container">
+                    <h2>Search Campaigns</h2>
+                    <form @submit.prevent="fetchCampaigns">
+                        <input
+                            type="text"
+                            v-model="searchQuery"
+                            placeholder="Search by name or description"
+                        />
+                        <button type="submit" class="button">Search</button>
+                    </form>
+                </div>
                 <!-- Display messages -->
                 <div v-if="messages.length" class="modal">
                     <div class="modal-content">
@@ -41,72 +38,70 @@ export default {
                     </div>
                 </div>
 
-
                 <!-- Campaign Details -->
-                <div v-if="campaignDetails.length">
+               <div v-if="campaignDetails && campaignDetails.length > 0">
+                    <!-- Display campaigns table -->
                     <table>
-                    <thead>
-                        <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Progress</th>
-                        <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(detail, index) in campaignDetails" :key="index">
-                        <td>{{ detail.campaign.name }}</td>
-                        <td>{{ detail.campaign.description }}</td>
-                        <td>{{ detail.progress }}</td>
-                        <td>
-                            <!-- View Modal Trigger -->
-                            <button @click="openModal(detail.campaign.campaign_id)" class="button">
-                            View
-                            </button>
-
-                            <!-- Request Form -->
-                            <form @submit.prevent="sendRequest(detail.campaign.campaign_id)">
-                            <input
-                                type="number"
-                                v-model="requestForm.paymentAmount"
-                                placeholder="Request a payment amount"
-                                required
-                            />
-                            <input
-                                type="text"
-                                v-model="requestForm.messages"
-                                placeholder="Send messages request to the sponsor"
-                                required
-                            />
-                            <input
-                                type="text"
-                                v-model="requestForm.requirements"
-                                placeholder="Enter your qualifications to join"
-                                required
-                            />
-                            <button type="submit" class="button">
-                                Request to Join
-                            </button>
-                            </form>
-                        </td>
-                        </tr>
-                    </tbody>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Progress</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(detail, index) in campaignDetails" :key="index">
+                                <td>{{ detail.campaign.name }}</td>
+                                <td>{{ detail.campaign.description }}</td>
+                                <td>{{ detail.progress }}</td>
+                                <td>
+                                    <button @click="openModal(detail.campaign.campaign_id)" class="button">
+                                        View
+                                    </button>
+                                    <form @submit.prevent="sendRequest(detail.campaign.campaign_id)">
+                                        <input
+                                            type="number"
+                                            v-model="detail.requestForm.paymentAmount"
+                                            placeholder="Request a payment amount"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            v-model="detail.requestForm.messages"
+                                            placeholder="Send messages request to the sponsor"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            v-model="detail.requestForm.requirements"
+                                            placeholder="Enter your qualifications to join"
+                                            required
+                                        />
+                                        <button type="submit" class="button">
+                                            Request to Join
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
                 <p v-else>No campaigns found.</p>
 
+
                 <!-- View Modal -->
                 <div v-if="showModal" class="modal">
                     <div class="modal-content">
-                    <h2 class="modal-title">View Campaign</h2>
-                    <p><strong>Name:</strong> {{ modalData.name }}</p>
-                    <p><strong>Description:</strong> {{ modalData.description }}</p>
-                    <p><strong>Start Date:</strong> {{ modalData.start_date }}</p>
-                    <p><strong>End Date:</strong> {{ modalData.end_date }}</p>
-                    <p><strong>Budget:</strong> {{ modalData.budget }}</p>
-                    <p><strong>Visibility:</strong> {{ modalData.visibility }}</p>
-                    <p><strong>Goals:</strong> {{ modalData.goals }}</p>
-                    <button @click="closeModal" class="button">Close</button>
+                        <h2 class="modal-title">View Campaign</h2>
+                        <p><strong>Name:</strong> {{ modalData.name }}</p>
+                        <p><strong>Description:</strong> {{ modalData.description }}</p>
+                        <p><strong>Start Date:</strong> {{ modalData.start_date }}</p>
+                        <p><strong>End Date:</strong> {{ modalData.end_date }}</p>
+                        <p><strong>Budget:</strong> {{ modalData.budget }}</p>
+                        <p><strong>Visibility:</strong> {{ modalData.visibility }}</p>
+                        <p><strong>Goals:</strong> {{ modalData.goals }}</p>
+                        <button @click="closeModal" class="button">Close</button>
                     </div>
                 </div>
             </div>
@@ -118,14 +113,7 @@ export default {
             searchQuery: '',
             campaignDetails: [],
             modalData: {},
-            showModal: false,
-            requestForm: {
-                paymentAmount: '',
-                messages: '',
-                requirements: ''
-            },
-            showModal: false,
-            modalData: {},
+            showModal: false
         };
     },
 
@@ -143,8 +131,6 @@ export default {
 
                 const decodedToken = jwt_decode(token);
                 const userRole = decodedToken.sub.role;
-
-                // alert(userRole)
 
                 if (userRole !== 'influencer') {
                     this.$router.push({
@@ -164,12 +150,18 @@ export default {
                     }
                 });
 
-                // const text = await response.text();
-                // console.log(text)
-
                 const data = await response.json();
+                console.log(data);
                 if (response.ok) {
-                this.campaignDetails = data.public_campaigns || [];
+                    this.campaignDetails = data.public_campaigns.map(campaign => ({
+                        campaign: campaign.campaign,
+                        progress: campaign.progress,
+                        requestForm: {
+                            paymentAmount: '',
+                            messages: '',
+                            requirements: ''
+                        }
+                    }));
                 } else {
                     this.messages = [{ category: "error", text: data.messages }];
                 }
@@ -181,6 +173,9 @@ export default {
         async sendRequest(campaignId) {
             try {
                 const token = localStorage.getItem('accessToken');
+                const campaignDetail = this.campaignDetails.find(detail => detail.campaign.campaign_id === campaignId);
+                const formData = campaignDetail.requestForm;
+
                 const response = await fetch(location.origin + '/influencer-send-requests', {
                     method: 'POST',
                     headers: {
@@ -189,11 +184,12 @@ export default {
                     },
                     body: JSON.stringify({
                         campaign_id: campaignId,
-                        payment_amount: this.requestForm.paymentAmount,
-                        messages: this.requestForm.messages,
-                        requirements: this.requestForm.requirements,
+                        payment_amount: formData.paymentAmount,
+                        messages: formData.messages,
+                        requirements: formData.requirements,
                     })
                 });
+
                 const data = await response.json();
                 if (response.ok) {
                     this.messages = [{ category: "success", text: data.message }];
@@ -210,7 +206,7 @@ export default {
             const campaign = this.campaignDetails.find(
                 (detail) => detail.campaign.campaign_id === campaignId
             ).campaign;
-            this.modalData = { ...campaign};
+            this.modalData = { ...campaign };
             this.showModal = true;
         },
 
@@ -218,11 +214,14 @@ export default {
             this.showModal = false;
             this.modalData = {};
         },
+
         closeMessageModal() {
             this.messages = [];
         }
     },
+
     mounted() {
         this.fetchCampaigns();
     },
 };
+

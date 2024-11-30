@@ -17,7 +17,7 @@ export default {
             <div v-if="messages.length" class="modal">
                 <div class="modal-content">
                     <p v-for="(message, index) in messages" :key="index" :class="message.category">
-                        {{ message.text }}
+                        {{ message.text }} 
                     </p>
                     <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
                 </div>
@@ -30,7 +30,6 @@ export default {
                     <thead>
                         <tr>
                             <th>Campaign ID</th>
-                            <th>Sponsor</th>
                             <th>Campaign Name</th>
                             <th>Description</th>
                             <th>Start Date</th>
@@ -39,9 +38,8 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="campaign in campaigns" :key="campaign.id">
-                            <td>{{ campaign.id }}</td>
-                            <td>{{ campaign.sponsor_name }}</td>
+                        <tr v-for="campaign in campaigns" :key="campaign.campaign_id">
+                            <td>{{ campaign.campaign_id }}</td>
                             <td>{{ campaign.name }}</td>
                             <td>{{ campaign.description }}</td>
                             <td>{{ campaign.start_date }}</td>
@@ -49,7 +47,7 @@ export default {
                             <td> 
                                 <button @click="flagCampaign(campaign)">Flag</button>
                                 <details>
-                                    <summary class="btn btn-view">View</summary>
+                                    <summary class="button">View</summary>
                                     <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
                                     <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
                                     <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
@@ -69,7 +67,6 @@ export default {
                     <thead>
                         <tr>
                             <th>Campaign ID</th>
-                            <th>Sponsor</th>
                             <th>Campaign Name</th>
                             <th>Description</th>
                             <th>Start Date</th>
@@ -78,9 +75,8 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="campaign in flaggedCampaigns" :key="campaign.id">
-                            <td>{{ campaign.id }}</td>
-                            <td>{{ campaign.sponsor_name }}</td>
+                        <tr v-for="campaign in flaggedCampaigns" :key="campaign.campaign_id">
+                            <td>{{ campaign.campaign_id }}</td>
                             <td>{{ campaign.name }}</td>
                             <td>{{ campaign.description }}</td>
                             <td>{{ campaign.start_date }}</td>
@@ -88,7 +84,7 @@ export default {
                             <td> 
                                 <button @click="unflagCampaign(campaign)">Unflag</button>
                                 <details>
-                                    <summary class="btn btn-view">View</summary>
+                                    <summary class="button">View</summary>
                                     <p><strong>Campaign Name:</strong> {{ campaign.name }}</p>
                                     <p><strong>Campaign Name:</strong> {{ campaign.budget }}</p>
                                     <p><strong>Campaign Name:</strong> {{ campaign.visibility }}</p>
@@ -165,7 +161,7 @@ export default {
                     console.error("Campaign ID is missing:", campaign);
                     return;
                 }
-                await this.performAction(campaign.id, 'unflag');
+                await this.performAction(campaign.campaign_id, 'unflag');
             } catch (error) {
                 console.error("Error unflagging campaign:", error);
             }

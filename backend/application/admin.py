@@ -198,6 +198,8 @@ class AdminManageCamapaigns(Resource):
 
         campaigns = Campaigns.query.filter(Campaigns.is_flagged == False).all()
 
+        print('campaing:', campaigns)
+
         flagged_campaigns = Campaigns.query.filter(Campaigns.is_flagged == True).all()
 
         campaigns_list = [campaign.to_dict() for campaign in campaigns]

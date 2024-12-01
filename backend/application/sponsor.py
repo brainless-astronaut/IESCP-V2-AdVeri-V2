@@ -106,6 +106,8 @@ class SponsorCampaigns(Resource):
                     progress = (days_passed / total_days) * 100 if total_days > 0 else 0
                     if progress >= 100:
                         progress = f'Completed on {campaign.end_date}'
+                    if progress < 0:
+                        progress = f'Starts on {campaign.start_date}'
                 else:
                     progress = 'Unknown'
 
@@ -161,6 +163,17 @@ class SponsorCampaigns(Resource):
             action = data.get('action')
             if action == 'create':
                 try: 
+
+                    # name = data.get('name)
+
+                    # if not name:
+                    #     return make_response(jsonify('message': 'Campaign name is required.'), 400)
+
+                    # existing_campaign = Campaigns.query.filter_by(name = name).first()
+                    # if existing_campaign:
+                    #     return make_response(jsonify('message': 'Campaign with the same name already exists.'), 400)
+                   
+
                     new_campaign = Campaigns(
                         sponsor_id = current_user['user_id'],
                         name = data.get('name'),
@@ -193,8 +206,18 @@ class SponsorCampaigns(Resource):
             elif action == 'send':
                 try:
                     campaign_id = data.get('campaign_id')
+
+                    # if not campaign_id:
+                    #   return make_response(jsonify('message': 'Campaign id is required.'), 400)
+
                     influencer_ids = data.get('influencer_ids')
                     for influencer_id in influencer_ids:
+
+                        # existing_request = AdRequests.query.filter(influencer_id = influencer_id, campaign_id = campaign_id, sponsor_id = sponsor_id).first()
+                        # 
+                        # if existing_request:
+                        #   return make_response(jsonify('message': 'Request already exists.'), 400)
+
                         new_request = AdRequests(
                             campaign_id = campaign_id,
                             influencer_id = influencer_id,

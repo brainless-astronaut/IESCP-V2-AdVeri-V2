@@ -57,7 +57,7 @@ export default {
         return {
             messages: [],           
             cards: {
-                requests_count: { title: "Total Requests", value: 0 },
+                total_requests_count: { title: "Total Requests", value: 0 },
                 pending_requests_count: { title: "Pending Requests", value: 0 },
                 negotiation_requests_count: { title: "Negotiation Requests", value: 0 },
                 joined_campaigns_count: { title: "Joined Campaigns", value: 0 },
@@ -100,12 +100,10 @@ export default {
                         'Authorization': `Bearer ${token}`,
                     }
                 })
-                const text = await response.text();
-                console.log(text);
 
                 if (response.ok) {
                     const data = await response.json();
-                    this.cards.requests_count.value = data.total_requests;
+                    this.cards.total_requests_count.value = data.total_requests_count;
                     this.cards.pending_requests_count.value = data.pending_requests_count;
                     this.cards.negotiation_requests_count.value = data.negotiation_requests_count;
                     this.cards.joined_campaigns_count.value = data.joined_campaigns_count;
@@ -119,9 +117,11 @@ export default {
         },
 
         async renderEarningsByCampaignChart() {
-            const labels= this.earnings_by_campaign.map((item) => item[1]) // Campaign names
-            const data = this.earnings_by_campaign.map((item) => item[0]) // Earnings
-
+            const labels = this.earnings_by_campaign.map(item => item.campaign_name); // Correct field names
+            const data = this.earnings_by_campaign.map(item => item.payment_amount); // Correct field names
+        
+            console.log(labels, data); // Check the data before passing it to the chart
+        
             new Chart(document.getElementById('earningsByCampaignChart'), {
                 type: 'bar',
                 data: {
@@ -130,26 +130,28 @@ export default {
                         label: 'Earnings by Campaign',
                         data,
                         backgroundColor: 'rgba(255, 191, 0, 1)',
-                    }]
+                    }],
                 },
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: {display: true },
-                        tooltip: { enabled: true},
+                        legend: { display: true },
+                        tooltip: { enabled: true },
                     },
                     scales: {
                         x: { title: { display: true, text: "Campaigns" } },
                         y: { title: { display: true, text: "Earnings (₹)" } },
-                      },
+                    },
                 },
             });
         },
 
         async renderEarningsByIndustryChart() {
-            const labels = this.earnings_by_industry.map((itme) => item[0]); // Indistries
-            const data = this.earnings_by_industry.map((item) => item.total_payment); // Earnings
-
+            const labels = this.earnings_by_industry.map(item => item.industry); // Correct field names
+            const data = this.earnings_by_industry.map(item => item.total_payment); // Correct field names
+        
+            console.log(labels, data); // Check the data before passing it to the chart
+        
             new Chart(document.getElementById('earningsByIndustryChart'), {
                 type: 'bar',
                 data: {
@@ -164,23 +166,33 @@ export default {
                     responsive: true,
                     plugins: {
                         legend: { display: true },
-                        tooltip: { enabled: true},
+                        tooltip: { enabled: true },
                     },
                     scales: {
                         x: { title: { display: true, text: "Industries" } },
                         y: { title: { display: true, text: "Earnings (₹)" } },
                     },
                 },
-            })
+            });
         },
         async closeMessageModal() {
             this.messages = []; // Clear messages to hide the modal
         },
     },
-    mounted() {
-        this.fetchDashboardData();
-        this.renderEarningsByCampaignChart();
-        this.renderEarningsByIndustryChart();
+    async mounted() {
+        try {
+            await this.fetchDashboardData();
+    
+            // Ensure data is available before rendering charts
+            if (this.earnings_by_campaign.length > 0 && this.earnings_by_industry.length > 0) {
+                this.renderEarningsByCampaignChart();
+                this.renderEarningsByIndustryChart();
+            } else {
+                console.error("Data not available for charts.");
+            }
+        } catch (error) {
+            console.error("Failed to fetch dashboard data:", error);
+        }
     },
 };
 

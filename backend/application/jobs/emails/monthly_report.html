@@ -1,0 +1,212 @@
+<!-- frontend/templates/monthly_report.html -->
+<!DOCTYPE html>
+<html>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Monthly Report</title>
+    <head>
+        <style>
+            :root {
+                --pacific-cyan: #1ca9c9ff;
+                --white-smoke: #f5f5f5ff;
+                --sky-blue: #87ceebff;
+                --oynx: #353839ff;
+                --amber: #ffbf00ff;
+            }
+            body {
+                margin: 0;
+                font-family: Fira Code, sans-serif;
+                background-color: var(--oynx);
+                color: var(--white-smoke);
+                align-items: center;
+            }
+            table {
+                width: 70%;
+                border-collapse: collapse;
+                margin: 0 auto;
+                text-align: left;
+                border-color: var(--pacific-cyan);
+            }
+
+            thead {
+                background-color: var(--pacific-cyan);
+                color: var(--white-smoke);
+                font-size: 1.25rem;
+            }
+
+            thead th {
+                padding: 0.5rem;
+            }
+
+            tbody {
+                background-color: var(--oynx);
+                color: var(--white-smoke);
+                font-size: 1rem;
+            }
+
+            tbody tr:hover {
+                color: var(--sky-blue);
+            }
+
+            tbody td {
+                padding: 0.75rem;
+                border: 1px solid var(--white-smoke);
+            }
+            h1 {
+                text-align: center;
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            h2 {
+                text-align: center;
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+            p {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+                text-align: center;
+                color: var(--amber);
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>Monthly Report</h1>
+
+        <h2>Campaigns</h2>
+        {% if data['campaigns'] %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Budget</th>
+                    <th>Visibility</th>
+                    <th>Goals</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for campaign in data['campaigns'] %}
+                    <tr>
+                        <td>{{ campaign.campaign_id }}</td>
+                        <td>{{ campaign.name }}</td>
+                        <td>{{ campaign.description }}</td>
+                        <td>{{ campaign.start_date }}</td>
+                        <td>{{ campaign.end_date }}</td>
+                        <td>{{ campaign.budget }}</td>
+                        <td>{{ campaign.visibility }}</td>
+                        <td>{{ campaign.goals }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No campaigns available.</p>
+        {% endif %}
+
+        <h2>Sponsors to Approve</h2>
+        {% if data['sponsors_to_approve'] %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Entity Name</th>
+                    <th>Industry</th>
+                    <th>Budget</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user, sponsor in data['sponsors_to_approve'] %}
+                <tr>
+                    <td>{{ sponsor.user_id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ sponsor.entity_name }}</td>
+                    <td>{{ sponsor.industry }}</td>
+                    <td>{{ sponsor.budget }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No sponsors to approve.</p>
+        {% endif %}
+
+        <h2>Approved Sponsors</h2>
+        {% if data['approved_sponsors'] %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>is_flagged</th>
+                        <th>Entity Name</th>
+                        <th>Industry</th>
+                        <th>Budget</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user, sponsor in data['approved_sponsors'] %}
+                    <tr>
+                        <td>{{ sponsor.user_id }}</td>
+                        <td>{{ user.username }}</td> 
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.is_flagged }}</td>
+                        <td>{{ sponsor.entity_name }}</td>
+                        <td>{{ sponsor.industry }}</td>
+                        <td>{{ sponsor.budget }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No approved sponsors available.</p>
+        {% endif %}
+
+
+        <h2>All Influencers</h2>
+        {% if data['all_influencers'] %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>is_flagged</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Niche</th>
+                        <th>Platform</th>
+                        <th>Reach</th>
+                        <th>Earnings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user, influencer in data['all_influencers'] %}
+                    <tr>
+                        <td>{{ influencer.user_id }}</td>
+                        <td>{{ user.username }}</td> 
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.is_flagged }}</td>
+                        <td>{{ influencer.name }}</td>
+                        <td>{{ influencer.category }}</td>
+                        <td>{{ influencer.niche }}</td>
+                        <td>{{ influencer.platform }}</td>
+                        <td>{{ influencer.reach }}</td>
+                        <td>{{ influencer.earnings }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No influencers available.</p>
+        {% endif %}
+    </body>
+</html>

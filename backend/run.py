@@ -62,10 +62,5 @@ import application.jobs.celery_schedule
 def home():
     return send_from_directory('../frontend', 'index.html')
 
-# from application.jobs.mailer import send_email
-# send_email('test@example.com', 'Test Subject', '<h1>Test Body</h1>')
-
-print('mail sent!')
-
 if __name__ == "__main__":
     app.run(debug=True)

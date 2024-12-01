@@ -94,99 +94,67 @@ def trigger_reports(self):
         return {'status': 'success', 'files': filenames}  # Return the list of filenames
     except Exception as e:
         return {'status': 'error', 'message': str(e)}
-    
-# @shared_task(bind=True, ignore_result=False)
-# def create_csv(self):
-#     campaigns = Campaigns.query.all()
-#     approved_sponsors = (
-#         db.session.query(Users, Sponsors)
-#         .join(Sponsors, Users.user_id == Sponsors.user_id)
-#         .filter(Users.is_approved == True)
-#         .all()
-#     )
-#     all_influencers = (
-#         db.session.query(Users, Influencers)
-#         .join(Influencers, Users.user_id == Influencers.user_id)
-#         .all()
-#     )
-#     sponsors_to_approve = (
-#         db.session.query(Users, Sponsors)
-#         .join(Sponsors, Users.user_id == Sponsors.user_id)
-#         .filter(Users.is_approved == False)
-#         .all()
-#     )
-#     # Task ID for unique filenames
-#     task_id = self.request.id
-    
-#     # Dictionary of datasets and corresponding column names
-#     datasets = {
-#         'campaigns': (campaigns, [column.name for column in Campaigns.__table__.columns]),
-#         'approved_sponsors': (approved_sponsors, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns]),
-#         'all_influencers': (all_influencers, [column.name for column in Users.__table__.columns + Influencers.__table__.columns]),
-#         'sponsors_to_approve': (sponsors_to_approve, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns])
-#     }
-#     # Loop through each dataset to generate and save CSV files
-#     filenames = []
-#     for name, (data, columns) in datasets.items():
-#         filename = f'{name}_data_{task_id}.csv'
-#         csv_out = flask_excel.make_response_from_query_sets(data, column_names=columns, file_type='csv')
-        
-#         # Save CSV to file
-#         with open(f'./backend/celery/downloads/{filename}', 'wb') as file:
-#             file.write(csv_out.data)
-        
-#         filenames.append(filename)  # Collect the filename
-#     return filenames  # Return the list of filenames
 
 @shared_task(bind=True, ignore_result=False)
 def monthly_report(self):
+    # Fetching campaigns (this is already returning ORM objects)
     campaigns = Campaigns.query.all()
+    
+    # Fetching approved sponsors
     approved_sponsors = (
         db.session.query(Users, Sponsors)
         .join(Sponsors, Users.user_id == Sponsors.user_id)
         .filter(Users.is_approved == True)
         .all()
     )
+    
+    # Fetching all influencers
     all_influencers = (
         db.session.query(Users, Influencers)
         .join(Influencers, Users.user_id == Influencers.user_id)
         .all()
     )
+
+    
+    # Fetching sponsors to approve
     sponsors_to_approve = (
         db.session.query(Users, Sponsors)
         .join(Sponsors, Users.user_id == Sponsors.user_id)
         .filter(Users.is_approved == False)
         .all()
     )
-    # Task ID for unique filenames
-    task_id = self.request.id
-    
-    # Dictionary of datasets and corresponding column names
-    datasets = {
-        'campaigns': (campaigns, [column.name for column in Campaigns.__table__.columns]),
-        'approved_sponsors': (approved_sponsors, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns]),
-        'all_influencers': (all_influencers, [column.name for column in Users.__table__.columns + Influencers.__table__.columns]),
-        'sponsors_to_approve': (sponsors_to_approve, [column.name for column in Users.__table__.columns + Sponsors.__table__.columns])
-    }
-    
-    # Loop through each dataset to generate and save CSV files
-    filenames = []
-    for name, (data, columns) in datasets.items():
-        filename = f'{name}_data_{task_id}.csv'
-        csv_out = flask_excel.make_response_from_query_sets(data, column_names=columns, file_type='csv')
-        
-        # Save CSV to file
-        file_path = f'./backend/celery/downloads/{filename}'
-        with open(file_path, 'wb') as file:
-            file.write(csv_out.data)
-        
-        filenames.append(file_path)  # Collect the full path of the file
-    
-    # Send email with attachments (CSV files)
-    recipient_email = 'admin@adveri.com'  # Specify the recipient's email
-    subject = 'Monthy Report'
-    body = '<h1 style="font-family: Fira Code, sans-serif;">Please find the attached CSV files</h1>'
-    
-    send_email(recipient_email, subject, body, attachments=filenames)
 
-    return filenames  # Return the list of filenames
+    # Prepare data for the report
+    report_data = {
+        "campaigns": campaigns,
+        "approved_sponsors": approved_sponsors,
+        "all_influencers": all_influencers,
+        "sponsors_to_approve": sponsors_to_approve,
+    }
+
+    print(report_data)
+
+    # Render the HTML template using Jinja2
+    email_templates_path = os.path.join(os.path.dirname(__file__), "emails")
+    env = Environment(loader=FileSystemLoader(email_templates_path))
+    
+    # Add `getattr` function to Jinja2 environment
+    env.globals.update(getattr=getattr)
+
+    try:
+        # Load and render the HTML template
+        template = env.get_template("monthly_report.html")
+        html_content = template.render(data=report_data)
+
+        # Send email with the rendered HTML
+        recipient_email = 'admin@adveri.com'
+        subject = 'Monthly Report'
+        send_email(recipient_email, subject, html_content)
+
+        app.logger.info(f"Monthly report sent to {recipient_email}")
+        return f"Monthly report sent to {recipient_email}"
+
+    except Exception as e:
+        app.logger.error(f"Error in monthly report task: {e}")
+        raise
+

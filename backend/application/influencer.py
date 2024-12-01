@@ -25,7 +25,7 @@ class InfluencerDashboard(Resource):
         influencer_id = current_user['user_id']
 
         # Count total ad requests for the influencer
-        requests_count = AdRequests.query.filter(
+        total_requests_count = AdRequests.query.filter(
             AdRequests.influencer_id == influencer_id
         ).count()
 
@@ -59,7 +59,7 @@ class InfluencerDashboard(Resource):
         earnings_by_campaign = [
             {
                 "campaign_name": campaign_name,
-                "payment_amount": payment_amount
+                "payment_amount": float(payment_amount)
             }
             for payment_amount, campaign_name in db.session.query(
                 AdRequests.payment_amount,
@@ -76,7 +76,7 @@ class InfluencerDashboard(Resource):
         earnings_by_industry = [
             {
                 "industry": industry,
-                "total_payment": total_payment,
+                "total_payment": float(total_payment),
                 "campaign_count": campaign_count
             }
             for industry, total_payment, campaign_count in db.session.query(
@@ -97,7 +97,7 @@ class InfluencerDashboard(Resource):
 
         # dataset = {
         #     'current_user': current_user,
-        #     'requests_count': requests_count,
+        #     'total_requests_count': total_requests_count,
         #     'pending_requests_count': pending_requests_count,
         #     'negotiation_requests_count': negotiation_requests_count,
         #     'joined_campaigns_count': joined_campaigns_count,
@@ -111,7 +111,7 @@ class InfluencerDashboard(Resource):
 
         return make_response(jsonify({
             'current_user': current_user,
-            'requests_count': requests_count,
+            'total_requests_count': total_requests_count,
             'pending_requests_count': pending_requests_count,
             'negotiation_requests_count': negotiation_requests_count,
             'joined_campaigns_count': joined_campaigns_count,
@@ -156,6 +156,8 @@ class InfluencerSendRequests(Resource):
                 progress = (days_passed / total_days) * 100 if total_days > 0 else 0
                 if progress >= 100:
                     progress = f'Completed on {campaign.end_date}'
+                if progress < 0:
+                    progress = f'Campaign starts on {campaign.start_date}'
 
                 public_campaigns_details.append({
                     'campaign': campaign.to_dict(),
@@ -203,6 +205,11 @@ class InfluencerSendRequests(Resource):
             
             if not campaign_id:
                 return make_response(jsonify({'message': 'Campaign does not exist.'}), 400)
+            
+            # existing_request = AdRequests.query.filter(influencer_id = influencer_id, campaign_id = campaign_id, sponsor_id = sponsor_id).first()
+            # 
+            # if existing_request:
+            #   return make_response(jsonify('message': 'Request already exists.'), 400)  
             
 
             new_request = AdRequests(
@@ -322,6 +329,7 @@ class InfluencerManageRequests(Resource):
                 amount = 0
                 if ad_request.negotiation_amount and ad_request.negotiation_amount > 0:
                     amount = ad_request.negotiation_amount
+                    ad_request.payment_amount = ad_request.negotiation_amount
                 else:
                     amount = ad_request.payment_amount
                 if amount > 0:
@@ -389,6 +397,8 @@ class InfluencerJoinedCampaigns(Resource):
                 progress = (days_passed / total_days) * 100 if total_days > 0 else 0
                 if progress >= 100:
                     progress = f'Completed on {campaign.end_date}'
+                if progress < 0:
+                    progress = f'Campaign starts on {campaign.start_date}'
 
                 joined_influencers = db.session.query(Influencers.name).join(
                     AdRequests, Influencers.user_id == AdRequests.influencer_id

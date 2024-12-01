@@ -188,7 +188,7 @@ export default {
                     return;
                 }
 
-                alert('passed token check');
+                // alert('passed token check');
 
                 const response = await fetch('/admin-campaigns', {
                     method: 'POST',

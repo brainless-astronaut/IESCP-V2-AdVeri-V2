@@ -24,7 +24,7 @@ EMAIL_TEMPLATES_DIR = os.path.join(BASE_DIR, "emails")
 def daily_login_reminder():
     app.logger.info("Daily login reminder task started.")
     # _24_hrs_ago = datetime.now() - timedelta(hours=24)
-    _24_hrs_ago = datetime.now() - timedelta(minutes=5)
+    _24_hrs_ago = datetime.now() - timedelta(hours=2)
     inactive_users = Users.query.filter(
         Users.last_login_at < _24_hrs_ago,
         Users.role.in_(['sponsor', 'influencer'])

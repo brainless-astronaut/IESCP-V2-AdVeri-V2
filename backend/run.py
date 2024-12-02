@@ -5,14 +5,12 @@ from flask import Flask, send_from_directory, jsonify
 from flask_jwt_extended import JWTManager
 from flask_caching import Cache
 from flask_cors import CORS
-from flask_bcrypt import Bcrypt
 import flask_excel as excel
 
 # Local Application Imports - These are my application modules that are modularized in the app folder.
 from application.config import Config
 from application.models import *
 from application.jobs.celery_factory import celery_init_app
-from celery.result import AsyncResult
 
 
 cache = Cache(config={'CACHE_TYPE': 'RedisCache'})

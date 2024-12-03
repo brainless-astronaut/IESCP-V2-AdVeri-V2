@@ -162,6 +162,11 @@ export default {
                 this.flaggedUsers = data.flagged_users
             } catch (error) {
                 console.error("Error fetching users:", error);
+
+                this.messages.push({
+                    text: `Error fetching users: ${error.message}`,
+                    category: 'success',
+                });
             }
         },
         async flagUser(user) {

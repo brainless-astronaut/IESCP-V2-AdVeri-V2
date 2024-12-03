@@ -164,9 +164,14 @@ export default {
                     }));
                 } else {
                     this.messages = [{ category: "error", text: data.messages }];
+
+                    
                 }
             } catch (error) {
-                this.messages = [{ category: "error", text: `Error fetching campaigns: ${error.messages}` }];
+                this.messages.push({
+                    text: error.message,
+                    category: 'error',
+                });
             }
         },
 

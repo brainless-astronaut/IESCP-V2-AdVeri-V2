@@ -113,6 +113,10 @@ export default {
                 }
             } catch (error) {
                 console.error("Failed to fetch dashboard data." + error);
+                this.messages.push({
+                    text: `${error.message}`,
+                    category: 'error',
+                });
             }
         },
 
@@ -192,6 +196,10 @@ export default {
             }
         } catch (error) {
             console.error("Failed to fetch dashboard data:", error);
+            this.messages.push({
+                text: `${error.message}`,
+                category: 'error',
+            });
         }
     },
 };

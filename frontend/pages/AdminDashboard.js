@@ -132,6 +132,11 @@ export default {
                 this.renderCharts();
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
+
+                this.messages.push({
+                    text: `Error fetching dashboard data: ${error.message}`,
+                    category: 'success',
+                });
             }
         },
         renderCharts() {
@@ -174,26 +179,6 @@ export default {
                     }
                 }
             });
-
-            // const influencersCtx = document.getElementById('influencersChart').getContext('2d');
-            // new Chart(influencersCtx, {
-            //     type: 'bar',
-            //     data: {
-            //         labels: Object.keys(this.influencersDistribution),
-            //         datasets: [{
-            //             label: 'influencers by Industry',
-            //             data: Object.values(this.influencersDistribution),
-            //             backgroundColor: 'rgba(0, 171, 213, 1)',
-            //         }]
-            //     },
-            //     options: {
-            //         scales: {
-            //             y: {
-            //                 beginAtZero: true
-            //             }
-            //         }
-            //     }
-            // });
         },
         async closeMessageModal() {
             this.messages = []; // Clear messages to hide the modal

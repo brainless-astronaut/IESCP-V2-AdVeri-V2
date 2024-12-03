@@ -14,7 +14,7 @@ export default {
                 reach: '',
                 role: 'influencer' // Hardcoded role as per requirement
             },
-            message: '',
+            messages: [],
         };
     },
     methods: {
@@ -36,8 +36,10 @@ export default {
                     this.$router.push('/');
                 }
             } catch (error) {
-                this.message = 'An error occurred: ' + error;
-                console.error("Error:", error);
+                this.messages.push({
+                    text: error.message,
+                    category: 'error',
+                });
             }
         },
         resetForm() {
@@ -57,8 +59,8 @@ export default {
     template: `
         <div class="register-container">
             <h1>Influencers Registration</h1>
-            <div v-if="message">
-                <p>{{ message }}</p>
+            <div v-if="messages">
+                <p>{{ messages.text }}</p>
             </div>
             <form @submit.prevent="registerSponsor">
                 <label for="username">Username:</label>

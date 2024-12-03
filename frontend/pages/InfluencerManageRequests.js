@@ -130,13 +130,20 @@ export default {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Failed to fetch ad requests.');
+                    // throw new Error(errorData.message || 'Failed to fetch ad requests.');
+                    this.messages.push({
+                        text: `{error.message}`,
+                        category: 'success',
+                    });
                 }
 
                 const data = await response.json();
                 this.adRequests = data.ad_requests || [];
             } catch (error) { 
-                this.messages = [{ category: 'error', text: error.message}];
+                this.messages.push({
+                    text: error.message,
+                    category: 'error',
+                });
             }
         },
 

@@ -17,12 +17,11 @@ export default {
 
         <div v-if="messages.length" class="modal">
             <div class="modal-content">
-                <!-- <p v-for="(message, index) in messages" :key="index" :class="message.category">
-                    {{ message }}
-                </p> -->
-                {{ messages}} 
+                <p v-for="(message, index) in messages" :key="index" :class="message.category">
+                    {{ message.text }}
+                </p>
                 <button class="close-button" @click="closeMessageModal" style="align-items: center">Close</button>
-            </div> 
+            </div>
         </div>
 
 
@@ -106,6 +105,12 @@ export default {
             } catch (error) {
                 console.error('Error fetching sponsors:', error);
                 this.messages = 'An unexpected error occurred while fetching sponsors.';
+
+                this.messages.push({
+                    text: `An unexpected error occurred while fetching sponsors. More information: ${error}`,
+                    category: 'error',
+                });
+
             }
         },
         async approveSponsor(user_id) {
@@ -145,16 +150,30 @@ export default {
                 });
                 if (response.ok) {
                     this.sponsorsToApprove = this.sponsorsToApprove.filter(s => s.user_id !== user_id);
-                    // alert(`Sponsor ${action === 'approve' ? 'approved' : 'denied'} successfully!`);
-                    console.log(`Sponsor ${action === 'approve' ? 'approved' : 'denied'} successfully!`);
-                    this.messages = `Sponsor ${action === 'approve' ? 'approved' : 'denied'} successfully!`;
+
+                    this.messages.push({
+                        text: `Sponsor ${action === 'approve' ? 'approved' : 'denied'} successfully!`,
+                        category: 'success',
+                    });
+
+
                 } else {
                     const errorData = await response.json();
-                    this.messages = errorData.message || `Failed to ${action} sponsor.`;
+
+                    this.messages.push({
+                        text: errorData.message || `Failed to ${action} sponsor.`,
+                        category: 'error',
+                    });
+
                 }
             } catch (error) {
                 console.error(`Error during ${action} action:`, error);
-                this.messages = `An unexpected error occurred while trying to ${action} the sponsor.`;
+
+                this.messages.push({
+                    text: `An unexpected error occurred while trying to ${action} the sponsor.`,
+                    category: 'error',
+                });
+
             }
         },
         async closeMessageModal() {

@@ -200,7 +200,7 @@ export default {
                 });
 
                 const responseText = await response.text();
-                console.log("Response from action:", responseText);
+                // console.log("Response from action:", responseText);
                 
                 if (!response.ok) {
                     // const responseText = await response.text(); // Define responseText
@@ -212,6 +212,11 @@ export default {
                 
             } catch (error) {
                 console.error(`Error performing action (${action}):`, error);
+
+                this.messages.push({
+                    text: `Error ${action === 'flag' ? 'flagging' : 'unflagging'} campaign: ${error}`,
+                    category: 'error',
+                });
             }
         },
         async closeMessageModal() {

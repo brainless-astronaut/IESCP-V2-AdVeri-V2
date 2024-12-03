@@ -246,10 +246,7 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                // console.log('reponse text: ' + await response.text())
                 if (!response.ok) {
-                    // throw new Error(`HTTP error! status: ${response.status}`);
-                    // console.log('reponse text: ' + await response.text())
                     this.messages.push({
                         text: 'No campaigns found. Please create a campaign.',
                         category: 'error'
@@ -262,29 +259,6 @@ export default {
                     console.log(`Error fetching campaigns: ${error}`);
             } finally {
                 this.loading = false;
-            }
-        },
-
-        async fetchFlaggedCampaigns() {
-            try {
-                const token = localStorage.getItem('accessToken');
-                if (!token) console.log("Token is missing in localStorage.");
-                const response = await fetch(`${location.origin}/sponsor-campaigns?flagged=true`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                console.log('reponse text: ' + await response.text())
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                console.log('reponse text: ' + await response.text());
-                const data = await response.json();
-                this.flaggedCampaigns = data.flagged_campaigns;
-            } catch (error) {
-                console.log(`Error fetching flagged campaigns: ${error}`);
             }
         },
         
@@ -304,10 +278,17 @@ export default {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                console.log("Campaign created successfully!");
+                this.messages.push({
+                    text: 'Campaign created successfully!',
+                    category: 'success'
+                });
                 await this.fetchCampaigns(); // Refresh campaigns after creation
             } catch (error) {
                 console.log(`Error creating campaign ${error}`);
+                this.messages.push({
+                    text: 'Failed to create the campaign. Please try again.',
+                    category: 'error'
+                });
             } finally {
                 this.closeCreateCampaignModal()
             }
@@ -336,15 +317,27 @@ export default {
                     body: JSON.stringify(payload),
                 });
                 const responseText = await response.text(); // For debugging purposes
-                console.log(`response text put: ${responseText}`)
-                console.log(`selected campaign: ${selectedCampaign}`)
+                // console.log(`response text put: ${responseText}`)
+                // console.log(`selected campaign: ${selectedCampaign}`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 console.log("Campaign updated successfully!");
+
+                this.messages.push({
+                    text: 'Campaign updated successfully!',
+                    category: 'success',
+                });
+
                 await this.fetchCampaigns(); // Refresh after edit
             } catch (error) {
                 console.log(`Error occurred while editing campaign: ${error}`);
+
+                this.messages.push({
+                    text: 'Failed to update the campaign. Please try again.',
+                    category: 'error',
+                });
+
             } finally {
                 this.closeEditModal()
             }
@@ -368,6 +361,12 @@ export default {
                 this.influencers = data.influencers;
             } catch (error) {
                 console.log(`Error while fetching influencers: ${error}`);
+
+                this.messages.push({
+                    text: 'Failed to fetch Influencers. Possible that there are no influencers available in your industry.',
+                    category: 'error',
+                });
+
             } finally {
                 this.loading = false;
             }
@@ -403,9 +402,20 @@ export default {
                 }
                 console.log('reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                this.messages.push({
+                    text: 'Request sent successfully!',
+                    category: 'success',
+                });
+
                 await this.fetchCampaigns(); // Refresh campaigns after sending requests
             } catch (error) {
                 console.log(`Error senfin request: ${error}`);
+
+                this.messages.push({
+                    text: `Failed to send request. More information: ${error}`,
+                    category: 'error',
+                });
             } finally {
                 this.closeSendRequestModal()
             }
@@ -429,20 +439,31 @@ export default {
                 console.log('reponse text: ' + await response.text());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 console.log("Campaign deleted successfully!");
+
+                this.messages.push({
+                    text: 'Campaign deleted successfully!',
+                    category: 'success',
+                });
+
                 await this.fetchCampaigns(); // Refresh campaigns after deletion
             } catch (error) {
-                console.log(`Error deleting campaign ${error}`);
+                // console.log(`Error deleting campaign ${error}`);
+
+                this.messages.push({
+                    text: `Failed to delete the campaign. More information: ${error}`,
+                    category: 'error',
+                });
             }
         },
         
         async openSendRequestModal(campaign) {
-            console.log('Raw campaign object:', campaign);
-            console.log('Campaign keys:', Object.keys(campaign));
+            // console.log('Raw campaign object:', campaign);
+            // console.log('Campaign keys:', Object.keys(campaign));
             this.selectedCampaign = { 
                 ...campaign,
                 campaignId: campaign.campaign.campaign_id, // Adjust as needed
             };
-            console.log('Selected campaign:', this.selectedCampaign);
+            // console.log('Selected campaign:', this.selectedCampaign);
             this.fetchInfluencers();
             this.requestForm.selectedInfluencers = [];
             this.showSendRequestModal = true;

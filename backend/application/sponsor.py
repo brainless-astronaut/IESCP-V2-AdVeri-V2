@@ -82,7 +82,7 @@ class SponsorCampaigns(Resource):
     def get(self):
         try:
             current_user = get_jwt_identity()
-            search_query = request.args.get('search', '').strip()
+            search_query = request.args.get('search_query', '').strip()
             campaigns = (
                 Campaigns.query.filter(
                     Campaigns.name.ilike(f'%{search_query}%') |

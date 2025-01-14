@@ -62,6 +62,45 @@ def weekly_login_reminder():
     except Exception as e:
         app.logger.error(f"Error in weekly login reminder: {e}")
 
+@shared_task(ignore_result = True)
+def pending_requests_reminder():
+    pending_requests = AdRequests.query.filter(
+        AdRequests.status == 'Pending'
+    )
+    pending_requests_counts = {}
+    usernames = {}
+    for request in pending_requests:
+        influencer = Users.query.filter_by(user_id=request.influencer_id).first()
+        sponsor = Users.query.filter_by(user_id=request.sponsor_id).first()
+
+        # Count the pending requests for each influencer
+        if influencer.user_id not in pending_requests_counts:
+            pending_requests_counts[influencer.user_id] = 1
+            usernames[influencer.user_id] = influencer.username
+        pending_requests_counts[influencer.user_id] += 1
+
+        if sponsor.user_id not in pending_requests_counts:
+            pending_requests_counts[sponsor.user_id] = 1
+            usernames[sponsor.user_id] = sponsor.username
+        pending_requests_counts[sponsor.user_id] += 1
+
+    email_templates_path = os.path.join(os.path.dirname(__file__), "emails")
+    env = Environment(loader=FileSystemLoader(email_templates_path))
+
+    try: 
+        template = env.get_template("pending_request_reminder.html")
+
+
+        # Send email to influencers and sponsors with the counts of pending requests
+        for user_id, counts in pending_requests_counts:
+            rendered_content = template.render(username = usernames[user_id], counts = counts)
+            send_email(user_id, 'Pending Requests Reminder', rendered_content)
+
+    except Exception as e:
+        app.logger.error(f"Error in sending pending requests reminder: {e}")
+
+
+
 @shared_task(bind = True, ignore_result = False)
 def trigger_reports(self):
     try:

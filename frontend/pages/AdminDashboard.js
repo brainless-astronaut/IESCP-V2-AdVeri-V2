@@ -72,7 +72,6 @@ export default {
             counts: {},
             sponsorsDistribution: {},
             campaignsDistribution: {},
-            // influencersDistribution: {},
             token: localStorage.getItem('accessToken')
         };
     },
@@ -127,7 +126,6 @@ export default {
                 };
                 this.sponsorsDistribution = data.sponsors_distribution;
                 this.campaignsDistribution = data.campaigns_distribution;
-                // this.influencersDistribution = data.influencers_distribution
 
                 this.renderCharts();
             } catch (error) {

@@ -13,13 +13,21 @@ export default {
                 <router-link to="/logout">Logout</router-link>
             </nav>
             <div class="navbar-right">
-                <div class="search-bar-container">
-                    <input type="text" v-model="searchQuery" placeholder="Search by name or description" class="search-bar"/>
-                    <button @click="fetchCampaigns" :disabled="loading">Search</button>
-                </div>
                 <button @click="openCreateCampaignModal">Create Campaign</button>
             </div>
         </header>
+
+        <div class="search-container">
+            <<h2>Search Campaigns</h2>
+            <form @submit.prevent="fetchCampaigns">
+                <input
+                    type="text"
+                    v-model="searchQuery"
+                    placeholder="Search by name or description"
+                />
+                <button type="submit" class="button">Search</button>
+            </form>
+        </div>
         
         <div v-if="messages.length" class="modal">
             <div class="modal-content">
@@ -239,7 +247,11 @@ export default {
                     });
                     return;
                 }
-                const response = await fetch(location.origin + '/sponsor-campaigns', {
+
+                const url = new URL(location.origin + '/sponsor-campaigns');
+                url.searchParams.append('search_query', this.searchQuery);
+
+                const response = await fetch(url.toString(), {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
